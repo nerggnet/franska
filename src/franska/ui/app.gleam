@@ -532,6 +532,7 @@ fn tense_name(tense: lexicon.Tense) -> String {
   case tense {
     lexicon.Presens -> "presens"
     lexicon.FuturProche -> "futur proche"
+    lexicon.PasseCompose -> "passé composé"
   }
 }
 

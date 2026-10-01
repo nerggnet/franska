@@ -2,8 +2,8 @@
 //// or reuse one. Put the canonical translation first in `sv`.
 
 import franska/lexicon.{
-  type Entry, type Word, A1, Entry, Expression, Feminine, Masculine, Present,
-  Verb,
+  type Entry, type Word, A1, Avoir, Entry, Etre, Expression, Feminine, Masculine,
+  Present, Verb,
 }
 
 pub fn entries() -> List(Entry) {
@@ -80,95 +80,102 @@ pub fn entries() -> List(Entry) {
     noun("magasin", "staden", "magasin", Masculine, ["affär", "butik"]),
     noun("eglise", "staden", "église", Feminine, ["kyrka"]),
     // Vanliga verb
-    verb("etre", ["vara"], "être", #(
-      "suis",
-      "es",
-      "est",
-      "sommes",
-      "êtes",
-      "sont",
-    )),
-    verb("avoir", ["ha"], "avoir", #("ai", "as", "a", "avons", "avez", "ont")),
-    verb("aller", ["gå", "åka", "fara"], "aller", #(
-      "vais",
-      "vas",
-      "va",
-      "allons",
-      "allez",
-      "vont",
-    )),
-    verb("faire", ["göra"], "faire", #(
-      "fais",
-      "fais",
+    verb(
+      "etre",
+      ["vara"],
+      "être",
+      #("suis", "es", "est", "sommes", "êtes", "sont"),
+      "été",
+      Avoir,
+    ),
+    verb(
+      "avoir",
+      ["ha"],
+      "avoir",
+      #("ai", "as", "a", "avons", "avez", "ont"),
+      "eu",
+      Avoir,
+    ),
+    verb(
+      "aller",
+      ["gå", "åka", "fara"],
+      "aller",
+      #("vais", "vas", "va", "allons", "allez", "vont"),
+      "allé",
+      Etre,
+    ),
+    verb(
+      "faire",
+      ["göra"],
+      "faire",
+      #("fais", "fais", "fait", "faisons", "faites", "font"),
       "fait",
-      "faisons",
-      "faites",
-      "font",
-    )),
-    verb("parler", ["tala", "prata"], "parler", #(
-      "parle",
-      "parles",
-      "parle",
-      "parlons",
-      "parlez",
-      "parlent",
-    )),
-    verb("aimer", ["älska", "tycka om", "gilla"], "aimer", #(
-      "aime",
-      "aimes",
-      "aime",
-      "aimons",
-      "aimez",
-      "aiment",
-    )),
-    verb("manger", ["äta"], "manger", #(
-      "mange",
-      "manges",
-      "mange",
-      "mangeons",
-      "mangez",
-      "mangent",
-    )),
-    verb("habiter", ["bo"], "habiter", #(
-      "habite",
-      "habites",
-      "habite",
-      "habitons",
-      "habitez",
-      "habitent",
-    )),
-    verb("vouloir", ["vilja"], "vouloir", #(
-      "veux",
-      "veux",
-      "veut",
-      "voulons",
-      "voulez",
-      "veulent",
-    )),
-    verb("pouvoir", ["kunna"], "pouvoir", #(
-      "peux",
-      "peux",
-      "peut",
-      "pouvons",
-      "pouvez",
-      "peuvent",
-    )),
-    verb("prendre", ["ta"], "prendre", #(
-      "prends",
-      "prends",
-      "prend",
-      "prenons",
-      "prenez",
-      "prennent",
-    )),
-    verb("boire", ["dricka"], "boire", #(
-      "bois",
-      "bois",
-      "boit",
-      "buvons",
-      "buvez",
-      "boivent",
-    )),
+      Avoir,
+    ),
+    verb(
+      "parler",
+      ["tala", "prata"],
+      "parler",
+      #("parle", "parles", "parle", "parlons", "parlez", "parlent"),
+      "parlé",
+      Avoir,
+    ),
+    verb(
+      "aimer",
+      ["älska", "tycka om", "gilla"],
+      "aimer",
+      #("aime", "aimes", "aime", "aimons", "aimez", "aiment"),
+      "aimé",
+      Avoir,
+    ),
+    verb(
+      "manger",
+      ["äta"],
+      "manger",
+      #("mange", "manges", "mange", "mangeons", "mangez", "mangent"),
+      "mangé",
+      Avoir,
+    ),
+    verb(
+      "habiter",
+      ["bo"],
+      "habiter",
+      #("habite", "habites", "habite", "habitons", "habitez", "habitent"),
+      "habité",
+      Avoir,
+    ),
+    verb(
+      "vouloir",
+      ["vilja"],
+      "vouloir",
+      #("veux", "veux", "veut", "voulons", "voulez", "veulent"),
+      "voulu",
+      Avoir,
+    ),
+    verb(
+      "pouvoir",
+      ["kunna"],
+      "pouvoir",
+      #("peux", "peux", "peut", "pouvons", "pouvez", "peuvent"),
+      "pu",
+      Avoir,
+    ),
+    verb(
+      "prendre",
+      ["ta"],
+      "prendre",
+      #("prends", "prends", "prend", "prenons", "prenez", "prennent"),
+      "pris",
+      Avoir,
+    ),
+    verb(
+      "boire",
+      ["dricka"],
+      "boire",
+      #("bois", "bois", "boit", "buvons", "buvez", "boivent"),
+      "bu",
+      Avoir,
+    ),
   ]
 }
 
@@ -184,12 +191,19 @@ fn noun(id, theme, fr, gender, sv) -> Entry {
   entry(id, theme, sv, lexicon.noun(fr, gender))
 }
 
-fn verb(id, sv, infinitive, forms) -> Entry {
+/// `forms` are the présent forms; `participle` and `auxiliary` give the
+/// passé composé.
+fn verb(id, sv, infinitive, forms, participle, auxiliary) -> Entry {
   let #(je, tu, il, nous, vous, ils) = forms
   entry(
     id,
     "verb",
     sv,
-    Verb(infinitive, Present(je:, tu:, il:, nous:, vous:, ils:)),
+    Verb(
+      infinitive:,
+      present: Present(je:, tu:, il:, nous:, vous:, ils:),
+      participle:,
+      auxiliary:,
+    ),
   )
 }

@@ -1,4 +1,4 @@
-import franska/answer.{Almost, Correct, MissingArticle, Wrong}
+import franska/answer.{Almost, Correct, MissingArticle, Typo, Wrong}
 import franska/exercise.{
   ChooseArticle, Conjugate, Listen, ToFrench, ToSwedish, Translate,
 }
@@ -24,6 +24,8 @@ fn aimer() {
     word: Verb(
       "aimer",
       Present("aime", "aimes", "aime", "aimons", "aimez", "aiment"),
+      "aimé",
+      lexicon.Avoir,
     ),
   )
 }
@@ -127,4 +129,42 @@ pub fn futur_proche_is_aller_and_the_infinitive_test() {
   let elles = find(aimer(), "aimer:futur-proche:ils")
   assert exercise.check(elles, "elles vont aimer") == Correct
   assert exercise.check(elles, "ils vont aimer") == Correct
+}
+
+fn aller() {
+  Entry(
+    id: "aller",
+    level: A1,
+    theme: "verb",
+    sv: ["gå"],
+    word: Verb(
+      "aller",
+      Present("vais", "vas", "va", "allons", "allez", "vont"),
+      "allé",
+      lexicon.Etre,
+    ),
+  )
+}
+
+pub fn passe_compose_with_avoir_test() {
+  let je = find(aimer(), "aimer:passe-compose:je")
+  assert je.french == "j'ai aimé"
+  assert exercise.check(je, "ai aimé") == Correct
+  assert exercise.check(je, "j'ai aimé") == Correct
+  let nous = find(aimer(), "aimer:passe-compose:nous")
+  assert nous.french == "nous avons aimé"
+}
+
+pub fn passe_compose_with_etre_agrees_with_the_subject_test() {
+  let je = find(aller(), "aller:passe-compose:je")
+  assert je.french == "je suis allé"
+  assert exercise.check(je, "je suis allée") == Correct
+  let il = find(aller(), "aller:passe-compose:il")
+  assert exercise.check(il, "il est allé") == Correct
+  assert exercise.check(il, "elle est allée") == Correct
+  assert exercise.check(il, "on est allés") == Correct
+  let ils = find(aller(), "aller:passe-compose:ils")
+  assert ils.french == "ils sont allés"
+  assert exercise.check(ils, "elles sont allées") == Correct
+  assert exercise.check(ils, "ils sont allé") == Almost("ils sont allés", Typo)
 }

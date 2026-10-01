@@ -44,7 +44,7 @@ entries automatically, so you never write exercises by hand.
 noun("maison", "hemmet", "maison", Feminine, ["hus", "hem"]),
 verb("parler", ["tala", "prata"], "parler", #(
   "parle", "parles", "parle", "parlons", "parlez", "parlent",
-)),
+), "parlé", Avoir),
 phrase("merci", "hälsningar", ["tack"], ["merci"]),
 ```
 
@@ -58,6 +58,9 @@ phrase("merci", "hälsningar", ["tack"], ["merci"]),
 - **Nouns get their article automatically.** `lexicon.noun` adds le, la or
   l'. Use `lexicon.noun_aspirated_h` for words like *héros* that keep le/la
   before an h.
+- **Verbs** list their présent forms, then the past participle and the
+  auxiliary for the passé composé (`Avoir`, or `Etre` for verbs like
+  *aller*, *venir* and *partir*). Other tenses are generated from these.
 - **Spell French correctly,** with accents and the œ ligature. The grading
   is lenient about learners' accents, not about the content's.
 

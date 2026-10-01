@@ -17,7 +17,7 @@ one theme:
 
 - Swedish → French and French → Swedish translation
 - le or la? for nouns
-- Verb conjugation: present tense and futur proche
+- Verb conjugation: present tense, futur proche and passé composé
 - Dictation: write down French read aloud
 
 It has accent buttons for French answers and reads French aloud with the

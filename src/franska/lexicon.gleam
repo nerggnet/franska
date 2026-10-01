@@ -54,7 +54,14 @@ pub type Word {
   /// `fr` is the bare noun ("chat"). `elides` is True when the definite
   /// article becomes l' ("l'école", "l'homme").
   Noun(fr: String, gender: Gender, elides: Bool)
-  Verb(infinitive: String, present: Present)
+  /// `participle` and `auxiliary` form the passé composé ("parlé" with
+  /// avoir, "allé" with être).
+  Verb(
+    infinitive: String,
+    present: Present,
+    participle: String,
+    auxiliary: Auxiliary,
+  )
   /// Any fixed phrase. The first French variant is the canonical one.
   Expression(fr: List(String))
 }
@@ -68,19 +75,28 @@ pub type Entry {
 
 pub const persons = [Je, Tu, Il, Nous, Vous, Ils]
 
+pub type Auxiliary {
+  Avoir
+  /// The participle agrees with the subject: "elle est allée".
+  Etre
+}
+
 pub type Tense {
   Presens
   /// aller + infinitive: "je vais parler".
   FuturProche
+  /// auxiliary + past participle: "j'ai parlé", "elle est allée".
+  PasseCompose
 }
 
-pub const tenses = [Presens, FuturProche]
+pub const tenses = [Presens, FuturProche, PasseCompose]
 
 /// Stable id of a tense, part of exercise ids.
 pub fn tense_id(tense: Tense) -> String {
   case tense {
     Presens -> "present"
     FuturProche -> "futur-proche"
+    PasseCompose -> "passe-compose"
   }
 }
 
@@ -154,18 +170,43 @@ fn forms(
   word: Word,
   tense: Tense,
   person: Person,
-  _subject: String,
+  subject: String,
 ) -> List(String) {
   case word, tense {
     Verb(present:, ..), Presens -> [conjugate(present, person)]
     Verb(infinitive:, ..), FuturProche -> [
       conjugate(aller, person) <> " " <> infinitive,
     ]
+    Verb(participle:, auxiliary: Avoir, ..), PasseCompose -> [
+      conjugate(avoir, person) <> " " <> participle,
+    ]
+    Verb(participle:, auxiliary: Etre, ..), PasseCompose ->
+      list.map(agreements(subject), fn(ending) {
+        conjugate(etre, person) <> " " <> participle <> ending
+      })
     _, _ -> []
   }
 }
 
+/// Participle endings for a subject with être, the most common first. Je,
+/// tu and vous can be either gender, and on can mean "vi".
+fn agreements(subject: String) -> List(String) {
+  case subject {
+    "il" -> [""]
+    "elle" -> ["e"]
+    "on" -> ["", "s", "es"]
+    "nous" | "ils" -> ["s", "es"]
+    "elles" -> ["es"]
+    "vous" -> ["s", "es", "", "e"]
+    _ -> ["", "e"]
+  }
+}
+
 const aller = Present("vais", "vas", "va", "allons", "allez", "vont")
+
+const avoir = Present("ai", "as", "a", "avons", "avez", "ont")
+
+const etre = Present("suis", "es", "est", "sommes", "êtes", "sont")
 
 /// Every accepted answer for a verb in a tense and person: the forms on
 /// their own ("parlons") and with each subject ("nous parlons"), canonical
