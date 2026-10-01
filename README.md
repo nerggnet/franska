@@ -12,7 +12,7 @@ Try it at **https://nerggnet.github.io/franska/**.
 ## Status
 
 The browser app ([Lustre](https://hexdocs.pm/lustre/)) offers rounds of 10
-exercises from 156 entries (67 at A1 and 89 at A2), optionally limited to
+exercises from 158 entries (67 at A1 and 91 at A2), optionally limited to
 one theme:
 
 - Swedish → French and French → Swedish translation
@@ -21,7 +21,8 @@ one theme:
 
 It has accent buttons for French answers and reads French aloud with the
 browser's speech synthesis. Spaced repetition decides what each round
-contains, so due reviews come first and then new words. Progress, a
+contains, so due reviews come first and then new words. Dagens
+repetition reviews everything due across all exercise types in one round. Progress, a
 statistics page and the practice streak are saved in the browser's local
 storage. Nothing leaves your device.
 

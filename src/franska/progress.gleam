@@ -105,6 +105,23 @@ pub fn plan_round(
   |> list.take(size)
 }
 
+/// The exercises that are due for review, the most overdue first.
+pub fn due(
+  progress: Progress,
+  exercises: List(Exercise),
+  now now: Int,
+) -> List(Exercise) {
+  exercises
+  |> list.filter_map(fn(e) {
+    case dict.get(progress.cards, e.id) {
+      Ok(card) if card.due <= now -> Ok(#(e, card.due))
+      _ -> Error(Nil)
+    }
+  })
+  |> list.sort(fn(a, b) { int.compare(a.1, b.1) })
+  |> list.map(fn(pair) { pair.0 })
+}
+
 pub fn stats(
   progress: Progress,
   exercises: List(Exercise),

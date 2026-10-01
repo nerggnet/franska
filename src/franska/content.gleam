@@ -21,6 +21,11 @@ pub fn themes() -> List(String) {
   |> list.unique
 }
 
+/// Every exercise of every drill.
+pub fn all_exercises() -> List(Exercise) {
+  list.flat_map(entries(), exercise.from_entry)
+}
+
 /// Every exercise of a drill, optionally limited to one theme.
 pub fn exercises(drill: Drill, theme: Option(String)) -> List(Exercise) {
   entries()

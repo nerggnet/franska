@@ -26,6 +26,9 @@ import lustre/event
 
 const round_size = 10
 
+/// Dagens repetition covers everything due, but not more than this at once.
+const review_size = 20
+
 const answer_input_id = "answer"
 
 pub const storage_key = "franska:progress"
@@ -46,13 +49,15 @@ pub type Env {
   )
 }
 
-/// `theme` is the chosen theme, or `None` for all themes.
+/// `theme` is the chosen theme, or `None` for all themes. `reviewing` is
+/// True while the round is Dagens repetition rather than a single drill.
 pub type Model {
   Model(
     env: Env,
     drill: Drill,
     theme: Option(String),
     progress: Progress,
+    reviewing: Bool,
     screen: Screen,
   )
 }
@@ -67,7 +72,14 @@ pub type Screen {
 pub fn init(flags: #(Env, Progress)) -> #(Model, Effect(Msg)) {
   let #(env, progress) = flags
   #(
-    Model(env:, drill: TranslateToFrench, theme: None, progress:, screen: Menu),
+    Model(
+      env:,
+      drill: TranslateToFrench,
+      theme: None,
+      progress:,
+      reviewing: False,
+      screen: Menu,
+    ),
     effect.none(),
   )
 }
@@ -79,6 +91,7 @@ pub type Msg {
   UserPickedTheme(Option(String))
   UserToggledReadAloud(Bool)
   UserStartedRound
+  UserStartedReview
   UserTypedAnswer(String)
   UserPressedAccent(String)
   UserChoseAnswer(String)
@@ -125,7 +138,20 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
         )
         |> model.env.shuffle
         |> session.new
-      show_exercise(model, session)
+      show_exercise(Model(..model, reviewing: False), session)
+    }
+
+    Menu, UserStartedReview | Finished(..), UserStartedReview -> {
+      let session =
+        content.all_exercises()
+        |> progress.due(model.progress, _, now: model.env.now())
+        |> list.take(review_size)
+        |> model.env.shuffle
+        |> session.new
+      case session.is_finished(session) {
+        True -> #(Model(..model, screen: Menu), effect.none())
+        False -> show_exercise(Model(..model, reviewing: True), session)
+      }
     }
 
     Practising(grade: None, ..) as screen, UserTypedAnswer(input) -> #(
@@ -270,7 +296,7 @@ pub fn view(model: Model) -> Element(Msg) {
             view_exercise(model.env, session, exercise, input, grade)
           Error(Nil) -> element.none()
         }
-      Finished(session:) -> view_finished(session)
+      Finished(session:) -> view_finished(session, model.reviewing)
       Statistics(confirming_reset:) ->
         view_statistics(model.progress, model.env.now(), confirming_reset)
     },
@@ -286,7 +312,50 @@ fn view_menu(model: Model) -> Element(Msg) {
       now: model.env.now(),
     )
   let streak = progress.streak_days(model.progress, model.env.today())
+  let due_everywhere =
+    list.length(progress.due(
+      model.progress,
+      content.all_exercises(),
+      now: model.env.now(),
+    ))
 
+  element.fragment([
+    case due_everywhere {
+      0 -> element.none()
+      due -> view_review_banner(due)
+    },
+    view_drill_picker(model, themes, stats, streak),
+  ])
+}
+
+fn view_review_banner(due: Int) -> Element(Msg) {
+  let size = int.min(due, review_size)
+  html.section([class("card review")], [
+    html.div([], [
+      html.h2([], [html.text("Dagens repetition")]),
+      html.p([], [
+        html.text(
+          plural(due, "övning", "övningar")
+          <> " från alla delar väntar på repetition."
+          <> case due > review_size {
+            True -> " Vi tar " <> int.to_string(size) <> " i taget."
+            False -> ""
+          },
+        ),
+      ]),
+    ]),
+    html.button([class("primary"), event.on_click(UserStartedReview)], [
+      html.text("Repetera"),
+    ]),
+  ])
+}
+
+fn view_drill_picker(
+  model: Model,
+  themes: List(String),
+  stats: progress.Stats,
+  streak: Int,
+) -> Element(Msg) {
   html.section([class("card")], [
     html.h2([], [html.text("Vad vill du öva?")]),
     html.div(
@@ -599,7 +668,7 @@ fn speaker_icon() -> Element(Msg) {
   )
 }
 
-fn view_finished(session: Session) -> Element(Msg) {
+fn view_finished(session: Session, reviewing: Bool) -> Element(Msg) {
   let summary = session.summary(session)
   let stat = fn(count: Int, label: String, tone: String) {
     html.div([class("stat " <> tone)], [
@@ -616,9 +685,16 @@ fn view_finished(session: Session) -> Element(Msg) {
       stat(summary.wrong, "fel", "wrong"),
     ]),
     html.div([class("actions")], [
-      html.button([class("primary"), event.on_click(UserStartedRound)], [
-        html.text("Öva igen"),
-      ]),
+      html.button(
+        [
+          class("primary"),
+          event.on_click(case reviewing {
+            True -> UserStartedReview
+            False -> UserStartedRound
+          }),
+        ],
+        [html.text("Öva igen")],
+      ),
       html.button([class("secondary"), event.on_click(UserQuitRound)], [
         html.text("Till menyn"),
       ]),

@@ -135,3 +135,14 @@ pub fn plan_round_takes_new_a1_before_new_a2_test() {
   assert ids(progress.plan_round(progress.new(), exercises, now:, size: 3))
     == ["a1-first", "a1-second", "a2-first"]
 }
+
+pub fn due_lists_only_due_exercises_most_overdue_first_test() {
+  let p =
+    with_cards([
+      #("a", CardState(box: 1, due: now - 10, reviews: 1, lapses: 0)),
+      #("b", CardState(box: 1, due: now + 10, reviews: 1, lapses: 0)),
+      #("c", CardState(box: 1, due: now - 50, reviews: 1, lapses: 0)),
+    ])
+  let exercises = list.map(["a", "b", "c", "new"], exercise)
+  assert ids(progress.due(p, exercises, now:)) == ["c", "a"]
+}

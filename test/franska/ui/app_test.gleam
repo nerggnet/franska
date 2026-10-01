@@ -1,15 +1,18 @@
 import franska/answer.{Correct, Wrong}
+import franska/content
 import franska/exercise.{Articles, Conjugation, TranslateToFrench}
 import franska/progress
 import franska/session
+import franska/srs
 import franska/ui/app.{
   Env, Finished, Menu, Practising, Statistics, UserAskedToReset,
   UserConfirmedReset, UserPickedDrill, UserPickedTheme, UserQuitRound,
-  UserStartedRound, UserSubmittedAnswer, UserTypedAnswer,
+  UserStartedReview, UserStartedRound, UserSubmittedAnswer, UserTypedAnswer,
 }
 import gleam/dict
 import gleam/list
 import gleam/option.{None, Some}
+import gleam/string
 
 const now = 1_000_000
 
@@ -137,4 +140,45 @@ pub fn reset_needs_confirmation_test() {
   let model = send(model, [UserAskedToReset, UserConfirmedReset])
   assert dict.is_empty(model.progress.cards)
   assert model.screen == Statistics(confirming_reset: False)
+}
+
+fn with_progress(model: app.Model, cards: List(#(String, srs.CardState))) {
+  app.Model(
+    ..model,
+    progress: progress.Progress(..model.progress, cards: dict.from_list(cards)),
+  )
+}
+
+pub fn review_round_takes_due_exercises_from_every_drill_test() {
+  let due = srs.CardState(box: 1, due: now - 1, reviews: 1, lapses: 0)
+  let later = srs.CardState(box: 1, due: now + 1, reviews: 1, lapses: 0)
+  let model =
+    start()
+    |> with_progress([
+      #("chat:to-fr", due),
+      #("chat:article", due),
+      #("parler:present:nous", due),
+      #("chien:to-fr", later),
+    ])
+    |> send([UserStartedReview])
+  assert model.reviewing
+  let assert Practising(session:, ..) = model.screen
+  assert list.sort(list.map(session.queue, fn(e) { e.id }), string.compare)
+    == ["chat:article", "chat:to-fr", "parler:present:nous"]
+}
+
+pub fn review_round_with_nothing_due_stays_in_the_menu_test() {
+  let model = start() |> send([UserStartedReview])
+  assert model.screen == Menu
+}
+
+pub fn review_round_is_limited_to_twenty_test() {
+  let due = srs.CardState(box: 1, due: now - 1, reviews: 1, lapses: 0)
+  let cards =
+    content.all_exercises()
+    |> list.take(30)
+    |> list.map(fn(e) { #(e.id, due) })
+  let model = start() |> with_progress(cards) |> send([UserStartedReview])
+  let assert Practising(session:, ..) = model.screen
+  assert list.length(session.queue) == 20
 }

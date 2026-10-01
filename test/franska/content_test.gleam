@@ -2,7 +2,6 @@ import franska/answer.{Correct}
 import franska/content
 import franska/exercise
 import franska/lexicon.{Expression}
-import gleam/dict
 import gleam/list
 import gleam/option
 import gleam/string
