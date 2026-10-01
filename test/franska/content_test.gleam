@@ -54,7 +54,9 @@ pub fn exercises_are_limited_to_drill_and_theme_test() {
 }
 
 pub fn conjugation_is_only_available_for_verbs_test() {
-  assert content.themes_for(exercise.Conjugation) == ["verb"]
+  assert content.themes_for(exercise.Conjugation(lexicon.Presens)) == ["verb"]
+  assert content.themes_for(exercise.Conjugation(lexicon.FuturProche))
+    == ["verb"]
 }
 
 pub fn articles_are_not_offered_for_themes_without_nouns_test() {

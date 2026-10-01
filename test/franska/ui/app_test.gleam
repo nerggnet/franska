@@ -1,6 +1,7 @@
 import franska/answer.{Correct, Wrong}
 import franska/content
 import franska/exercise.{Articles, Conjugation, TranslateToFrench}
+import franska/lexicon
 import franska/progress
 import franska/session
 import franska/srs
@@ -58,7 +59,7 @@ pub fn picking_a_drill_drops_a_theme_it_does_not_have_test() {
     start()
     |> send([UserPickedTheme(Some("djur")), UserPickedDrill(Articles)])
   assert model.theme == Some("djur")
-  let model = send(model, [UserPickedDrill(Conjugation)])
+  let model = send(model, [UserPickedDrill(Conjugation(lexicon.Presens))])
   assert model.theme == None
 }
 

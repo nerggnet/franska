@@ -408,8 +408,22 @@ fn view_drill_picker(
     html.h2([], [html.text("Vad vill du öva?")]),
     html.div(
       [class("chips")],
-      list.map(available_drills(model.env), fn(drill) {
-        chip(drill_name(drill), drill == model.drill, UserPickedDrill(drill))
+      available_drills(model.env)
+        |> list.filter(fn(drill) { conjugation_tense(drill) == Error(Nil) })
+        |> list.map(fn(drill) {
+          chip(drill_name(drill), drill == model.drill, UserPickedDrill(drill))
+        }),
+    ),
+    html.h2([class("subheading")], [html.text("Böj verb")]),
+    html.div(
+      [class("chips")],
+      list.map(lexicon.tenses, fn(tense) {
+        let drill = Conjugation(tense)
+        chip(
+          string.capitalise(tense_name(tense)),
+          drill == model.drill,
+          UserPickedDrill(drill),
+        )
       }),
     ),
     // A single theme is not worth choosing between.
@@ -502,16 +516,30 @@ fn drill_name(drill: Drill) -> String {
     TranslateToFrench -> "Svenska → franska"
     TranslateToSwedish -> "Franska → svenska"
     Articles -> "le eller la?"
-    Conjugation -> "Böj verb"
+    Conjugation(tense) -> "Böj verb: " <> tense_name(tense)
     Dictation -> "Diktamen"
+  }
+}
+
+fn conjugation_tense(drill: Drill) -> Result(lexicon.Tense, Nil) {
+  case drill {
+    Conjugation(tense) -> Ok(tense)
+    _ -> Error(Nil)
+  }
+}
+
+fn tense_name(tense: lexicon.Tense) -> String {
+  case tense {
+    lexicon.Presens -> "presens"
+    lexicon.FuturProche -> "futur proche"
   }
 }
 
 /// Dictation needs speech synthesis.
 fn available_drills(env: Env) -> List(Drill) {
   case env.can_speak {
-    True -> exercise.drills
-    False -> list.filter(exercise.drills, fn(drill) { drill != Dictation })
+    True -> exercise.drills()
+    False -> list.filter(exercise.drills(), fn(drill) { drill != Dictation })
   }
 }
 
@@ -587,7 +615,7 @@ fn instruction(exercise: Exercise) -> String {
     Translate(ToFrench) -> "Översätt till franska"
     Translate(ToSwedish) -> "Översätt till svenska"
     ChooseArticle -> "Heter det le eller la?"
-    Conjugate(_) -> "Böj verbet i presens"
+    Conjugate(tense, _) -> "Böj verbet i " <> tense_name(tense)
     Listen -> "Skriv det du hör"
   }
 }
@@ -626,7 +654,7 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
           html.text("Betyder: " <> exercise.prompt),
         ]),
       ])
-    Conjugate(person) ->
+    Conjugate(_, person) ->
       html.p([class("prompt"), attribute.lang("fr")], [
         html.text(person_label(person) <> " "),
         html.span([class("blank")], [html.text("___")]),

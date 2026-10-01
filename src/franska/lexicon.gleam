@@ -2,6 +2,7 @@
 //// `Entry` values; exercises are derived from them (see `franska/exercise`).
 
 import gleam/int
+import gleam/list
 import gleam/order
 import gleam/string
 
@@ -67,6 +68,22 @@ pub type Entry {
 
 pub const persons = [Je, Tu, Il, Nous, Vous, Ils]
 
+pub type Tense {
+  Presens
+  /// aller + infinitive: "je vais parler".
+  FuturProche
+}
+
+pub const tenses = [Presens, FuturProche]
+
+/// Stable id of a tense, part of exercise ids.
+pub fn tense_id(tense: Tense) -> String {
+  case tense {
+    Presens -> "present"
+    FuturProche -> "futur-proche"
+  }
+}
+
 /// A noun whose article elision follows the spelling: l' before a vowel or
 /// h. Use `noun_aspirated_h` for the h aspiré exceptions ("le héros").
 pub fn noun(fr: String, gender: Gender) -> Word {
@@ -112,13 +129,69 @@ pub fn conjugate(present: Present, person: Person) -> String {
 
 /// The subject pronoun joined to a verb form: "je parle", "j'aime".
 pub fn with_pronoun(form: String, person: Person) -> String {
+  with_subject(pronoun(person), form)
+}
+
+fn with_subject(subject: String, form: String) -> String {
+  case subject, starts_with_vowel_sound(form) {
+    "je", True -> "j'" <> form
+    _, _ -> subject <> " " <> form
+  }
+}
+
+/// Every subject a person covers, the canonical one first.
+fn subjects(person: Person) -> List(String) {
   case person {
-    Je ->
-      case starts_with_vowel_sound(form) {
-        True -> "j'" <> form
-        False -> "je " <> form
-      }
-    _ -> pronoun(person) <> " " <> form
+    Il -> ["il", "elle", "on"]
+    Ils -> ["ils", "elles"]
+    _ -> [pronoun(person)]
+  }
+}
+
+/// The accepted forms of a verb for one subject, canonical first, without
+/// the subject.
+fn forms(
+  word: Word,
+  tense: Tense,
+  person: Person,
+  _subject: String,
+) -> List(String) {
+  case word, tense {
+    Verb(present:, ..), Presens -> [conjugate(present, person)]
+    Verb(infinitive:, ..), FuturProche -> [
+      conjugate(aller, person) <> " " <> infinitive,
+    ]
+    _, _ -> []
+  }
+}
+
+const aller = Present("vais", "vas", "va", "allons", "allez", "vont")
+
+/// Every accepted answer for a verb in a tense and person: the forms on
+/// their own ("parlons") and with each subject ("nous parlons"), canonical
+/// first. Empty for anything but a verb.
+pub fn conjugation_answers(
+  word: Word,
+  tense: Tense,
+  person: Person,
+) -> List(String) {
+  let by_subject =
+    list.map(subjects(person), fn(subject) {
+      #(subject, forms(word, tense, person, subject))
+    })
+  let bare = list.flat_map(by_subject, fn(pair) { pair.1 })
+  let with_subjects =
+    list.flat_map(by_subject, fn(pair) {
+      list.map(pair.1, with_subject(pair.0, _))
+    })
+  list.unique(list.append(bare, with_subjects))
+}
+
+/// The canonical conjugated form with its pronoun: "nous allons parler".
+pub fn conjugated(word: Word, tense: Tense, person: Person) -> String {
+  case forms(word, tense, person, pronoun(person)) {
+    [form, ..] -> with_pronoun(form, person)
+    [] -> ""
   }
 }
 

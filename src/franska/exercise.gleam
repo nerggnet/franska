@@ -3,7 +3,7 @@
 
 import franska/answer.{type Grade, type Language}
 import franska/lexicon.{
-  type Entry, type Level, type Person, Expression, Noun, Verb,
+  type Entry, type Level, type Person, type Tense, Expression, Noun, Verb,
 }
 import gleam/list
 
@@ -16,8 +16,8 @@ pub type Kind {
   Translate(Direction)
   /// Pick le or la for a noun shown without its article.
   ChooseArticle
-  /// Give the présent form of a verb for a person.
-  Conjugate(Person)
+  /// Give the form of a verb in a tense for a person.
+  Conjugate(Tense, Person)
   /// Write down French that is read aloud. The prompt is the Swedish
   /// meaning, shown as a hint since some words sound the same.
   Listen
@@ -28,17 +28,19 @@ pub type Drill {
   TranslateToFrench
   TranslateToSwedish
   Articles
-  Conjugation
   Dictation
+  Conjugation(Tense)
 }
 
-pub const drills = [
-  TranslateToFrench,
-  TranslateToSwedish,
-  Articles,
-  Conjugation,
-  Dictation,
-]
+pub fn drills() -> List(Drill) {
+  [
+    TranslateToFrench,
+    TranslateToSwedish,
+    Articles,
+    Dictation,
+    ..list.map(lexicon.tenses, Conjugation)
+  ]
+}
 
 /// `id` is stable and unique, so it can key the learner's progress.
 /// `prompt` is the bare stimulus; the UI adds instructions per `kind`.
@@ -62,7 +64,7 @@ pub fn drill(kind: Kind) -> Drill {
     Translate(ToFrench) -> TranslateToFrench
     Translate(ToSwedish) -> TranslateToSwedish
     ChooseArticle -> Articles
-    Conjugate(_) -> Conjugation
+    Conjugate(tense, _) -> Conjugation(tense)
     Listen -> Dictation
   }
 }
@@ -131,18 +133,18 @@ pub fn from_entry(entry: Entry) -> List(Exercise) {
         french,
       ),
     ]
-    Verb(infinitive:, present:) ->
-      list.map(lexicon.persons, fn(person) {
-        let form = lexicon.conjugate(present, person)
-        exercise(
-          "present:" <> lexicon.pronoun(person),
-          Conjugate(person),
-          infinitive,
-          conjugation_answers(form, person),
-          answer.French,
-          lexicon.with_pronoun(form, person),
-        )
-      })
+    Verb(infinitive:, ..) as verb -> {
+      use tense <- list.flat_map(lexicon.tenses)
+      use person <- list.map(lexicon.persons)
+      exercise(
+        lexicon.tense_id(tense) <> ":" <> lexicon.pronoun(person),
+        Conjugate(tense, person),
+        infinitive,
+        lexicon.conjugation_answers(verb, tense, person),
+        answer.French,
+        lexicon.conjugated(verb, tense, person),
+      )
+    }
     Expression(..) -> []
   }
 
@@ -155,13 +157,4 @@ pub fn check(exercise: Exercise, given: String) -> Grade {
     accepted: exercise.accepted,
     language: exercise.answer_language,
   )
-}
-
-fn conjugation_answers(form: String, person: Person) -> List(String) {
-  let alternatives = case person {
-    lexicon.Il -> ["elle " <> form, "on " <> form]
-    lexicon.Ils -> ["elles " <> form]
-    _ -> []
-  }
-  [form, lexicon.with_pronoun(form, person), ..alternatives]
 }

@@ -64,7 +64,7 @@ pub fn verb_yields_one_exercise_per_person_test() {
     exercise.from_entry(aimer())
     |> list.filter(fn(e) {
       case e.kind {
-        Conjugate(_) -> True
+        Conjugate(lexicon.Presens, _) -> True
         _ -> False
       }
     })
@@ -101,7 +101,8 @@ pub fn french_is_the_full_form_test() {
 
 pub fn drill_matches_kind_test() {
   assert exercise.drill(ChooseArticle) == exercise.Articles
-  assert exercise.drill(Conjugate(lexicon.Nous)) == exercise.Conjugation
+  assert exercise.drill(Conjugate(lexicon.FuturProche, lexicon.Nous))
+    == exercise.Conjugation(lexicon.FuturProche)
   assert exercise.drill(Translate(ToSwedish)) == exercise.TranslateToSwedish
 }
 
@@ -110,4 +111,20 @@ pub fn dictation_hints_the_meaning_and_expects_the_french_test() {
   assert ex.prompt == "hus"
   assert ex.french == "la maison"
   assert exercise.check(ex, "la maison") == Correct
+}
+
+pub fn existing_present_ids_are_kept_test() {
+  let ids = exercise.from_entry(aimer()) |> list.map(fn(e) { e.id })
+  assert list.contains(ids, "aimer:present:je")
+  assert list.contains(ids, "aimer:present:ils")
+}
+
+pub fn futur_proche_is_aller_and_the_infinitive_test() {
+  let je = find(aimer(), "aimer:futur-proche:je")
+  assert je.french == "je vais aimer"
+  assert exercise.check(je, "vais aimer") == Correct
+  assert exercise.check(je, "je vais aimer") == Correct
+  let elles = find(aimer(), "aimer:futur-proche:ils")
+  assert exercise.check(elles, "elles vont aimer") == Correct
+  assert exercise.check(elles, "ils vont aimer") == Correct
 }

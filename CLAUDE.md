@@ -63,7 +63,8 @@ must work on both targets, has no FFI and never reads the clock.
   works out l' elision; use `noun_aspirated_h` for exceptions.
 - `exercise.gleam`: derives all exercises from an entry: translation in both
   directions, le/la for nouns, and one conjugation per person for verbs.
-  Exercise ids are `<entry id>:<suffix>`. `Exercise.french` is the full
+  Exercise ids are `<entry id>:<suffix>`; conjugation suffixes are
+  `<tense id>:<pronoun>` (`present:je`, `futur-proche:nous`). `Exercise.french` is the full
   French form, used to reveal answers and for reading aloud. A `Drill` is
   the kind of practice picked in the menu.
 - `answer.gleam`: normalising and grading. A grade is `Correct`,
