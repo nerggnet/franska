@@ -1,0 +1,297 @@
+//// A2 vocabulary. Ids are stored with the learner's progress: never rename
+//// or reuse one. Put the canonical translation first in `sv`.
+
+import franska/lexicon.{
+  type Entry, type Word, A2, Entry, Expression, Feminine, Masculine, Present,
+  Verb,
+}
+
+pub fn entries() -> List(Entry) {
+  [
+    // Vardagsfraser
+    phrase("je-ne-sais-pas", "vardagsfraser", ["jag vet inte"], [
+      "je ne sais pas", "je sais pas",
+    ]),
+    phrase("je-ne-comprends-pas", "vardagsfraser", ["jag förstår inte"], [
+      "je ne comprends pas", "je comprends pas",
+    ]),
+    phrase(
+      "pouvez-vous-repeter",
+      "vardagsfraser",
+      ["kan du upprepa?", "kan ni upprepa?"],
+      ["pouvez-vous répéter ?", "vous pouvez répéter ?", "tu peux répéter ?"],
+    ),
+    phrase("combien-ca-coute", "vardagsfraser", ["vad kostar det?"], [
+      "combien ça coûte ?", "ça coûte combien ?", "c'est combien ?",
+    ]),
+    phrase("quelle-heure-est-il", "vardagsfraser", ["vad är klockan?"], [
+      "quelle heure est-il ?", "il est quelle heure ?",
+    ]),
+    phrase("j-ai-faim", "vardagsfraser", ["jag är hungrig"], ["j'ai faim"]),
+    phrase("j-ai-soif", "vardagsfraser", ["jag är törstig"], ["j'ai soif"]),
+    phrase("j-ai-froid", "vardagsfraser", ["jag fryser"], ["j'ai froid"]),
+    phrase("d-accord", "vardagsfraser", ["okej", "ok", "visst"], ["d'accord"]),
+    phrase("de-rien", "vardagsfraser", ["ingen orsak", "varsågod"], [
+      "de rien",
+    ]),
+    phrase("bon-appetit", "vardagsfraser", ["smaklig måltid"], [
+      "bon appétit",
+    ]),
+    phrase("a-bientot", "vardagsfraser", ["vi ses snart", "på återseende"], [
+      "à bientôt",
+    ]),
+    // Tid
+    phrase("aujourd-hui", "tid", ["i dag", "idag"], ["aujourd'hui"]),
+    phrase("demain", "tid", ["i morgon", "imorgon"], ["demain"]),
+    phrase("hier", "tid", ["i går", "igår"], ["hier"]),
+    phrase("maintenant", "tid", ["nu"], ["maintenant"]),
+    phrase("toujours", "tid", ["alltid", "fortfarande"], ["toujours"]),
+    phrase("souvent", "tid", ["ofta"], ["souvent"]),
+    noun("jour", "tid", "jour", Masculine, ["dag"]),
+    noun("semaine", "tid", "semaine", Feminine, ["vecka"]),
+    noun("mois", "tid", "mois", Masculine, ["månad"]),
+    noun("annee", "tid", "année", Feminine, ["år"]),
+    noun("heure", "tid", "heure", Feminine, ["timme"]),
+    noun("matin", "tid", "matin", Masculine, ["morgon", "förmiddag"]),
+    noun("soir", "tid", "soir", Masculine, ["kväll"]),
+    // Väder och natur
+    phrase(
+      "il-fait-beau",
+      "väder",
+      ["det är fint väder", "det är vackert väder"],
+      ["il fait beau"],
+    ),
+    phrase("il-pleut", "väder", ["det regnar"], ["il pleut"]),
+    phrase("il-fait-froid", "väder", ["det är kallt"], ["il fait froid"]),
+    phrase("il-fait-chaud", "väder", ["det är varmt"], ["il fait chaud"]),
+    noun("soleil", "väder", "soleil", Masculine, ["sol"]),
+    noun("pluie", "väder", "pluie", Feminine, ["regn"]),
+    noun("neige", "väder", "neige", Feminine, ["snö"]),
+    noun("vent", "väder", "vent", Masculine, ["vind", "blåst"]),
+    noun("nuage", "väder", "nuage", Masculine, ["moln"]),
+    noun("mer", "väder", "mer", Feminine, ["hav"]),
+    noun("montagne", "väder", "montagne", Feminine, ["berg"]),
+    noun("arbre", "väder", "arbre", Masculine, ["träd"]),
+    noun("fleur", "väder", "fleur", Feminine, ["blomma"]),
+    // Kläder
+    noun("chemise", "kläder", "chemise", Feminine, ["skjorta"]),
+    noun("pantalon", "kläder", "pantalon", Masculine, ["byxor", "byxa"]),
+    noun("robe", "kläder", "robe", Feminine, ["klänning"]),
+    noun("jupe", "kläder", "jupe", Feminine, ["kjol"]),
+    noun("chaussure", "kläder", "chaussure", Feminine, ["sko"]),
+    noun("manteau", "kläder", "manteau", Masculine, ["kappa", "rock"]),
+    noun("veste", "kläder", "veste", Feminine, ["jacka", "kavaj"]),
+    noun("chapeau", "kläder", "chapeau", Masculine, ["hatt"]),
+    // Kroppen
+    noun("tete", "kroppen", "tête", Feminine, ["huvud"]),
+    noun("main", "kroppen", "main", Feminine, ["hand"]),
+    noun("bras", "kroppen", "bras", Masculine, ["arm"]),
+    noun("jambe", "kroppen", "jambe", Feminine, ["ben"]),
+    noun("pied", "kroppen", "pied", Masculine, ["fot"]),
+    noun("oeil", "kroppen", "œil", Masculine, ["öga"]),
+    noun("bouche", "kroppen", "bouche", Feminine, ["mun"]),
+    noun("dos", "kroppen", "dos", Masculine, ["rygg"]),
+    noun("coeur", "kroppen", "cœur", Masculine, ["hjärta"]),
+    // Resor
+    noun("voyage", "resor", "voyage", Masculine, ["resa"]),
+    noun("avion", "resor", "avion", Masculine, ["flygplan", "plan"]),
+    noun("train", "resor", "train", Masculine, ["tåg"]),
+    noun("billet", "resor", "billet", Masculine, ["biljett"]),
+    noun("valise", "resor", "valise", Feminine, ["resväska", "väska"]),
+    noun("hotel", "resor", "hôtel", Masculine, ["hotell"]),
+    noun("plage", "resor", "plage", Feminine, ["strand"]),
+    noun("pays", "resor", "pays", Masculine, ["land"]),
+    noun("cle", "resor", "clé", Feminine, ["nyckel"]),
+    // Arbete
+    noun("travail", "arbete", "travail", Masculine, ["arbete", "jobb"]),
+    noun("bureau", "arbete", "bureau", Masculine, ["kontor", "skrivbord"]),
+    noun("argent", "arbete", "argent", Masculine, ["pengar"]),
+    noun("medecin", "arbete", "médecin", Masculine, ["läkare"]),
+    noun("professeur", "arbete", "professeur", Masculine, ["lärare"]),
+    noun("ordinateur", "arbete", "ordinateur", Masculine, ["dator"]),
+    noun("reunion", "arbete", "réunion", Feminine, ["möte"]),
+    // Fler verb
+    verb("venir", ["komma"], "venir", #(
+      "viens",
+      "viens",
+      "vient",
+      "venons",
+      "venez",
+      "viennent",
+    )),
+    verb("voir", ["se"], "voir", #(
+      "vois",
+      "vois",
+      "voit",
+      "voyons",
+      "voyez",
+      "voient",
+    )),
+    verb("savoir", ["veta", "kunna"], "savoir", #(
+      "sais",
+      "sais",
+      "sait",
+      "savons",
+      "savez",
+      "savent",
+    )),
+    verb("dire", ["säga"], "dire", #(
+      "dis",
+      "dis",
+      "dit",
+      "disons",
+      "dites",
+      "disent",
+    )),
+    verb("mettre", ["sätta", "lägga", "ställa", "ta på sig"], "mettre", #(
+      "mets",
+      "mets",
+      "met",
+      "mettons",
+      "mettez",
+      "mettent",
+    )),
+    verb("partir", ["åka iväg", "ge sig av", "gå"], "partir", #(
+      "pars",
+      "pars",
+      "part",
+      "partons",
+      "partez",
+      "partent",
+    )),
+    verb("sortir", ["gå ut"], "sortir", #(
+      "sors",
+      "sors",
+      "sort",
+      "sortons",
+      "sortez",
+      "sortent",
+    )),
+    verb("dormir", ["sova"], "dormir", #(
+      "dors",
+      "dors",
+      "dort",
+      "dormons",
+      "dormez",
+      "dorment",
+    )),
+    verb("lire", ["läsa"], "lire", #(
+      "lis",
+      "lis",
+      "lit",
+      "lisons",
+      "lisez",
+      "lisent",
+    )),
+    verb("ecrire", ["skriva"], "écrire", #(
+      "écris",
+      "écris",
+      "écrit",
+      "écrivons",
+      "écrivez",
+      "écrivent",
+    )),
+    verb("finir", ["avsluta", "bli klar", "sluta"], "finir", #(
+      "finis",
+      "finis",
+      "finit",
+      "finissons",
+      "finissez",
+      "finissent",
+    )),
+    verb("acheter", ["köpa"], "acheter", #(
+      "achète",
+      "achètes",
+      "achète",
+      "achetons",
+      "achetez",
+      "achètent",
+    )),
+    verb("appeler", ["ringa", "kalla"], "appeler", #(
+      "appelle",
+      "appelles",
+      "appelle",
+      "appelons",
+      "appelez",
+      "appellent",
+    )),
+    verb("attendre", ["vänta", "vänta på"], "attendre", #(
+      "attends",
+      "attends",
+      "attend",
+      "attendons",
+      "attendez",
+      "attendent",
+    )),
+    verb("comprendre", ["förstå"], "comprendre", #(
+      "comprends",
+      "comprends",
+      "comprend",
+      "comprenons",
+      "comprenez",
+      "comprennent",
+    )),
+    verb("connaitre", ["känna", "känna till"], "connaître", #(
+      "connais",
+      "connais",
+      "connaît",
+      "connaissons",
+      "connaissez",
+      "connaissent",
+    )),
+    verb("devoir", ["måste", "vara tvungen"], "devoir", #(
+      "dois",
+      "dois",
+      "doit",
+      "devons",
+      "devez",
+      "doivent",
+    )),
+    verb("travailler", ["arbeta", "jobba"], "travailler", #(
+      "travaille",
+      "travailles",
+      "travaille",
+      "travaillons",
+      "travaillez",
+      "travaillent",
+    )),
+    verb("regarder", ["titta på", "titta", "se på"], "regarder", #(
+      "regarde",
+      "regardes",
+      "regarde",
+      "regardons",
+      "regardez",
+      "regardent",
+    )),
+    verb("ecouter", ["lyssna", "lyssna på"], "écouter", #(
+      "écoute",
+      "écoutes",
+      "écoute",
+      "écoutons",
+      "écoutez",
+      "écoutent",
+    )),
+  ]
+}
+
+fn entry(id: String, theme: String, sv: List(String), word: Word) -> Entry {
+  Entry(id:, level: A2, theme:, sv:, word:)
+}
+
+fn phrase(id, theme, sv, fr) -> Entry {
+  entry(id, theme, sv, Expression(fr))
+}
+
+fn noun(id, theme, fr, gender, sv) -> Entry {
+  entry(id, theme, sv, lexicon.noun(fr, gender))
+}
+
+fn verb(id, sv, infinitive, forms) -> Entry {
+  let #(je, tu, il, nous, vous, ils) = forms
+  entry(
+    id,
+    "verb",
+    sv,
+    Verb(infinitive, Present(je:, tu:, il:, nous:, vous:, ils:)),
+  )
+}

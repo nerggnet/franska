@@ -1,5 +1,6 @@
 import franska/answer.{Correct, French, Wrong}
 import franska/exercise.{Exercise, ToFrench, Translate}
+import franska/lexicon.{A1}
 import franska/progress.{Progress, Stats, Streak}
 import franska/srs.{type CardState, CardState}
 import gleam/dict
@@ -18,6 +19,7 @@ fn exercise(id: String) {
     accepted: [id],
     answer_language: French,
     french: id,
+    level: A1,
   )
 }
 
@@ -121,4 +123,15 @@ pub fn invalid_json_is_rejected_test() {
 pub fn missing_optional_fields_get_defaults_test() {
   assert progress.from_json("{\"version\": 1, \"cards\": {}}")
     == Ok(progress.new())
+}
+
+pub fn plan_round_takes_new_a1_before_new_a2_test() {
+  let exercises = [
+    Exercise(..exercise("a2-first"), level: lexicon.A2),
+    exercise("a1-first"),
+    Exercise(..exercise("a2-second"), level: lexicon.A2),
+    exercise("a1-second"),
+  ]
+  assert ids(progress.plan_round(progress.new(), exercises, now:, size: 3))
+    == ["a1-first", "a1-second", "a2-first"]
 }

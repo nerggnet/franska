@@ -1,5 +1,6 @@
 import franska/answer.{Almost, Correct, French, MissingAccents, Wrong}
 import franska/exercise.{Exercise, ToFrench, Translate}
+import franska/lexicon.{A1}
 import franska/session.{Summary}
 import gleam/list
 
@@ -12,6 +13,7 @@ fn exercise(id: String) {
     accepted: [id],
     answer_language: French,
     french: id,
+    level: A1,
   )
 }
 

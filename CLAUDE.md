@@ -39,8 +39,10 @@ reads the clock.
 - `.github/workflows/pages.yml`: deploys every push to `main`. It runs
   `gleam run -m lustre/dev build --minify` and then rewrites the generated
   root-relative script path to a relative one.
-- `content.gleam` and `content/a1.gleam`: the curated entries. Add a new
-  level as a module and include it in `content.entries()`.
+- `content.gleam`, `content/a1.gleam` and `content/a2.gleam`: the curated
+  entries. Keep easier levels first in `content.entries()`. Add a new level
+  as a module, add it to `lexicon.Level` and `level_rank`, and include it
+  there.
 - `session.gleam`: one practice round. A wrong answer comes back 3 exercises
   later.
 
@@ -60,8 +62,8 @@ reads the clock.
   seconds passed in by the caller. A correct answer before a card is due
   does not promote it.
 - `progress.gleam`: the saved state (cards by exercise id, read-aloud
-  setting, streak), its JSON format, `plan_round` (due first, then new,
-  then due soonest) and `stats`. The app stores it under the
+  setting, streak), its JSON format, `plan_round` (due first, then new
+  with easier levels first, then due soonest) and `stats`. The app stores it under the
   localStorage key `franska:progress`. Bump `version` when the format
   changes incompatibly; unreadable data falls back to a fresh start.
   Only the first attempt at an exercise in a round is recorded.
@@ -87,5 +89,5 @@ reads the clock.
    ~~(Web Speech API, fr-FR), deploy to GitHub Pages~~
 4. ~~Progress in `localStorage`, spaced repetition picks rounds, stats view~~
 
-Ideas for later: A2 content, passé composé and other tenses, mixed-drill
+Ideas for later: passé composé and other tenses, mixed-drill
 rounds, export/import of progress.

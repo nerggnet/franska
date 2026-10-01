@@ -1,13 +1,15 @@
 //// All curated content. Add a new level or content module here.
 
 import franska/content/a1
+import franska/content/a2
 import franska/exercise.{type Drill, type Exercise}
 import franska/lexicon.{type Entry}
 import gleam/list
 import gleam/option.{type Option, None, Some}
 
+/// A1 entries come first, so new A1 words are practised before A2 ones.
 pub fn entries() -> List(Entry) {
-  a1.entries()
+  list.append(a1.entries(), a2.entries())
 }
 
 /// Every theme in the content, in the order it first appears.

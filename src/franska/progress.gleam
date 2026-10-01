@@ -3,6 +3,7 @@
 
 import franska/answer.{type Grade}
 import franska/exercise.{type Exercise}
+import franska/lexicon
 import franska/srs.{type CardState, CardState}
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode.{type Decoder}
@@ -72,8 +73,9 @@ pub fn streak_days(progress: Progress, today: Int) -> Int {
 }
 
 /// Picks up to `size` exercises: due ones first, most overdue first, then
-/// new ones in the given order. If that is not enough, the rest are the
-/// ones due soonest, which can be practised ahead without being promoted.
+/// new ones, easiest level first and otherwise in the given order. If that
+/// is not enough, the rest are the ones due soonest, which can be practised
+/// ahead without being promoted.
 pub fn plan_round(
   progress: Progress,
   exercises: List(Exercise),
@@ -89,6 +91,9 @@ pub fn plan_round(
       #(e, card)
     })
     |> list.sort(fn(a, b) { int.compare({ a.1 }.due, { b.1 }.due) })
+  // `list.sort` is stable, so the given order is kept within a level.
+  let new =
+    list.sort(new, fn(a, b) { lexicon.compare_levels(a.level, b.level) })
   let #(due, later) =
     list.partition(by_due, fn(pair) { srs.is_due(pair.1, now) })
 

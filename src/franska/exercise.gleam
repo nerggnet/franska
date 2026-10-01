@@ -2,7 +2,9 @@
 //// content automatically adds every exercise that fits it.
 
 import franska/answer.{type Grade, type Language}
-import franska/lexicon.{type Entry, type Person, Expression, Noun, Verb}
+import franska/lexicon.{
+  type Entry, type Level, type Person, Expression, Noun, Verb,
+}
 import gleam/list
 
 pub type Direction {
@@ -41,6 +43,7 @@ pub type Exercise {
     accepted: List(String),
     answer_language: Language,
     french: String,
+    level: Level,
   )
 }
 
@@ -68,6 +71,7 @@ pub fn from_entry(entry: Entry) -> List(Exercise) {
       accepted:,
       answer_language:,
       french:,
+      level: entry.level,
     )
   }
   let to_french_accepted = case entry.word {

@@ -63,3 +63,11 @@ pub fn articles_are_not_offered_for_themes_without_nouns_test() {
   assert !list.contains(themes, "verb")
   assert list.contains(themes, "mat")
 }
+
+pub fn content_has_both_levels_with_a1_first_test() {
+  let levels = list.map(content.entries(), fn(e) { e.level })
+  let #(a1, rest) = list.split_while(levels, fn(l) { l == lexicon.A1 })
+  assert a1 != []
+  assert rest != []
+  assert list.all(rest, fn(l) { l == lexicon.A2 })
+}

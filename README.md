@@ -12,7 +12,8 @@ Try it at **https://nerggnet.github.io/franska/**.
 ## Status
 
 The browser app ([Lustre](https://hexdocs.pm/lustre/)) offers rounds of 10
-exercises from 67 A1 entries, optionally limited to one theme:
+exercises from 156 entries (67 at A1 and 89 at A2), optionally limited to
+one theme:
 
 - Swedish → French and French → Swedish translation
 - le or la? for nouns

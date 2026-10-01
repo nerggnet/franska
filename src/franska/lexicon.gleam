@@ -1,11 +1,25 @@
 //// The vocabulary a learner studies. Content is curated as a list of
 //// `Entry` values; exercises are derived from them (see `franska/exercise`).
 
+import gleam/int
+import gleam/order
 import gleam/string
 
 pub type Level {
   A1
   A2
+}
+
+/// Orders levels from easiest to hardest.
+pub fn compare_levels(a: Level, b: Level) -> order.Order {
+  int.compare(level_rank(a), level_rank(b))
+}
+
+fn level_rank(level: Level) -> Int {
+  case level {
+    A1 -> 1
+    A2 -> 2
+  }
 }
 
 pub type Gender {
