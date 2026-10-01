@@ -8,6 +8,7 @@ import gleam/result
 import lustre
 
 pub fn main() -> Nil {
+  browser.register_service_worker()
   // Unreadable or outdated progress starts over rather than breaking the app.
   let progress =
     progress.from_json(browser.load(app.storage_key))

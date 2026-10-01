@@ -98,3 +98,11 @@ export function read_chosen_file(id, on_text) {
   // Allow choosing the same file again later.
   input.value = "";
 }
+
+/// Registers the offline service worker in production builds. The dev
+/// server is left alone so live reload is never served from a cache.
+export function register_service_worker() {
+  if (!("serviceWorker" in navigator)) return;
+  if (document.querySelector('script[src*="hot-reload"]')) return;
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}

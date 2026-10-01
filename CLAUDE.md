@@ -42,6 +42,11 @@ must work on both targets, has no FFI and never reads the clock.
   (lang, title, stylesheet) is under `[tools.lustre.html]` in `gleam.toml`.
   Keep asset paths relative (`franska.css`, not `/franska.css`), because the
   site is served from https://nerggnet.github.io/franska/.
+- `assets/sw.js`, `assets/manifest.webmanifest` and the icons make the app
+  installable and usable offline. The service worker tries the network
+  first and falls back to its cache, and is only registered in production
+  builds (never by the dev server). Keep its `SHELL` list in line with the
+  built files.
 - `.github/workflows/pages.yml`: deploys every push to `main`. It runs
   `gleam run -m lustre/dev build --minify` and then rewrites the generated
   root-relative script path to a relative one.

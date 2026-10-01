@@ -28,6 +28,10 @@ storage, and nothing leaves your device. The app asks the browser to keep
 that data, and the statistics page can export it to a file and import it
 again, for a backup or to move to another device.
 
+The app works offline and can be installed on a phone or computer (in
+Safari: *Dela → Lägg till på hemskärmen*; in Chrome: the install icon in
+the address bar).
+
 Every push to `main` deploys to GitHub Pages
 (`.github/workflows/pages.yml`).
 

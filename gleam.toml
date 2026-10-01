@@ -26,3 +26,12 @@ lustre_dev_tools = ">= 2.4.0 and < 3.0.0"
 lang = "sv"
 title = "Franska"
 stylesheets = [{ href = "franska.css" }]
+meta = [
+  { name = "theme-color", content = "#1f4fa3" },
+  { name = "description", content = "Öva franska från svenska, en fras i taget" },
+]
+links = [
+  { rel = "manifest", href = "manifest.webmanifest" },
+  { rel = "icon", href = "icon.svg", type = "image/svg+xml" },
+  { rel = "apple-touch-icon", href = "apple-touch-icon.png" },
+]

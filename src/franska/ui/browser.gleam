@@ -56,3 +56,8 @@ pub fn download(_prefix: String, _text: String) -> Nil {
 pub fn read_chosen_file(_id: String, on_text: fn(String) -> Nil) -> Nil {
   on_text("")
 }
+
+@external(javascript, "./browser.ffi.mjs", "register_service_worker")
+pub fn register_service_worker() -> Nil {
+  Nil
+}
