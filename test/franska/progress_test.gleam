@@ -146,3 +146,17 @@ pub fn due_lists_only_due_exercises_most_overdue_first_test() {
   let exercises = list.map(["a", "b", "c", "new"], exercise)
   assert ids(progress.due(p, exercises, now:)) == ["c", "a"]
 }
+
+pub fn difficult_lists_most_mistakes_first_test() {
+  let p =
+    with_cards([
+      #("once", CardState(box: 2, due: now, reviews: 3, lapses: 1)),
+      #("never", CardState(box: 3, due: now, reviews: 3, lapses: 0)),
+      #("thrice", CardState(box: 1, due: now, reviews: 5, lapses: 3)),
+      #("once-weak", CardState(box: 1, due: now, reviews: 2, lapses: 1)),
+    ])
+  let exercises = list.map(["once", "never", "thrice", "once-weak"], exercise)
+  assert progress.difficult(p, exercises)
+    |> list.map(fn(pair) { { pair.0 }.id })
+    == ["thrice", "once-weak", "once"]
+}

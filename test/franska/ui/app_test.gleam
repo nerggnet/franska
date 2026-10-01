@@ -163,7 +163,7 @@ pub fn review_round_takes_due_exercises_from_every_drill_test() {
       #("chien:to-fr", later),
     ])
     |> send([UserStartedReview])
-  assert model.reviewing
+  assert model.round == app.ReviewRound
   let assert Practising(session:, ..) = model.screen
   assert list.sort(list.map(session.queue, fn(e) { e.id }), string.compare)
     == ["chat:article", "chat:to-fr", "parler:present:nous"]
@@ -224,4 +224,22 @@ pub fn dictation_is_hidden_without_speech_test() {
   assert !string.contains(html, "Diktamen")
   let speaking = app.Model(..model, env: Env(..model.env, can_speak: True))
   assert string.contains(element.to_string(app.view(speaking)), "Diktamen")
+}
+
+pub fn difficult_round_takes_the_exercises_with_most_mistakes_test() {
+  let missed = srs.CardState(box: 1, due: now + 1000, reviews: 3, lapses: 2)
+  let fine = srs.CardState(box: 3, due: now + 1000, reviews: 3, lapses: 0)
+  let model =
+    start()
+    |> with_progress([#("chat:to-fr", missed), #("chien:to-fr", fine)])
+    |> send([app.UserOpenedStatistics, app.UserStartedDifficultRound])
+  assert model.round == app.DifficultRound
+  let assert Practising(session:, ..) = model.screen
+  assert list.map(session.queue, fn(e) { e.id }) == ["chat:to-fr"]
+}
+
+pub fn difficult_round_without_mistakes_does_nothing_test() {
+  let model =
+    start() |> send([app.UserOpenedStatistics, app.UserStartedDifficultRound])
+  assert model.screen == Statistics(confirming_reset: False, notice: None)
 }

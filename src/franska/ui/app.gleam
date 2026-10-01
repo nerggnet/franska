@@ -14,6 +14,7 @@ import franska/gender
 import franska/lexicon
 import franska/progress.{type Progress, Progress}
 import franska/session.{type Session}
+import franska/srs
 import franska/ui/browser
 import gleam/dynamic/decode
 import gleam/int
@@ -55,17 +56,26 @@ pub type Env {
   )
 }
 
-/// `theme` is the chosen theme, or `None` for all themes. `reviewing` is
-/// True while the round is Dagens repetition rather than a single drill.
+/// `theme` is the chosen theme, or `None` for all themes. `round` is the
+/// kind of the current or last round, so "Öva igen" repeats it.
 pub type Model {
   Model(
     env: Env,
     drill: Drill,
     theme: Option(String),
     progress: Progress,
-    reviewing: Bool,
+    round: Round,
     screen: Screen,
   )
+}
+
+pub type Round {
+  /// The drill and theme chosen in the menu.
+  DrillRound
+  /// Dagens repetition: everything due.
+  ReviewRound
+  /// Svåra ord: the exercises with the most mistakes.
+  DifficultRound
 }
 
 pub type Screen {
@@ -88,7 +98,7 @@ pub fn init(flags: #(Env, Progress)) -> #(Model, Effect(Msg)) {
       drill: TranslateToFrench,
       theme: None,
       progress:,
-      reviewing: False,
+      round: DrillRound,
       screen: Menu,
     ),
     effect.none(),
@@ -103,6 +113,7 @@ pub type Msg {
   UserToggledReadAloud(Bool)
   UserStartedRound
   UserStartedReview
+  UserStartedDifficultRound
   UserTypedAnswer(String)
   UserPressedAccent(String)
   UserChoseAnswer(String)
@@ -152,7 +163,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
         )
         |> model.env.shuffle
         |> session.new
-      show_exercise(Model(..model, reviewing: False), session)
+      show_exercise(Model(..model, round: DrillRound), session)
     }
 
     Menu, UserStartedReview | Finished(..), UserStartedReview -> {
@@ -164,7 +175,22 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
         |> session.new
       case session.is_finished(session) {
         True -> #(Model(..model, screen: Menu), effect.none())
-        False -> show_exercise(Model(..model, reviewing: True), session)
+        False -> show_exercise(Model(..model, round: ReviewRound), session)
+      }
+    }
+
+    Statistics(..), UserStartedDifficultRound
+    | Finished(..), UserStartedDifficultRound
+    -> {
+      let session =
+        progress.difficult(model.progress, content.all_exercises())
+        |> list.take(round_size)
+        |> list.map(fn(pair) { pair.0 })
+        |> model.env.shuffle
+        |> session.new
+      case session.is_finished(session) {
+        True -> #(model, effect.none())
+        False -> show_exercise(Model(..model, round: DifficultRound), session)
       }
     }
 
@@ -340,7 +366,7 @@ pub fn view(model: Model) -> Element(Msg) {
             view_exercise(model.env, session, exercise, input, grade)
           Error(Nil) -> element.none()
         }
-      Finished(session:) -> view_finished(session, model.reviewing)
+      Finished(session:) -> view_finished(session, model.round)
       Statistics(confirming_reset:, notice:) ->
         view_statistics(
           model.progress,
@@ -820,7 +846,7 @@ fn speaker_icon() -> Element(Msg) {
   )
 }
 
-fn view_finished(session: Session, reviewing: Bool) -> Element(Msg) {
+fn view_finished(session: Session, round: Round) -> Element(Msg) {
   let summary = session.summary(session)
   let stat = fn(count: Int, label: String, tone: String) {
     html.div([class("stat " <> tone)], [
@@ -840,9 +866,10 @@ fn view_finished(session: Session, reviewing: Bool) -> Element(Msg) {
       html.button(
         [
           class("primary"),
-          event.on_click(case reviewing {
-            True -> UserStartedReview
-            False -> UserStartedRound
+          event.on_click(case round {
+            DrillRound -> UserStartedRound
+            ReviewRound -> UserStartedReview
+            DifficultRound -> UserStartedDifficultRound
           }),
         ],
         [html.text("Öva igen")],
@@ -896,6 +923,7 @@ fn view_statistics(
         "En övning räknas som inlärd när nästa repetition är minst en vecka bort.",
       ),
     ]),
+    view_difficult(progress.difficult(progress, content.all_exercises())),
     view_backup(notice),
     case confirming_reset {
       False ->
@@ -962,4 +990,34 @@ fn view_backup(notice: Option(Notice)) -> Element(Msg) {
         ])
     },
   ])
+}
+
+fn view_difficult(difficult: List(#(Exercise, srs.CardState))) -> Element(Msg) {
+  case difficult {
+    [] -> element.none()
+    _ ->
+      html.div([class("difficult")], [
+        html.h2([class("subheading")], [html.text("Svåra ord")]),
+        html.ul(
+          [class("difficult-list")],
+          list.map(list.take(difficult, round_size), fn(pair) {
+            let #(exercise, card) = pair
+            html.li([], [
+              html.span([attribute.lang("fr")], [html.text(exercise.french)]),
+              html.span([class("muted")], [
+                html.text(
+                  drill_name(exercise.drill(exercise.kind))
+                  <> " · fel "
+                  <> plural(card.lapses, "gång", "gånger"),
+                ),
+              ]),
+            ])
+          }),
+        ),
+        html.button(
+          [class("secondary"), event.on_click(UserStartedDifficultRound)],
+          [html.text("Öva på svåra ord")],
+        ),
+      ])
+  }
 }

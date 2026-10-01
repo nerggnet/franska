@@ -10,6 +10,7 @@ import gleam/dynamic/decode.{type Decoder}
 import gleam/int
 import gleam/json
 import gleam/list
+import gleam/order
 import gleam/result
 
 /// Bump when the stored format changes incompatibly.
@@ -120,6 +121,27 @@ pub fn due(
   })
   |> list.sort(fn(a, b) { int.compare(a.1, b.1) })
   |> list.map(fn(pair) { pair.0 })
+}
+
+/// The exercises answered wrong at least once, most mistakes first and,
+/// among equals, the least well known first.
+pub fn difficult(
+  progress: Progress,
+  exercises: List(Exercise),
+) -> List(#(Exercise, CardState)) {
+  exercises
+  |> list.filter_map(fn(e) {
+    case dict.get(progress.cards, e.id) {
+      Ok(card) if card.lapses > 0 -> Ok(#(e, card))
+      _ -> Error(Nil)
+    }
+  })
+  |> list.sort(fn(a, b) {
+    case int.compare({ b.1 }.lapses, { a.1 }.lapses) {
+      order.Eq -> int.compare({ a.1 }.box, { b.1 }.box)
+      other -> other
+    }
+  })
 }
 
 pub fn stats(

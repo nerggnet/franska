@@ -484,3 +484,31 @@ input:focus-visible {
   font-weight: 400;
   color: var(--text);
 }
+
+.difficult {
+  margin-bottom: 1.5rem;
+}
+
+.difficult-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.difficult-list li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.difficult-list li span:first-child {
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
