@@ -261,3 +261,86 @@ pub fn invariable_adjectives_are_not_compared_test() {
   assert lexicon.compared(lexicon.invariable_adjective("marron"), lexicon.More)
     == []
 }
+
+fn future(word: lexicon.Word) -> List(String) {
+  list.map(lexicon.persons, lexicon.conjugated(word, lexicon.FuturSimple, _))
+}
+
+pub fn futur_simple_of_regular_verbs_test() {
+  let parler =
+    verb("parler", ["parle", "parles", "parle", "parlons", "parlez", "parlent"])
+  assert future(parler)
+    == [
+      "je parlerai", "tu parleras", "il parlera", "nous parlerons",
+      "vous parlerez", "ils parleront",
+    ]
+  let finir =
+    verb("finir", [
+      "finis",
+      "finis",
+      "finit",
+      "finissons",
+      "finissez",
+      "finissent",
+    ])
+  assert lexicon.conjugated(finir, lexicon.FuturSimple, lexicon.Je)
+    == "je finirai"
+  let prendre =
+    verb("prendre", [
+      "prends",
+      "prends",
+      "prend",
+      "prenons",
+      "prenez",
+      "prennent",
+    ])
+  assert lexicon.conjugated(prendre, lexicon.FuturSimple, lexicon.Nous)
+    == "nous prendrons"
+}
+
+pub fn futur_simple_irregular_stems_test() {
+  let aller = verb("aller", ["vais", "vas", "va", "allons", "allez", "vont"])
+  assert lexicon.conjugated(aller, lexicon.FuturSimple, lexicon.Je) == "j'irai"
+  let etre = verb("être", ["suis", "es", "est", "sommes", "êtes", "sont"])
+  assert lexicon.conjugated(etre, lexicon.FuturSimple, lexicon.Ils)
+    == "ils seront"
+  let faire =
+    verb("faire", ["fais", "fais", "fait", "faisons", "faites", "font"])
+  assert lexicon.conjugated(faire, lexicon.FuturSimple, lexicon.Il) == "il fera"
+}
+
+pub fn futur_simple_keeps_spelling_changes_test() {
+  let acheter =
+    verb("acheter", [
+      "achète", "achètes", "achète", "achetons", "achetez", "achètent",
+    ])
+  assert lexicon.conjugated(acheter, lexicon.FuturSimple, lexicon.Je)
+    == "j'achèterai"
+  let appeler =
+    verb("appeler", [
+      "appelle", "appelles", "appelle", "appelons", "appelez", "appellent",
+    ])
+  assert lexicon.conjugated(appeler, lexicon.FuturSimple, lexicon.Nous)
+    == "nous appellerons"
+  let preferer =
+    verb("préférer", [
+      "préfère", "préfères", "préfère", "préférons", "préférez", "préfèrent",
+    ])
+  let answers =
+    lexicon.conjugation_answers(preferer, lexicon.FuturSimple, lexicon.Je)
+  assert list.contains(answers, "je préférerai")
+  assert list.contains(answers, "je préfèrerai")
+  assert lexicon.conjugated(preferer, lexicon.FuturSimple, lexicon.Je)
+    == "je préférerai"
+}
+
+pub fn futur_simple_of_reflexive_verbs_test() {
+  let lever =
+    reflexive(
+      "lever",
+      ["lève", "lèves", "lève", "levons", "levez", "lèvent"],
+      "levé",
+    )
+  assert lexicon.conjugated(lever, lexicon.FuturSimple, lexicon.Je)
+    == "je me lèverai"
+}

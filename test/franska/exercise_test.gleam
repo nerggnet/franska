@@ -1,6 +1,4 @@
-import franska/answer.{
-  Almost, Correct, MissingAccents, MissingArticle, Typo, Wrong,
-}
+import franska/answer.{Almost, Correct, MissingAccents, MissingArticle, Wrong}
 import franska/exercise.{
   ChooseArticle, Conjugate, Listen, ToFrench, ToSwedish, Translate,
 }

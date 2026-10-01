@@ -104,6 +104,9 @@ pub type Tense {
   Presens
   /// aller + infinitive: "je vais parler".
   FuturProche
+  /// A stem, mostly the infinitive, plus -ai, -as, -a, -ons, -ez, -ont:
+  /// "je parlerai", "j'irai".
+  FuturSimple
   /// auxiliary + past participle: "j'ai parlé", "elle est allée".
   PasseCompose
   /// Generated from the nous stem: "nous parlons" gives "je parlais".
@@ -112,7 +115,14 @@ pub type Tense {
   Imperatif
 }
 
-pub const tenses = [Presens, FuturProche, PasseCompose, Imparfait, Imperatif]
+pub const tenses = [
+  Presens,
+  FuturProche,
+  FuturSimple,
+  PasseCompose,
+  Imparfait,
+  Imperatif,
+]
 
 /// The persons a tense has: the imperative only has tu, nous and vous.
 pub fn persons_for(tense: Tense) -> List(Person) {
@@ -127,6 +137,7 @@ pub fn tense_id(tense: Tense) -> String {
   case tense {
     Presens -> "present"
     FuturProche -> "futur-proche"
+    FuturSimple -> "futur-simple"
     PasseCompose -> "passe-compose"
     Imparfait -> "imparfait"
     Imperatif -> "imperatif"
@@ -376,8 +387,70 @@ fn forms(
     Verb(infinitive:, present:, ..), Imparfait -> [
       reflexive(word, person, imparfait(infinitive, present, person)),
     ]
+    Verb(infinitive:, present:, ..), FuturSimple ->
+      list.map(future_stems(infinitive, present), fn(stem) {
+        reflexive(word, person, stem <> future_ending(person))
+      })
     Verb(..), Imperatif -> imperative(word, person)
     _, _ -> []
+  }
+}
+
+/// The stems of the futur simple, canonical first. Ten common verbs have
+/// an irregular stem. Otherwise -er verbs build on the je form, so the
+/// spelling changes carry over (j'achète, j'achèterai; j'appelle,
+/// j'appellerai), except that é→è verbs keep their é (préférerai) with
+/// the reformed è (préfèrerai) also accepted. Other verbs use the
+/// infinitive, -re verbs without the final e (prendr-).
+fn future_stems(infinitive: String, present: Present) -> List(String) {
+  case irregular_future_stem(infinitive) {
+    Ok(stem) -> [stem]
+    Error(Nil) ->
+      case string.ends_with(infinitive, "er") {
+        True -> {
+          let from_je = present.je <> "r"
+          case
+            from_je != infinitive
+            && string.contains(present.je, "è")
+            && string.contains(infinitive, "é")
+          {
+            True -> [infinitive, from_je]
+            False -> [from_je]
+          }
+        }
+        False ->
+          case string.ends_with(infinitive, "re") {
+            True -> [string.drop_end(infinitive, 1)]
+            False -> [infinitive]
+          }
+      }
+  }
+}
+
+fn irregular_future_stem(infinitive: String) -> Result(String, Nil) {
+  case infinitive {
+    "être" -> Ok("ser")
+    "avoir" -> Ok("aur")
+    "aller" -> Ok("ir")
+    "faire" -> Ok("fer")
+    "venir" -> Ok("viendr")
+    "voir" -> Ok("verr")
+    "pouvoir" -> Ok("pourr")
+    "vouloir" -> Ok("voudr")
+    "savoir" -> Ok("saur")
+    "devoir" -> Ok("devr")
+    _ -> Error(Nil)
+  }
+}
+
+fn future_ending(person: Person) -> String {
+  case person {
+    Je -> "ai"
+    Tu -> "as"
+    Il -> "a"
+    Nous -> "ons"
+    Vous -> "ez"
+    Ils -> "ont"
   }
 }
 

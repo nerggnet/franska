@@ -680,6 +680,38 @@ pub fn entries() -> List(Entry) {
       ["que"],
       "",
     ),
+    sentence(
+      "futur-il-fera-beau",
+      "futur",
+      "I morgon blir det fint väder.",
+      "Demain, il ___ beau.",
+      ["fera"],
+      "faire",
+    ),
+    sentence(
+      "futur-nous-irons",
+      "futur",
+      "Nästa år åker vi till Frankrike.",
+      "L'année prochaine, nous ___ en France.",
+      ["irons"],
+      "aller",
+    ),
+    sentence(
+      "futur-je-t-appellerai",
+      "futur",
+      "Jag ringer dig i morgon.",
+      "Je t'___ demain.",
+      ["appellerai"],
+      "appeler",
+    ),
+    sentence(
+      "futur-tu-seras",
+      "futur",
+      "När du blir stor kommer du att förstå.",
+      "Quand tu ___ grand, tu comprendras.",
+      ["seras"],
+      "être",
+    ),
     // Pronomen
     pronoun("pron-je-vois-marie", "Jag ser henne.", "Je vois [Marie].", [
       "Je la vois.",
