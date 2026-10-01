@@ -292,6 +292,31 @@ pub fn entries() -> List(Entry) {
       "écouté",
       Avoir,
     ),
+    // Fler verb
+    verb(
+      "vendre",
+      ["sälja"],
+      "vendre",
+      #("vends", "vends", "vend", "vendons", "vendez", "vendent"),
+      "vendu",
+      Avoir,
+    ),
+    verb(
+      "preferer",
+      ["föredra"],
+      "préférer",
+      #("préfère", "préfères", "préfère", "préférons", "préférez", "préfèrent"),
+      "préféré",
+      Avoir,
+    ),
+    verb(
+      "rentrer",
+      ["komma hem", "gå hem", "åka hem"],
+      "rentrer",
+      #("rentre", "rentres", "rentre", "rentrons", "rentrez", "rentrent"),
+      "rentré",
+      Etre,
+    ),
     // Adjektiv
     adjective("heureux", "egenskaper", ["lycklig"], "heureux", "heureuse"),
     adjective("triste", "egenskaper", ["ledsen"], "triste", "triste"),

@@ -12,7 +12,7 @@ Try it at **https://nerggnet.github.io/franska/**.
 ## Status
 
 The browser app ([Lustre](https://hexdocs.pm/lustre/)) offers rounds of 10
-exercises from 201 words and phrases (96 at A1 and 105 at A2) and 32
+exercises from 321 words and phrases (213 at A1 and 108 at A2) and 32
 sentences, optionally limited to one theme:
 
 - Swedish → French and French → Swedish translation
