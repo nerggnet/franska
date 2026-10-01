@@ -13,6 +13,7 @@ import franska/lexicon
 import franska/progress.{type Progress, Progress}
 import franska/session.{type Session}
 import franska/ui/browser
+import gleam/dynamic/decode
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
@@ -30,6 +31,8 @@ const round_size = 10
 const review_size = 20
 
 const answer_input_id = "answer"
+
+const import_input_id = "import-file"
 
 pub const storage_key = "franska:progress"
 
@@ -66,7 +69,12 @@ pub type Screen {
   Menu
   Practising(session: Session, input: String, grade: Option(Grade))
   Finished(session: Session)
-  Statistics(confirming_reset: Bool)
+  Statistics(confirming_reset: Bool, notice: Option(Notice))
+}
+
+pub type Notice {
+  Imported
+  CouldNotImport
 }
 
 pub fn init(flags: #(Env, Progress)) -> #(Model, Effect(Msg)) {
@@ -102,6 +110,9 @@ pub type Msg {
   UserAskedToReset
   UserConfirmedReset
   UserCancelledReset
+  UserExportedProgress
+  UserChoseImportFile
+  ImportFileRead(String)
 }
 
 pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
@@ -185,31 +196,48 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
     | Statistics(..), UserQuitRound
     -> #(Model(..model, screen: Menu), effect.none())
 
-    Menu, UserOpenedStatistics -> #(
-      Model(..model, screen: Statistics(confirming_reset: False)),
-      effect.none(),
-    )
+    Menu, UserOpenedStatistics -> #(statistics(model, None), effect.none())
 
     Statistics(..), UserAskedToReset -> #(
-      Model(..model, screen: Statistics(confirming_reset: True)),
+      Model(..model, screen: Statistics(confirming_reset: True, notice: None)),
       effect.none(),
     )
 
     Statistics(..), UserCancelledReset -> #(
-      Model(..model, screen: Statistics(confirming_reset: False)),
+      statistics(model, None),
       effect.none(),
     )
 
-    Statistics(confirming_reset: True), UserConfirmedReset -> {
+    Statistics(confirming_reset: True, ..), UserConfirmedReset -> {
       // Only learning progress is reset; the read-aloud setting stays.
       let fresh =
         Progress(..progress.new(), read_aloud: model.progress.read_aloud)
       let #(model, save) = update_progress(model, fresh)
-      #(Model(..model, screen: Statistics(confirming_reset: False)), save)
+      #(statistics(model, None), save)
     }
+
+    Statistics(..), UserExportedProgress -> #(
+      model,
+      export_effect(model.progress),
+    )
+
+    Statistics(..), UserChoseImportFile -> #(model, read_import_effect())
+
+    Statistics(..), ImportFileRead(text) ->
+      case progress.from_json(text) {
+        Ok(imported) -> {
+          let #(model, save) = update_progress(model, imported)
+          #(statistics(model, Some(Imported)), save)
+        }
+        Error(Nil) -> #(statistics(model, Some(CouldNotImport)), effect.none())
+      }
 
     _, _ -> #(model, effect.none())
   }
+}
+
+fn statistics(model: Model, notice: Option(Notice)) -> Model {
+  Model(..model, screen: Statistics(confirming_reset: False, notice:))
 }
 
 fn update_progress(model: Model, progress: Progress) -> #(Model, Effect(Msg)) {
@@ -273,6 +301,18 @@ fn insert_accent(accent: String) -> Effect(Msg) {
 fn save_effect(progress: Progress) -> Effect(Msg) {
   use _ <- effect.from
   browser.save(storage_key, progress.to_json(progress))
+  browser.request_persistence()
+}
+
+fn export_effect(progress: Progress) -> Effect(Msg) {
+  use _ <- effect.from
+  browser.download("franska-framsteg", progress.to_json(progress))
+}
+
+fn read_import_effect() -> Effect(Msg) {
+  use dispatch <- effect.from
+  use text <- browser.read_chosen_file(import_input_id)
+  dispatch(ImportFileRead(text))
 }
 
 fn speak_effect(text: String) -> Effect(Msg) {
@@ -297,8 +337,13 @@ pub fn view(model: Model) -> Element(Msg) {
           Error(Nil) -> element.none()
         }
       Finished(session:) -> view_finished(session, model.reviewing)
-      Statistics(confirming_reset:) ->
-        view_statistics(model.progress, model.env.now(), confirming_reset)
+      Statistics(confirming_reset:, notice:) ->
+        view_statistics(
+          model.progress,
+          model.env.now(),
+          confirming_reset,
+          notice,
+        )
     },
   ])
 }
@@ -706,6 +751,7 @@ fn view_statistics(
   progress: Progress,
   now: Int,
   confirming_reset: Bool,
+  notice: Option(Notice),
 ) -> Element(Msg) {
   let row = fn(drill: Drill) {
     let stats = progress.stats(progress, content.exercises(drill, None), now:)
@@ -742,6 +788,7 @@ fn view_statistics(
         "En övning räknas som inlärd när nästa repetition är minst en vecka bort.",
       ),
     ]),
+    view_backup(notice),
     case confirming_reset {
       False ->
         html.div([class("actions")], [
@@ -766,6 +813,44 @@ fn view_statistics(
               [html.text("Avbryt")],
             ),
           ]),
+        ])
+    },
+  ])
+}
+
+fn view_backup(notice: Option(Notice)) -> Element(Msg) {
+  html.div([class("backup")], [
+    html.h2([class("subheading")], [html.text("Säkerhetskopia")]),
+    html.p([class("hint")], [
+      html.text(
+        "Framstegen sparas bara i den här webbläsaren. Exportera dem till en fil för att ha en kopia eller flytta dem till en annan enhet. En import ersätter de nuvarande framstegen.",
+      ),
+    ]),
+    html.div([class("actions")], [
+      html.button([class("secondary"), event.on_click(UserExportedProgress)], [
+        html.text("Exportera"),
+      ]),
+      html.label([class("file-button secondary")], [
+        html.input([
+          attribute.id(import_input_id),
+          attribute.type_("file"),
+          attribute.accept(["application/json", ".json"]),
+          event.on("change", decode.success(UserChoseImportFile)),
+        ]),
+        html.text("Importera"),
+      ]),
+    ]),
+    case notice {
+      None -> element.none()
+      Some(Imported) ->
+        html.p([class("feedback correct"), attribute.role("status")], [
+          html.text("Framstegen är importerade."),
+        ])
+      Some(CouldNotImport) ->
+        html.p([class("feedback wrong"), attribute.role("status")], [
+          html.text(
+            "Filen kunde inte läsas. Välj en fil som exporterats härifrån.",
+          ),
         ])
     },
   ])

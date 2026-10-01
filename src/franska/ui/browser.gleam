@@ -41,3 +41,18 @@ pub fn now_seconds() -> Int {
 pub fn local_day() -> Int {
   0
 }
+
+@external(javascript, "./browser.ffi.mjs", "request_persistence")
+pub fn request_persistence() -> Nil {
+  Nil
+}
+
+@external(javascript, "./browser.ffi.mjs", "download")
+pub fn download(_prefix: String, _text: String) -> Nil {
+  Nil
+}
+
+@external(javascript, "./browser.ffi.mjs", "read_chosen_file")
+pub fn read_chosen_file(_id: String, on_text: fn(String) -> Nil) -> Nil {
+  on_text("")
+}

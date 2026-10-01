@@ -34,7 +34,8 @@ must work on both targets, has no FFI and never reads the clock.
   from FFI directly, so `update` is tested in `test/franska/ui/app_test.gleam`
   with a fixed clock and no shuffling. The menu picks a `Drill` and a theme.
 - `src/franska/ui/browser.gleam` and `browser.ffi.mjs`: all browser access
-  (storage, speech, focus, inserting accents at the caret, the clock). Give
+  (storage and the persistence request, file export/import, speech, focus,
+  inserting accents at the caret, the clock). Give
   every external a Gleam fallback body so the package still compiles for
   Erlang.
 - `assets/franska.css`: styles, served at `/` by the dev tools. Page config

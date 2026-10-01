@@ -24,7 +24,9 @@ browser's speech synthesis. Spaced repetition decides what each round
 contains, so due reviews come first and then new words. Dagens
 repetition reviews everything due across all exercise types in one round. Progress, a
 statistics page and the practice streak are saved in the browser's local
-storage. Nothing leaves your device.
+storage, and nothing leaves your device. The app asks the browser to keep
+that data, and the statistics page can export it to a file and import it
+again, for a backup or to move to another device.
 
 Every push to `main` deploys to GitHub Pages
 (`.github/workflows/pages.yml`).

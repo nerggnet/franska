@@ -134,12 +134,12 @@ pub fn quitting_returns_to_the_menu_test() {
 pub fn reset_needs_confirmation_test() {
   let model = start() |> send([UserStartedRound]) |> answer_correctly
   let model = send(model, [UserQuitRound, app.UserOpenedStatistics])
-  assert model.screen == Statistics(confirming_reset: False)
+  assert model.screen == Statistics(confirming_reset: False, notice: None)
   let model = send(model, [UserConfirmedReset])
   assert !dict.is_empty(model.progress.cards)
   let model = send(model, [UserAskedToReset, UserConfirmedReset])
   assert dict.is_empty(model.progress.cards)
-  assert model.screen == Statistics(confirming_reset: False)
+  assert model.screen == Statistics(confirming_reset: False, notice: None)
 }
 
 fn with_progress(model: app.Model, cards: List(#(String, srs.CardState))) {
@@ -181,4 +181,37 @@ pub fn review_round_is_limited_to_twenty_test() {
   let model = start() |> with_progress(cards) |> send([UserStartedReview])
   let assert Practising(session:, ..) = model.screen
   assert list.length(session.queue) == 20
+}
+
+pub fn importing_valid_progress_replaces_it_test() {
+  let card = srs.CardState(box: 3, due: now, reviews: 4, lapses: 0)
+  let exported =
+    progress.Progress(
+      ..progress.new(),
+      cards: dict.from_list([#("chat:to-fr", card)]),
+    )
+    |> progress.to_json
+  let model =
+    start()
+    |> send([
+      app.UserOpenedStatistics,
+      app.ImportFileRead(exported),
+    ])
+  assert dict.to_list(model.progress.cards) == [#("chat:to-fr", card)]
+  assert model.screen
+    == Statistics(confirming_reset: False, notice: Some(app.Imported))
+}
+
+pub fn importing_an_unreadable_file_keeps_progress_test() {
+  let model = start() |> send([UserStartedRound]) |> answer_correctly
+  let before = model.progress
+  let model =
+    send(model, [
+      UserQuitRound,
+      app.UserOpenedStatistics,
+      app.ImportFileRead("{"),
+    ])
+  assert model.progress == before
+  assert model.screen
+    == Statistics(confirming_reset: False, notice: Some(app.CouldNotImport))
 }
