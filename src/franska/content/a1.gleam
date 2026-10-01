@@ -3,7 +3,7 @@
 
 import franska/lexicon.{
   type Entry, type Word, A1, Avoir, Entry, Etre, Expression, Feminine, Masculine,
-  Present, Verb,
+  Present, Sentence, Verb,
 }
 
 pub fn entries() -> List(Entry) {
@@ -176,6 +176,119 @@ pub fn entries() -> List(Entry) {
       "bu",
       Avoir,
     ),
+    // Meningar
+    sentence(
+      "je-suis-suedois",
+      "Jag är svensk.",
+      "Je ___ suédois.",
+      ["suis"],
+      "être",
+    ),
+    sentence(
+      "nous-habitons-a-paris",
+      "Vi bor i Paris.",
+      "Nous ___ à Paris.",
+      ["habitons"],
+      "habiter",
+    ),
+    sentence(
+      "elle-a-un-chat",
+      "Hon har en katt.",
+      "Elle ___ un chat.",
+      ["a"],
+      "avoir",
+    ),
+    sentence(
+      "tu-veux-du-cafe",
+      "Vill du ha kaffe?",
+      "Tu ___ du café ?",
+      ["veux"],
+      "vouloir",
+    ),
+    sentence(
+      "ils-parlent-francais",
+      "De talar franska.",
+      "Ils ___ français.",
+      ["parlent"],
+      "parler",
+    ),
+    sentence(
+      "il-va-au-cinema",
+      "Han går på bio.",
+      "Il ___ au cinéma.",
+      ["va"],
+      "aller",
+    ),
+    sentence(
+      "vous-avez-quel-age",
+      "Hur gammal är ni?",
+      "Vous ___ quel âge ?",
+      ["avez"],
+      "avoir",
+    ),
+    sentence(
+      "nous-mangeons-une-pizza",
+      "Vi äter en pizza.",
+      "Nous ___ une pizza.",
+      ["mangeons"],
+      "manger",
+    ),
+    sentence(
+      "elles-vont-au-restaurant",
+      "De går på restaurang.",
+      "Elles ___ au restaurant.",
+      ["vont"],
+      "aller",
+    ),
+    sentence(
+      "je-fais-mes-devoirs",
+      "Jag gör mina läxor.",
+      "Je ___ mes devoirs.",
+      ["fais"],
+      "faire",
+    ),
+    sentence(
+      "j-aime-le-pain",
+      "Jag tycker om bröd.",
+      "J'aime ___ pain.",
+      ["le"],
+      "le/la",
+    ),
+    sentence(
+      "la-maison-est-grande",
+      "Huset är stort.",
+      "___ maison est grande.",
+      ["la"],
+      "le/la",
+    ),
+    sentence(
+      "c-est-le-livre-de-paul",
+      "Det är Pauls bok.",
+      "C'est ___ livre de Paul.",
+      ["le"],
+      "le/la",
+    ),
+    sentence(
+      "et-toi",
+      "Jag heter Anna, och du?",
+      "Je m'appelle Anna, et ___ ?",
+      ["toi", "vous"],
+      "",
+    ),
+    sentence(
+      "j-ai-vingt-ans",
+      "Jag är tjugo år.",
+      "J'ai ___ ans.",
+      ["vingt"],
+      "20",
+    ),
+    sentence(
+      "il-fait-beau-aujourd-hui",
+      "Det är fint väder i dag.",
+      "Il fait ___ aujourd'hui.",
+      ["beau"],
+      "",
+    ),
   ]
 }
 
@@ -206,4 +319,10 @@ fn verb(id, sv, infinitive, forms, participle, auxiliary) -> Entry {
       auxiliary:,
     ),
   )
+}
+
+/// A sentence with a `___` gap, its Swedish translation, the accepted
+/// answers for the gap and a hint ("" for none).
+fn sentence(id, sv, text, answers, hint) -> Entry {
+  entry(id, "meningar", [sv], Sentence(text:, answers:, hint:))
 }

@@ -64,6 +64,9 @@ pub type Word {
   )
   /// Any fixed phrase. The first French variant is the canonical one.
   Expression(fr: List(String))
+  /// A sentence with one gap, written `___` in `text`. `answers` fill the
+  /// gap, canonical first; `hint` (such as the verb's infinitive) may be "".
+  Sentence(text: String, answers: List(String), hint: String)
 }
 
 /// A unit of curated content. `id` must be unique across all content and
@@ -74,6 +77,9 @@ pub type Entry {
 }
 
 pub const persons = [Je, Tu, Il, Nous, Vous, Ils]
+
+/// How the gap is written in a `Sentence`.
+pub const gap = "___"
 
 pub type Auxiliary {
   Avoir
@@ -118,7 +124,7 @@ pub fn definite_article(word: Word) -> Result(String, Nil) {
     Noun(elides: True, ..) -> Ok("l'")
     Noun(gender: Masculine, ..) -> Ok("le")
     Noun(gender: Feminine, ..) -> Ok("la")
-    Verb(..) | Expression(..) -> Error(Nil)
+    Verb(..) | Expression(..) | Sentence(..) -> Error(Nil)
   }
 }
 
@@ -132,6 +138,9 @@ pub fn french(word: Word) -> String {
     Verb(infinitive:, ..) -> infinitive
     Expression(fr: [first, ..]) -> first
     Expression(fr: []) -> ""
+    Sentence(text:, answers: [first, ..], ..) ->
+      string.replace(text, gap, first)
+    Sentence(text:, answers: [], ..) -> text
   }
 }
 

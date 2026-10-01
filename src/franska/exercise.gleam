@@ -3,7 +3,8 @@
 
 import franska/answer.{type Grade, type Language}
 import franska/lexicon.{
-  type Entry, type Level, type Person, type Tense, Expression, Noun, Verb,
+  type Entry, type Level, type Person, type Tense, Expression, Noun, Sentence,
+  Verb,
 }
 import gleam/list
 
@@ -23,6 +24,9 @@ pub type Kind {
   Listen
   /// Write a number in words (see `franska/numbers`).
   WriteNumber(Int)
+  /// Fill the gap in a sentence. The prompt is the sentence with its gap;
+  /// `translation` is the Swedish meaning and `hint` may be "".
+  FillGap(hint: String, translation: String)
 }
 
 /// The kinds of practice a learner can choose between.
@@ -32,6 +36,7 @@ pub type Drill {
   Articles
   Dictation
   Numbers
+  Sentences
   Conjugation(Tense)
 }
 
@@ -42,6 +47,7 @@ pub fn drills() -> List(Drill) {
     Articles,
     Dictation,
     Numbers,
+    Sentences,
     ..list.map(lexicon.tenses, Conjugation)
   ]
 }
@@ -71,6 +77,7 @@ pub fn drill(kind: Kind) -> Drill {
     Conjugate(tense, _) -> Conjugation(tense)
     Listen -> Dictation
     WriteNumber(_) -> Numbers
+    FillGap(..) -> Sentences
   }
 }
 
@@ -92,9 +99,30 @@ pub fn from_entry(entry: Entry) -> List(Exercise) {
       level: entry.level,
     )
   }
+  case entry.word {
+    Sentence(text:, answers:, hint:) -> [
+      exercise(
+        "gap",
+        FillGap(hint:, translation: swedish),
+        text,
+        answers,
+        answer.French,
+        french,
+      ),
+    ]
+    _ -> word_exercises(entry, exercise, french, swedish)
+  }
+}
+
+fn word_exercises(
+  entry: Entry,
+  exercise: fn(String, Kind, String, List(String), Language, String) -> Exercise,
+  french: String,
+  swedish: String,
+) -> List(Exercise) {
   let to_french_accepted = case entry.word {
     Expression(fr:) -> fr
-    Noun(..) | Verb(..) -> [french]
+    _ -> [french]
   }
 
   let translations = [
@@ -150,7 +178,7 @@ pub fn from_entry(entry: Entry) -> List(Exercise) {
         lexicon.conjugated(verb, tense, person),
       )
     }
-    Expression(..) -> []
+    Expression(..) | Sentence(..) -> []
   }
 
   list.append(translations, extras)

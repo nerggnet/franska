@@ -46,6 +46,7 @@ verb("parler", ["tala", "prata"], "parler", #(
   "parle", "parles", "parle", "parlons", "parlez", "parlent",
 ), "parlé", Avoir),
 phrase("merci", "hälsningar", ["tack"], ["merci"]),
+sentence("je-suis-suedois", "Jag är svensk.", "Je ___ suédois.", ["suis"], "être"),
 ```
 
 - **Ids are permanent.** The first argument is the entry's id, which is
@@ -61,6 +62,9 @@ phrase("merci", "hälsningar", ["tack"], ["merci"]),
 - **Verbs** list their présent forms, then the past participle and the
   auxiliary for the passé composé (`Avoir`, or `Etre` for verbs like
   *aller*, *venir* and *partir*). Other tenses are generated from these.
+- **Sentences** have exactly one gap, written `___`, then the answers for
+  the gap and a hint shown in brackets (use `""` for none). They only make
+  a gap-fill exercise, so keep the Swedish translation natural.
 - **Spell French correctly,** with accents and the œ ligature. The grading
   is lenient about learners' accents, not about the content's.
 

@@ -12,14 +12,15 @@ Try it at **https://nerggnet.github.io/franska/**.
 ## Status
 
 The browser app ([Lustre](https://hexdocs.pm/lustre/)) offers rounds of 10
-exercises from 158 entries (67 at A1 and 91 at A2), optionally limited to
-one theme:
+exercises from 158 words and phrases (67 at A1 and 91 at A2) and 32
+sentences, optionally limited to one theme:
 
 - Swedish → French and French → Swedish translation
 - le or la? for nouns
 - Verb conjugation: présent, futur proche, passé composé and imparfait
 - Dictation: write down French read aloud
 - Numbers: write 0–100, the hundreds and a few thousands in words
+- Sentences: fill the gap in a sentence, with the Swedish meaning as context
 
 It has accent buttons for French answers and reads French aloud with the
 browser's speech synthesis. Spaced repetition decides what each round

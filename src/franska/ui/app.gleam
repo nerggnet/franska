@@ -7,8 +7,8 @@ import franska/answer.{type Grade, Almost, Correct, Wrong}
 import franska/content
 import franska/exercise.{
   type Drill, type Exercise, Articles, ChooseArticle, Conjugate, Conjugation,
-  Dictation, Listen, Numbers, ToFrench, ToSwedish, Translate, TranslateToFrench,
-  TranslateToSwedish, WriteNumber,
+  Dictation, FillGap, Listen, Numbers, Sentences, ToFrench, ToSwedish, Translate,
+  TranslateToFrench, TranslateToSwedish, WriteNumber,
 }
 import franska/lexicon
 import franska/progress.{type Progress, Progress}
@@ -18,6 +18,7 @@ import gleam/dynamic/decode
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
+import gleam/result
 import gleam/string
 import lustre/attribute.{attribute, class}
 import lustre/effect.{type Effect}
@@ -519,6 +520,7 @@ fn drill_name(drill: Drill) -> String {
     Conjugation(tense) -> "Böj verb: " <> tense_name(tense)
     Dictation -> "Diktamen"
     Numbers -> "Tal"
+    Sentences -> "Meningar"
   }
 }
 
@@ -621,6 +623,7 @@ fn instruction(exercise: Exercise) -> String {
     Conjugate(tense, _) -> "Böj verbet i " <> tense_name(tense)
     Listen -> "Skriv det du hör"
     WriteNumber(_) -> "Skriv talet med bokstäver"
+    FillGap(..) -> "Fyll i luckan"
   }
 }
 
@@ -660,6 +663,25 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
       ])
     WriteNumber(_) ->
       html.p([class("prompt number")], [html.text(exercise.prompt)])
+    FillGap(hint:, translation:) -> {
+      let #(before, after) =
+        string.split_once(exercise.prompt, lexicon.gap)
+        |> result.unwrap(#(exercise.prompt, ""))
+      let hint = case hint {
+        "" -> element.none()
+        hint ->
+          html.span([class("infinitive")], [html.text(" (" <> hint <> ")")])
+      }
+      html.div([class("sentence")], [
+        html.p([class("prompt"), attribute.lang("fr")], [
+          html.text(before),
+          html.span([class("blank")], [html.text("___")]),
+          hint,
+          html.text(after),
+        ]),
+        html.p([class("hint"), attribute.lang("sv")], [html.text(translation)]),
+      ])
+    }
     Conjugate(_, person) ->
       html.p([class("prompt"), attribute.lang("fr")], [
         html.text(person_label(person) <> " "),

@@ -106,3 +106,19 @@ pub fn nous_forms_end_in_ons_test() {
     })
   assert bad == []
 }
+
+pub fn sentences_have_one_gap_and_an_answer_test() {
+  let bad =
+    content.entries()
+    |> list.filter_map(fn(e) {
+      case e.word {
+        lexicon.Sentence(text:, answers:, ..) ->
+          case list.length(string.split(text, lexicon.gap)), answers {
+            2, [_, ..] -> Error(Nil)
+            _, _ -> Ok(e.id)
+          }
+        _ -> Error(Nil)
+      }
+    })
+  assert bad == []
+}

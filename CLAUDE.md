@@ -62,7 +62,9 @@ must work on both targets, has no FFI and never reads the clock.
 
 - `lexicon.gleam`: the content model. An `Entry(id, level, theme, sv, word)`
   holds a `Word`, which is a `Noun` (with gender and elision), a `Verb`
-  (présent forms) or an `Expression`. Build nouns with `lexicon.noun`, which
+  (présent forms, participle and auxiliary), an `Expression` or a
+  `Sentence` with one `___` gap. Other tenses are generated from the verb
+  data. Build nouns with `lexicon.noun`, which
   works out l' elision; use `noun_aspirated_h` for exceptions.
 - `exercise.gleam`: derives all exercises from an entry: translation in both
   directions, le/la for nouns, and one conjugation per person for verbs.

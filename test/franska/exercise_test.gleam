@@ -168,3 +168,21 @@ pub fn passe_compose_with_etre_agrees_with_the_subject_test() {
   assert exercise.check(ils, "elles sont allées") == Correct
   assert exercise.check(ils, "ils sont allé") == Almost("ils sont allés", Typo)
 }
+
+pub fn a_sentence_yields_only_a_gap_exercise_test() {
+  let entry =
+    Entry(
+      id: "je-suis",
+      level: A1,
+      theme: "meningar",
+      sv: ["Jag är svensk."],
+      word: lexicon.Sentence("Je ___ suédois.", ["suis"], "être"),
+    )
+  let assert [ex] = exercise.from_entry(entry)
+  assert ex.kind
+    == exercise.FillGap(hint: "être", translation: "Jag är svensk.")
+  assert ex.prompt == "Je ___ suédois."
+  assert ex.french == "Je suis suédois."
+  assert exercise.check(ex, "suis") == Correct
+  assert exercise.check(ex, "es") == Wrong("suis")
+}

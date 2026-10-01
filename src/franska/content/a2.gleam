@@ -3,7 +3,7 @@
 
 import franska/lexicon.{
   type Entry, type Word, A2, Avoir, Entry, Etre, Expression, Feminine, Masculine,
-  Present, Verb,
+  Present, Sentence, Verb,
 }
 
 pub fn entries() -> List(Entry) {
@@ -292,6 +292,119 @@ pub fn entries() -> List(Entry) {
       "écouté",
       Avoir,
     ),
+    // Meningar
+    sentence(
+      "demain-je-vais-partir",
+      "I morgon ska jag åka.",
+      "Demain, je ___ partir.",
+      ["vais"],
+      "aller",
+    ),
+    sentence(
+      "hier-nous-sommes-alles",
+      "I går åkte vi till stranden.",
+      "Hier, nous ___ allés à la plage.",
+      ["sommes"],
+      "être",
+    ),
+    sentence(
+      "j-ai-mange-une-pomme",
+      "Jag åt ett äpple.",
+      "J'___ mangé une pomme.",
+      ["ai"],
+      "avoir",
+    ),
+    sentence(
+      "elle-est-partie-hier-soir",
+      "Hon åkte i går kväll.",
+      "Elle est ___ hier soir.",
+      ["partie"],
+      "partir",
+    ),
+    sentence(
+      "ils-sont-sortis",
+      "De gick ut ur huset.",
+      "Ils sont ___ de la maison.",
+      ["sortis"],
+      "sortir",
+    ),
+    sentence(
+      "ils-ont-regarde-un-film",
+      "De tittade på en film.",
+      "Ils ont ___ un film.",
+      ["regardé"],
+      "regarder",
+    ),
+    sentence(
+      "je-lisais-beaucoup",
+      "När jag var liten läste jag mycket.",
+      "Quand j'étais petit, je ___ beaucoup.",
+      ["lisais"],
+      "lire",
+    ),
+    sentence(
+      "il-faisait-beau-hier",
+      "Det var fint väder i går.",
+      "Il ___ beau hier.",
+      ["faisait"],
+      "faire",
+    ),
+    sentence(
+      "nous-etions-a-la-maison",
+      "Vi var hemma.",
+      "Nous ___ à la maison.",
+      ["étions"],
+      "être, imparfait",
+    ),
+    sentence(
+      "je-ne-sais-pas-ou",
+      "Jag vet inte var han är.",
+      "Je ne ___ pas où il est.",
+      ["sais"],
+      "savoir",
+    ),
+    sentence(
+      "nous-attendons-le-train",
+      "Vi väntar på tåget.",
+      "Nous ___ le train.",
+      ["attendons"],
+      "attendre",
+    ),
+    sentence(
+      "tu-dois-mettre-ton-manteau",
+      "Du måste ta på dig kappan.",
+      "Tu ___ mettre ton manteau.",
+      ["dois"],
+      "devoir",
+    ),
+    sentence(
+      "je-vais-voir-mes-amis",
+      "Jag ska träffa mina vänner i kväll.",
+      "Je vais ___ mes amis ce soir.",
+      ["voir"],
+      "voir",
+    ),
+    sentence(
+      "elle-travaille-au-bureau",
+      "Hon arbetar på kontoret.",
+      "Elle ___ au bureau.",
+      ["travaille"],
+      "travailler",
+    ),
+    sentence(
+      "j-achete-un-billet",
+      "Jag köper en biljett till Lyon.",
+      "J'___ un billet pour Lyon.",
+      ["achète"],
+      "acheter",
+    ),
+    sentence(
+      "on-part-a-quelle-heure",
+      "Vilken tid åker vi?",
+      "On ___ à quelle heure ?",
+      ["part"],
+      "partir",
+    ),
   ]
 }
 
@@ -322,4 +435,10 @@ fn verb(id, sv, infinitive, forms, participle, auxiliary) -> Entry {
       auxiliary:,
     ),
   )
+}
+
+/// A sentence with a `___` gap, its Swedish translation, the accepted
+/// answers for the gap and a hint ("" for none).
+fn sentence(id, sv, text, answers, hint) -> Entry {
+  entry(id, "meningar", [sv], Sentence(text:, answers:, hint:))
 }
