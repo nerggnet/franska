@@ -49,8 +49,15 @@ pub fn there_are_about_fifty_entries_test() {
 
 pub fn exercises_are_limited_to_drill_and_theme_test() {
   let found = content.exercises(exercise.Articles, option.Some("djur"))
-  assert list.map(found, fn(e) { e.prompt })
+  assert list.take(list.map(found, fn(e) { e.prompt }), 4)
     == ["chat", "chien", "oiseau", "cheval"]
+  assert list.all(found, fn(e) {
+    e.kind == exercise.ChooseArticle
+    && case content.entry(e.entry_id) {
+      Ok(entry) -> entry.theme == "djur"
+      Error(Nil) -> False
+    }
+  })
 }
 
 pub fn conjugation_is_only_available_for_verbs_test() {

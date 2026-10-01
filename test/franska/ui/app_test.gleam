@@ -50,6 +50,16 @@ fn answer_correctly(model: app.Model) -> app.Model {
   answer(model, accepted)
 }
 
+fn answer_all_correctly(model: app.Model) -> app.Model {
+  case model.screen {
+    Practising(..) ->
+      answer_correctly(model)
+      |> send([UserSubmittedAnswer])
+      |> answer_all_correctly
+    _ -> model
+  }
+}
+
 pub fn starts_in_the_menu_test() {
   assert start().screen == Menu
 }
@@ -75,8 +85,16 @@ pub fn a_round_has_ten_exercises_of_the_chosen_drill_test() {
 pub fn a_round_is_limited_to_the_chosen_theme_test() {
   let model = start() |> send([UserPickedTheme(Some("djur")), UserStartedRound])
   let assert Practising(session:, ..) = model.screen
-  assert list.map(session.queue, fn(e) { e.prompt })
+  // Without shuffling, the round is the theme's first ten words in order.
+  assert list.take(list.map(session.queue, fn(e) { e.prompt }), 4)
     == ["katt", "hund", "fågel", "häst"]
+  assert list.length(session.queue) == 10
+  assert list.all(session.queue, fn(e) {
+    case content.entry(e.entry_id) {
+      Ok(entry) -> entry.theme == "djur"
+      Error(Nil) -> False
+    }
+  })
 }
 
 pub fn an_answer_is_graded_and_saved_test() {
@@ -114,12 +132,9 @@ pub fn only_the_first_attempt_is_saved_test() {
 
 pub fn finishing_all_exercises_ends_the_round_test() {
   let model = start() |> send([UserPickedTheme(Some("djur")), UserStartedRound])
-  let model =
-    list.fold([1, 2, 3, 4], model, fn(model, _) {
-      answer_correctly(model) |> send([UserSubmittedAnswer])
-    })
+  let model = answer_all_correctly(model)
   let assert Finished(session:) = model.screen
-  assert session.summary(session) == session.Summary(4, 0, 0)
+  assert session.summary(session) == session.Summary(10, 0, 0)
 }
 
 pub fn wrong_answers_show_the_expected_answer_test() {

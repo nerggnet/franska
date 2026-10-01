@@ -405,8 +405,8 @@ fn forms(
   }
 }
 
-/// The stems of the futur simple, canonical first. Ten common verbs have
-/// an irregular stem. Otherwise -er verbs build on the je form, so the
+/// The stems of the futur simple, canonical first. Common verbs like être
+/// (ser-) and aller (ir-) have an irregular stem. Otherwise -er verbs build on the je form, so the
 /// spelling changes carry over (j'achète, j'achèterai; j'appelle,
 /// j'appellerai), except that é→è verbs keep their é (préférerai) with
 /// the reformed è (préfèrerai) also accepted. Other verbs use the
@@ -448,6 +448,7 @@ fn irregular_future_stem(infinitive: String) -> Result(String, Nil) {
     "vouloir" -> Ok("voudr")
     "savoir" -> Ok("saur")
     "devoir" -> Ok("devr")
+    "courir" -> Ok("courr")
     _ -> Error(Nil)
   }
 }
