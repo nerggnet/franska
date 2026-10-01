@@ -18,8 +18,8 @@ optionally limited to one theme:
 
 - Swedish → French and French → Swedish translation
 - le or la? for nouns
-- Verb conjugation: présent, futur proche, passé composé and imparfait,
-  including reflexive verbs (se lever, s'habiller)
+- Verb conjugation: présent, futur proche, passé composé, imparfait and
+  imperative, including reflexive verbs (se lever, lève-toi)
 - Dictation: write down French read aloud
 - Numbers: write 0–100, the hundreds and a few thousands in words
 - Sentences: fill the gap in a sentence, with the Swedish meaning as context;

@@ -173,3 +173,55 @@ pub fn marked_part_test() {
   assert lexicon.marked_part("Je vois Marie.") == Error(Nil)
   assert lexicon.marked_part("[Je] vois [Marie].") == Error(Nil)
 }
+
+fn imperative(word: lexicon.Word) -> List(String) {
+  list.map([lexicon.Tu, lexicon.Nous, lexicon.Vous], fn(person) {
+    lexicon.conjugated(word, lexicon.Imperatif, person)
+  })
+}
+
+pub fn imperative_of_er_verbs_drops_the_s_test() {
+  let parler =
+    verb("parler", ["parle", "parles", "parle", "parlons", "parlez", "parlent"])
+  assert imperative(parler) == ["parle", "parlons", "parlez"]
+  let aller = verb("aller", ["vais", "vas", "va", "allons", "allez", "vont"])
+  assert imperative(aller) == ["va", "allons", "allez"]
+  let finir =
+    verb("finir", [
+      "finis",
+      "finis",
+      "finit",
+      "finissons",
+      "finissez",
+      "finissent",
+    ])
+  assert imperative(finir) == ["finis", "finissons", "finissez"]
+}
+
+pub fn irregular_imperatives_test() {
+  let etre = verb("être", ["suis", "es", "est", "sommes", "êtes", "sont"])
+  assert imperative(etre) == ["sois", "soyons", "soyez"]
+  let avoir = verb("avoir", ["ai", "as", "a", "avons", "avez", "ont"])
+  assert imperative(avoir) == ["aie", "ayons", "ayez"]
+}
+
+pub fn verbs_without_an_imperative_test() {
+  let pouvoir =
+    verb("pouvoir", ["peux", "peux", "peut", "pouvons", "pouvez", "peuvent"])
+  assert lexicon.conjugation_answers(pouvoir, lexicon.Imperatif, lexicon.Tu)
+    == []
+  let parler =
+    verb("parler", ["parle", "parles", "parle", "parlons", "parlez", "parlent"])
+  assert lexicon.conjugation_answers(parler, lexicon.Imperatif, lexicon.Je)
+    == []
+}
+
+pub fn reflexive_imperative_puts_the_pronoun_after_test() {
+  let lever =
+    reflexive(
+      "lever",
+      ["lève", "lèves", "lève", "levons", "levez", "lèvent"],
+      "levé",
+    )
+  assert imperative(lever) == ["lève-toi", "levons-nous", "levez-vous"]
+}

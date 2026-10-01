@@ -240,3 +240,16 @@ pub fn a_negation_rewrite_takes_the_whole_sentence_test() {
   assert exercise.check(ex, "Tu n'as pas de chién.")
     == Almost("Tu n'as pas de chien.", MissingAccents)
 }
+
+pub fn imperative_exercises_are_for_tu_nous_and_vous_test() {
+  let ids =
+    exercise.from_entry(aimer())
+    |> list.map(fn(e) { e.id })
+    |> list.filter(string.starts_with(_, "aimer:imperatif"))
+  assert ids
+    == ["aimer:imperatif:tu", "aimer:imperatif:nous", "aimer:imperatif:vous"]
+  let tu = find(aimer(), "aimer:imperatif:tu")
+  assert tu.french == "aime"
+  assert exercise.check(tu, "Aime !") == Correct
+  assert exercise.check(tu, "aimes") == Almost("aime", Typo)
+}

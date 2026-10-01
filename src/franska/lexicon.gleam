@@ -108,9 +108,19 @@ pub type Tense {
   PasseCompose
   /// Generated from the nous stem: "nous parlons" gives "je parlais".
   Imparfait
+  /// Only tu, nous and vous: "parle", "parlons", "parlez", "lève-toi".
+  Imperatif
 }
 
-pub const tenses = [Presens, FuturProche, PasseCompose, Imparfait]
+pub const tenses = [Presens, FuturProche, PasseCompose, Imparfait, Imperatif]
+
+/// The persons a tense has: the imperative only has tu, nous and vous.
+pub fn persons_for(tense: Tense) -> List(Person) {
+  case tense {
+    Imperatif -> [Tu, Nous, Vous]
+    _ -> persons
+  }
+}
 
 /// Stable id of a tense, part of exercise ids.
 pub fn tense_id(tense: Tense) -> String {
@@ -119,6 +129,7 @@ pub fn tense_id(tense: Tense) -> String {
     FuturProche -> "futur-proche"
     PasseCompose -> "passe-compose"
     Imparfait -> "imparfait"
+    Imperatif -> "imperatif"
   }
 }
 
@@ -297,7 +308,65 @@ fn forms(
     Verb(infinitive:, present:, ..), Imparfait -> [
       reflexive(word, person, imparfait(infinitive, present, person)),
     ]
+    Verb(..), Imperatif -> imperative(word, person)
     _, _ -> []
+  }
+}
+
+/// The affirmative imperative: the présent without the subject, where -er
+/// verbs (and aller, ouvrir) drop the s of the tu form. Être, avoir and
+/// savoir are irregular; pouvoir, vouloir and devoir are left out, as their
+/// imperatives are hardly used. Reflexive verbs take a stressed pronoun
+/// after a hyphen: "lève-toi".
+fn imperative(word: Word, person: Person) -> List(String) {
+  case word, person {
+    Verb(infinitive: "pouvoir", ..), _
+    | Verb(infinitive: "vouloir", ..), _
+    | Verb(infinitive: "devoir", ..), _
+    | _, Je
+    | _, Il
+    | _, Ils
+    -> []
+    Verb(infinitive:, present:, reflexive:, ..), _ -> {
+      let form = case irregular_imperative(infinitive, person) {
+        Ok(form) -> form
+        Error(Nil) ->
+          case person {
+            Tu ->
+              case string.ends_with(present.tu, "es") || present.tu == "vas" {
+                True -> string.drop_end(present.tu, 1)
+                False -> present.tu
+              }
+            Nous -> present.nous
+            _ -> present.vous
+          }
+      }
+      case reflexive, person {
+        True, Tu -> [form <> "-toi"]
+        True, Nous -> [form <> "-nous"]
+        True, _ -> [form <> "-vous"]
+        False, _ -> [form]
+      }
+    }
+    _, _ -> []
+  }
+}
+
+fn irregular_imperative(
+  infinitive: String,
+  person: Person,
+) -> Result(String, Nil) {
+  case infinitive, person {
+    "être", Tu -> Ok("sois")
+    "être", Nous -> Ok("soyons")
+    "être", Vous -> Ok("soyez")
+    "avoir", Tu -> Ok("aie")
+    "avoir", Nous -> Ok("ayons")
+    "avoir", Vous -> Ok("ayez")
+    "savoir", Tu -> Ok("sache")
+    "savoir", Nous -> Ok("sachons")
+    "savoir", Vous -> Ok("sachez")
+    _, _ -> Error(Nil)
   }
 }
 
@@ -384,23 +453,30 @@ pub fn conjugation_answers(
   tense: Tense,
   person: Person,
 ) -> List(String) {
-  let by_subject =
-    list.map(subjects(person), fn(subject) {
-      #(subject, forms(word, tense, person, subject))
-    })
-  let bare = list.flat_map(by_subject, fn(pair) { pair.1 })
-  let with_subjects =
-    list.flat_map(by_subject, fn(pair) {
-      list.map(pair.1, with_subject(pair.0, _))
-    })
-  list.unique(list.append(bare, with_subjects))
+  case tense {
+    // The imperative has no subject.
+    Imperatif -> forms(word, tense, person, pronoun(person))
+    _ -> {
+      let by_subject =
+        list.map(subjects(person), fn(subject) {
+          #(subject, forms(word, tense, person, subject))
+        })
+      let bare = list.flat_map(by_subject, fn(pair) { pair.1 })
+      let with_subjects =
+        list.flat_map(by_subject, fn(pair) {
+          list.map(pair.1, with_subject(pair.0, _))
+        })
+      list.unique(list.append(bare, with_subjects))
+    }
+  }
 }
 
 /// The canonical conjugated form with its pronoun: "nous allons parler".
 pub fn conjugated(word: Word, tense: Tense, person: Person) -> String {
-  case forms(word, tense, person, pronoun(person)) {
-    [form, ..] -> with_pronoun(form, person)
-    [] -> ""
+  case forms(word, tense, person, pronoun(person)), tense {
+    [form, ..], Imperatif -> form
+    [form, ..], _ -> with_pronoun(form, person)
+    [], _ -> ""
   }
 }
 

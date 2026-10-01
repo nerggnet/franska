@@ -194,15 +194,20 @@ fn word_exercises(
     ]
     Verb(..) as verb -> {
       use tense <- list.flat_map(lexicon.tenses)
-      use person <- list.map(lexicon.persons)
-      exercise(
-        lexicon.tense_id(tense) <> ":" <> lexicon.pronoun(person),
-        Conjugate(tense, person),
-        french,
-        lexicon.conjugation_answers(verb, tense, person),
-        answer.French,
-        lexicon.conjugated(verb, tense, person),
-      )
+      use person <- list.filter_map(lexicon.persons_for(tense))
+      // Some verbs lack some forms, such as the imperative of pouvoir.
+      case lexicon.conjugation_answers(verb, tense, person) {
+        [] -> Error(Nil)
+        answers ->
+          Ok(exercise(
+            lexicon.tense_id(tense) <> ":" <> lexicon.pronoun(person),
+            Conjugate(tense, person),
+            french,
+            answers,
+            answer.French,
+            lexicon.conjugated(verb, tense, person),
+          ))
+      }
     }
     Adjective(masculine:, ..) as adjective -> {
       // A form that is the same as the masculine or an earlier form is

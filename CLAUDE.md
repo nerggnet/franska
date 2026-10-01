@@ -75,7 +75,9 @@ must work on both targets, has no FFI and never reads the clock.
 - `exercise.gleam`: derives all exercises from an entry: translation in both
   directions, le/la for nouns, and one conjugation per person for verbs.
   Exercise ids are `<entry id>:<suffix>`; conjugation suffixes are
-  `<tense id>:<pronoun>` (`present:je`, `futur-proche:nous`). `Exercise.french` is the full
+  `<tense id>:<pronoun>` (`present:je`, `futur-proche:nous`). The
+  imperative only has tu, nous and vous (`lexicon.persons_for`), and verbs
+  without a form get no exercise for it. `Exercise.french` is the full
   French form, used to reveal answers and for reading aloud. A `Drill` is
   the kind of practice picked in the menu.
 - `answer.gleam`: normalising and grading. A grade is `Correct`,

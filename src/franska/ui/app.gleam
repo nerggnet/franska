@@ -584,6 +584,7 @@ fn tense_name(tense: lexicon.Tense) -> String {
     lexicon.FuturProche -> "futur proche"
     lexicon.PasseCompose -> "passé composé"
     lexicon.Imparfait -> "imparfait"
+    lexicon.Imperatif -> "imperativ"
   }
 }
 
@@ -758,6 +759,17 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
         html.p([class("hint"), attribute.lang("sv")], [html.text(translation)]),
       ])
     }
+    Conjugate(lexicon.Imperatif, person) ->
+      html.p([class("prompt"), attribute.lang("fr")], [
+        html.span([class("infinitive")], [
+          html.text("(" <> lexicon.pronoun(person) <> ") "),
+        ]),
+        html.span([class("blank")], [html.text("___")]),
+        html.text(" !"),
+        html.span([class("infinitive")], [
+          html.text(" (" <> exercise.prompt <> ")"),
+        ]),
+      ])
     Conjugate(_, person) ->
       html.p([class("prompt"), attribute.lang("fr")], [
         html.text(person_label(person) <> " "),
