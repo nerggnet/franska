@@ -89,3 +89,20 @@ pub fn ambiguous_prompts_are_found_test() {
   ]
   assert content.ambiguous_prompts(entries) == [["hej:to-fr", "hej-igen:to-fr"]]
 }
+
+/// The imparfait is generated from the nous form, so it must end in -ons.
+pub fn nous_forms_end_in_ons_test() {
+  let bad =
+    content.entries()
+    |> list.filter_map(fn(e) {
+      case e.word {
+        lexicon.Verb(infinitive:, present:, ..) if infinitive != "être" ->
+          case string.ends_with(present.nous, "ons") {
+            True -> Error(Nil)
+            False -> Ok(e.id)
+          }
+        _ -> Error(Nil)
+      }
+    })
+  assert bad == []
+}

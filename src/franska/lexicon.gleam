@@ -87,9 +87,11 @@ pub type Tense {
   FuturProche
   /// auxiliary + past participle: "j'ai parlé", "elle est allée".
   PasseCompose
+  /// Generated from the nous stem: "nous parlons" gives "je parlais".
+  Imparfait
 }
 
-pub const tenses = [Presens, FuturProche, PasseCompose]
+pub const tenses = [Presens, FuturProche, PasseCompose, Imparfait]
 
 /// Stable id of a tense, part of exercise ids.
 pub fn tense_id(tense: Tense) -> String {
@@ -97,6 +99,7 @@ pub fn tense_id(tense: Tense) -> String {
     Presens -> "present"
     FuturProche -> "futur-proche"
     PasseCompose -> "passe-compose"
+    Imparfait -> "imparfait"
   }
 }
 
@@ -184,8 +187,38 @@ fn forms(
       list.map(agreements(subject), fn(ending) {
         conjugate(etre, person) <> " " <> participle <> ending
       })
+    Verb(infinitive:, present:, ..), Imparfait -> [
+      imparfait(infinitive, present, person),
+    ]
     _, _ -> []
   }
+}
+
+/// The imparfait: the nous stem of the présent plus the endings. Être is
+/// the only exception (ét-). Before an i, -ge- loses its e and -ç- becomes
+/// c again: mangeais but mangions, commençais but commencions.
+fn imparfait(infinitive: String, present: Present, person: Person) -> String {
+  let stem = case infinitive {
+    "être" -> "ét"
+    _ -> string.drop_end(present.nous, 3)
+  }
+  let ending = case person {
+    Je | Tu -> "ais"
+    Il -> "ait"
+    Nous -> "ions"
+    Vous -> "iez"
+    Ils -> "aient"
+  }
+  let stem = case string.starts_with(ending, "i") {
+    False -> stem
+    True ->
+      case string.ends_with(stem, "ge"), string.ends_with(stem, "ç") {
+        True, _ -> string.drop_end(stem, 1)
+        _, True -> string.drop_end(stem, 1) <> "c"
+        False, False -> stem
+      }
+  }
+  stem <> ending
 }
 
 /// Participle endings for a subject with être, the most common first. Je,
