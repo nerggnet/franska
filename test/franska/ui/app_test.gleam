@@ -243,3 +243,11 @@ pub fn difficult_round_without_mistakes_does_nothing_test() {
     start() |> send([app.UserOpenedStatistics, app.UserStartedDifficultRound])
   assert model.screen == Statistics(confirming_reset: False, notice: None)
 }
+
+pub fn number_keys_pick_le_and_la_test() {
+  assert app.article_shortcut("1") == Ok("le")
+  assert app.article_shortcut("2") == Ok("la")
+  assert app.article_shortcut("3") == Error(Nil)
+  assert app.article_shortcut("0") == Error(Nil)
+  assert app.article_shortcut("l") == Error(Nil)
+}

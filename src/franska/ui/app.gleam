@@ -621,6 +621,10 @@ fn view_exercise(
           }),
           attribute.aria_label("Ditt svar"),
           event.on_input(UserTypedAnswer),
+          case exercise.kind, answered {
+            ChooseArticle, False -> on_article_shortcut()
+            _, _ -> attribute.none()
+          },
         ]),
         html.button([class("primary"), attribute.type_("submit")], [
           html.text(case answered {
@@ -631,7 +635,7 @@ fn view_exercise(
       ],
     ),
     case exercise.kind, answered {
-      ChooseArticle, False -> view_choices(["le", "la"])
+      ChooseArticle, False -> view_choices()
       _, False if exercise.answer_language == answer.French -> view_accents()
       _, _ -> element.none()
     },
@@ -728,18 +732,52 @@ fn person_label(person: lexicon.Person) -> String {
   }
 }
 
-fn view_choices(choices: List(String)) -> Element(Msg) {
+const article_choices = ["le", "la"]
+
+/// The answer a shortcut key picks: 1 for le, 2 for la.
+pub fn article_shortcut(key: String) -> Result(String, Nil) {
+  case int.parse(key) {
+    Ok(n) if n >= 1 -> list.drop(article_choices, n - 1) |> list.first
+    _ -> Error(Nil)
+  }
+}
+
+/// Answers on 1 or 2 without typing the digit; other keys type as usual.
+fn on_article_shortcut() -> attribute.Attribute(Msg) {
+  event.advanced("keydown", {
+    use key <- decode.field("key", decode.string)
+    case article_shortcut(key) {
+      Ok(choice) ->
+        decode.success(event.handler(
+          UserChoseAnswer(choice),
+          prevent_default: True,
+          stop_propagation: False,
+        ))
+      Error(Nil) ->
+        decode.failure(
+          event.handler(UserSubmittedAnswer, False, False),
+          "shortcut key",
+        )
+    }
+  })
+}
+
+fn view_choices() -> Element(Msg) {
   html.div(
     [class("choices")],
-    list.map(choices, fn(choice) {
+    list.index_map(article_choices, fn(choice, index) {
       html.button(
         [
           class("secondary"),
           attribute.type_("button"),
           attribute.lang("fr"),
+          attribute.aria_keyshortcuts(int.to_string(index + 1)),
           event.on_click(UserChoseAnswer(choice)),
         ],
-        [html.text(choice)],
+        [
+          html.text(choice),
+          html.kbd([], [html.text(int.to_string(index + 1))]),
+        ],
       )
     }),
   )

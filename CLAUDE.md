@@ -111,5 +111,10 @@ must work on both targets, has no FFI and never reads the clock.
    ~~(Web Speech API, fr-FR), deploy to GitHub Pages~~
 4. ~~Progress in `localStorage`, spaced repetition picks rounds, stats view~~
 
-Ideas for later: passé composé and other tenses, mixed-drill
-rounds, export/import of progress.
+Since then: Dagens repetition, progress export/import and persistent
+storage, offline/installable (PWA), dictation, futur proche, passé composé,
+imparfait, numbers, gap-fill sentences, gender hints, Svåra ord and le/la
+keyboard shortcuts (1/2).
+
+Ideas for later: more A2 content and sentences, futur simple and the
+conditional, rounds mixing drills.
