@@ -19,6 +19,7 @@ one theme:
 - le or la? for nouns
 - Verb conjugation: présent, futur proche, passé composé and imparfait
 - Dictation: write down French read aloud
+- Numbers: write 0–100, the hundreds and a few thousands in words
 
 It has accent buttons for French answers and reads French aloud with the
 browser's speech synthesis. Spaced repetition decides what each round

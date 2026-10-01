@@ -7,8 +7,8 @@ import franska/answer.{type Grade, Almost, Correct, Wrong}
 import franska/content
 import franska/exercise.{
   type Drill, type Exercise, Articles, ChooseArticle, Conjugate, Conjugation,
-  Dictation, Listen, ToFrench, ToSwedish, Translate, TranslateToFrench,
-  TranslateToSwedish,
+  Dictation, Listen, Numbers, ToFrench, ToSwedish, Translate, TranslateToFrench,
+  TranslateToSwedish, WriteNumber,
 }
 import franska/lexicon
 import franska/progress.{type Progress, Progress}
@@ -518,6 +518,7 @@ fn drill_name(drill: Drill) -> String {
     Articles -> "le eller la?"
     Conjugation(tense) -> "Böj verb: " <> tense_name(tense)
     Dictation -> "Diktamen"
+    Numbers -> "Tal"
   }
 }
 
@@ -619,6 +620,7 @@ fn instruction(exercise: Exercise) -> String {
     ChooseArticle -> "Heter det le eller la?"
     Conjugate(tense, _) -> "Böj verbet i " <> tense_name(tense)
     Listen -> "Skriv det du hör"
+    WriteNumber(_) -> "Skriv talet med bokstäver"
   }
 }
 
@@ -656,6 +658,8 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
           html.text("Betyder: " <> exercise.prompt),
         ]),
       ])
+    WriteNumber(_) ->
+      html.p([class("prompt number")], [html.text(exercise.prompt)])
     Conjugate(_, person) ->
       html.p([class("prompt"), attribute.lang("fr")], [
         html.text(person_label(person) <> " "),

@@ -464,3 +464,8 @@ input:focus-visible {
   width: 28px;
   height: 28px;
 }
+
+.prompt.number {
+  font-variant-numeric: tabular-nums;
+  font-size: 2.5rem;
+}

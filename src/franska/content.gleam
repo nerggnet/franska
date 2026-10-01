@@ -5,6 +5,7 @@ import franska/content/a1
 import franska/content/a2
 import franska/exercise.{type Drill, type Exercise}
 import franska/lexicon.{type Entry}
+import franska/numbers
 import gleam/dict
 import gleam/list
 import gleam/option.{type Option, None, Some}
@@ -24,10 +25,20 @@ pub fn themes() -> List(String) {
 /// Every exercise of every drill.
 pub fn all_exercises() -> List(Exercise) {
   list.flat_map(entries(), exercise.from_entry)
+  |> list.append(numbers.exercises())
 }
 
-/// Every exercise of a drill, optionally limited to one theme.
+/// Every exercise of a drill, optionally limited to one theme. Numbers are
+/// generated and have no theme.
 pub fn exercises(drill: Drill, theme: Option(String)) -> List(Exercise) {
+  case drill, theme {
+    exercise.Numbers, None -> numbers.exercises()
+    exercise.Numbers, Some(_) -> []
+    _, _ -> entry_exercises(drill, theme)
+  }
+}
+
+fn entry_exercises(drill: Drill, theme: Option(String)) -> List(Exercise) {
   entries()
   |> list.filter(fn(entry) {
     case theme {

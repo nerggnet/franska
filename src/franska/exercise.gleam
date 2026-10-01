@@ -21,6 +21,8 @@ pub type Kind {
   /// Write down French that is read aloud. The prompt is the Swedish
   /// meaning, shown as a hint since some words sound the same.
   Listen
+  /// Write a number in words (see `franska/numbers`).
+  WriteNumber(Int)
 }
 
 /// The kinds of practice a learner can choose between.
@@ -29,6 +31,7 @@ pub type Drill {
   TranslateToSwedish
   Articles
   Dictation
+  Numbers
   Conjugation(Tense)
 }
 
@@ -38,6 +41,7 @@ pub fn drills() -> List(Drill) {
     TranslateToSwedish,
     Articles,
     Dictation,
+    Numbers,
     ..list.map(lexicon.tenses, Conjugation)
   ]
 }
@@ -66,6 +70,7 @@ pub fn drill(kind: Kind) -> Drill {
     ChooseArticle -> Articles
     Conjugate(tense, _) -> Conjugation(tense)
     Listen -> Dictation
+    WriteNumber(_) -> Numbers
   }
 }
 

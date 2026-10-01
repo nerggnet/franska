@@ -54,6 +54,9 @@ must work on both targets, has no FFI and never reads the clock.
   entries. Keep easier levels first in `content.entries()`. Add a new level
   as a module, add it to `lexicon.Level` and `level_rank`, and include it
   there.
+- `numbers.gleam`: French number words (traditional spelling, 1990 reform
+  also accepted) and the generated `Numbers` drill. Number exercises are
+  not entries; `content.exercises` and `content.all_exercises` add them.
 - `session.gleam`: one practice round. A wrong answer comes back 3 exercises
   later.
 
