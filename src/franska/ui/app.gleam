@@ -7,9 +7,10 @@ import franska/answer.{type Grade, Almost, Correct, Wrong}
 import franska/content
 import franska/exercise.{
   type Drill, type Exercise, Adjectives, Agree, Articles, ChooseArticle, Compare,
-  Comparisons, Conjugate, Conjugation, Dictation, FillGap, Listen, Negation,
-  Numbers, Pronouns, Sentences, ToFrench, ToSwedish, Transform, Translate,
-  TranslateToFrench, TranslateToSwedish, WriteNumber,
+  Comparisons, Comprehend, Conjugate, Conjugation, Dictation, FillGap, Hearing,
+  Listen, ListeningTexts, Negation, Numbers, Pronouns, Reading, ReadingTexts,
+  Sentences, ToFrench, ToSwedish, Transform, Translate, TranslateToFrench,
+  TranslateToSwedish, WriteNumber,
 }
 import franska/gender
 import franska/lexicon
@@ -17,6 +18,7 @@ import franska/progress.{type Progress, Progress}
 import franska/session.{type Session}
 import franska/srs
 import franska/ui/browser
+import gleam/bool
 import gleam/dynamic/decode
 import gleam/int
 import gleam/list
@@ -120,6 +122,7 @@ pub type Msg {
   UserChoseAnswer(String)
   UserSubmittedAnswer
   UserAskedToHear(String)
+  UserAskedToHearSlowly(String)
   UserQuitRound
   UserOpenedStatistics
   UserAskedToReset
@@ -149,6 +152,24 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
 
     Menu, UserToggledReadAloud(read_aloud) ->
       update_progress(model, Progress(..model.progress, read_aloud:))
+
+    Menu, UserStartedRound
+    | Finished(..), UserStartedRound
+      if model.drill == ReadingTexts || model.drill == ListeningTexts
+    -> {
+      // A text round is one text with all its questions, in order. Spaced
+      // repetition picks the text: the one with the question most due.
+      let questions = content.exercises(model.drill, model.theme)
+      let session =
+        questions
+        |> model.env.shuffle
+        |> progress.plan_round(model.progress, _, now: model.env.now(), size: 1)
+        |> list.flat_map(fn(first) {
+          list.filter(questions, fn(e) { e.entry_id == first.entry_id })
+        })
+        |> session.new
+      show_exercise(Model(..model, round: DrillRound), session)
+    }
 
     Menu, UserStartedRound | Finished(..), UserStartedRound -> {
       // Shuffle first so new exercises come in random order, and again so
@@ -221,6 +242,11 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
 
     Practising(..), UserAskedToHear(text) -> #(model, speak_effect(text))
 
+    Practising(..), UserAskedToHearSlowly(text) -> #(
+      model,
+      speak_at(text, slow_rate),
+    )
+
     Practising(..), UserQuitRound
     | Finished(..), UserQuitRound
     | Statistics(..), UserQuitRound
@@ -276,9 +302,18 @@ fn update_progress(model: Model, progress: Progress) -> #(Model, Effect(Msg)) {
 
 fn show_exercise(model: Model, session: Session) -> #(Model, Effect(Msg)) {
   let screen = Practising(session:, input: "", grade: None)
-  // Dictation is always read out; a French prompt is if read-aloud is on.
+  // Dictation is always read out, and a text to listen to when it first
+  // comes up; a French prompt is if read-aloud is on.
+  let previous_entry = case session.answers {
+    [#(previous, _), ..] -> previous.entry_id
+    [] -> ""
+  }
   let speech = case session.current(session), model.progress.read_aloud {
     Ok(exercise), _ if exercise.kind == Listen -> speak_effect(exercise.french)
+    Ok(exercise.Exercise(kind: Comprehend(medium: Hearing, ..), ..) as exercise),
+      _
+      if exercise.entry_id != previous_entry
+    -> speak_effect(exercise.french)
     Ok(exercise), True if exercise.kind == Translate(ToSwedish) ->
       speak_effect(exercise.french)
     _, _ -> effect.none()
@@ -310,7 +345,11 @@ fn check_answer(
       }
       // Hear the right French after answering, unless it was just read out.
       let speech = case model.progress.read_aloud, exercise.kind {
-        True, Translate(ToSwedish) | True, Listen | False, _ -> effect.none()
+        True, Translate(ToSwedish)
+        | True, Listen
+        | True, Comprehend(..)
+        | False, _
+        -> effect.none()
         True, _ -> speak_effect(exercise.french)
       }
       let screen = Practising(session:, input:, grade: Some(grade))
@@ -346,9 +385,17 @@ fn read_import_effect() -> Effect(Msg) {
   dispatch(ImportFileRead(text))
 }
 
+const normal_rate = 0.9
+
+const slow_rate = 0.6
+
 fn speak_effect(text: String) -> Effect(Msg) {
+  speak_at(text, normal_rate)
+}
+
+fn speak_at(text: String, rate: Float) -> Effect(Msg) {
   use _ <- effect.from
-  browser.speak(text)
+  browser.speak(text, rate)
 }
 
 // VIEW ------------------------------------------------------------------------
@@ -454,6 +501,7 @@ fn view_drill_picker(
     group("Ord", WordDrills),
     group("Grammatik", GrammarDrills),
     group("Böj verb", VerbDrills),
+    group("Texter", TextDrills),
     // A single theme is not worth choosing between.
     case themes {
       [] | [_] -> element.none()
@@ -552,6 +600,8 @@ fn drill_name(drill: Drill) -> String {
     Negation -> "Negation"
     Pronouns -> "Pronomen"
     Comparisons -> "Jämförelse"
+    ReadingTexts -> "Läsförståelse"
+    ListeningTexts -> "Hörförståelse"
   }
 }
 
@@ -559,6 +609,7 @@ type DrillGroup {
   WordDrills
   GrammarDrills
   VerbDrills
+  TextDrills
 }
 
 /// Which row of the menu a drill is shown in.
@@ -568,6 +619,7 @@ fn drill_group(drill: Drill) -> DrillGroup {
       WordDrills
     Adjectives | Sentences | Negation | Pronouns | Comparisons -> GrammarDrills
     Conjugation(_) -> VerbDrills
+    ReadingTexts | ListeningTexts -> TextDrills
   }
 }
 
@@ -591,11 +643,14 @@ fn tense_name(tense: lexicon.Tense) -> String {
   }
 }
 
-/// Dictation needs speech synthesis.
+/// Dictation and listening need speech synthesis.
 fn available_drills(env: Env) -> List(Drill) {
   case env.can_speak {
     True -> exercise.drills()
-    False -> list.filter(exercise.drills(), fn(drill) { drill != Dictation })
+    False ->
+      list.filter(exercise.drills(), fn(drill) {
+        drill != Dictation && drill != ListeningTexts
+      })
   }
 }
 
@@ -623,6 +678,53 @@ fn view_exercise(
     ]),
     html.p([class("instruction")], [html.text(instruction(exercise))]),
     view_prompt(exercise, env.can_speak),
+    case exercise.kind {
+      Comprehend(options:, ..) -> view_question(exercise, options, answered)
+      _ -> view_answer_form(exercise, input, answered)
+    },
+    case grade {
+      Some(grade) -> view_feedback(exercise, grade, env.can_speak)
+      None -> element.none()
+    },
+  ])
+}
+
+/// The question about a text with its options, then "Nästa" once answered.
+fn view_question(
+  exercise: Exercise,
+  options: List(String),
+  answered: Bool,
+) -> Element(Msg) {
+  element.fragment([
+    html.p([class("question"), attribute.lang("sv")], [
+      html.text(exercise.prompt),
+    ]),
+    case answered {
+      False -> view_choices(options, "sv")
+      True ->
+        html.form(
+          [class("answer"), event.on_submit(fn(_) { UserSubmittedAnswer })],
+          [
+            html.button(
+              [
+                attribute.id(answer_input_id),
+                class("primary"),
+                attribute.type_("submit"),
+              ],
+              [html.text("Nästa")],
+            ),
+          ],
+        )
+    },
+  ])
+}
+
+fn view_answer_form(
+  exercise: Exercise,
+  input: String,
+  answered: Bool,
+) -> Element(Msg) {
+  element.fragment([
     html.form(
       [class("answer"), event.on_submit(fn(_) { UserSubmittedAnswer })],
       [
@@ -646,7 +748,7 @@ fn view_exercise(
           attribute.aria_label("Ditt svar"),
           event.on_input(UserTypedAnswer),
           case exercise.kind, answered {
-            ChooseArticle, False -> on_article_shortcut()
+            ChooseArticle, False -> on_choice_shortcut(article_choices)
             _, _ -> attribute.none()
           },
         ]),
@@ -659,13 +761,9 @@ fn view_exercise(
       ],
     ),
     case exercise.kind, answered {
-      ChooseArticle, False -> view_choices()
+      ChooseArticle, False -> view_choices(article_choices, "fr")
       _, False if exercise.answer_language == answer.French -> view_accents()
       _, _ -> element.none()
-    },
-    case grade {
-      Some(grade) -> view_feedback(exercise, grade, env.can_speak)
-      None -> element.none()
     },
   ])
 }
@@ -684,6 +782,8 @@ fn instruction(exercise: Exercise) -> String {
     Transform(task: lexicon.Negate, ..) -> "Gör meningen negativ"
     Transform(task: lexicon.UsePronoun, ..) ->
       "Byt ut det markerade mot ett pronomen"
+    Comprehend(medium: Reading, ..) -> "Läs texten och svara på frågan"
+    Comprehend(medium: Hearing, ..) -> "Lyssna på texten och svara på frågan"
   }
 }
 
@@ -723,6 +823,32 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
       ])
     WriteNumber(_) ->
       html.p([class("prompt number")], [html.text(exercise.prompt)])
+    Comprehend(medium: Reading, ..) ->
+      case text_of(exercise) {
+        Ok(#(title, french, _)) -> view_text(title, french)
+        Error(Nil) -> element.none()
+      }
+    Comprehend(medium: Hearing, ..) ->
+      html.div([class("listen")], [
+        html.button(
+          [
+            class("speaker large"),
+            attribute.type_("button"),
+            attribute.aria_label("Lyssna igen"),
+            attribute.title("Lyssna igen"),
+            event.on_click(UserAskedToHear(exercise.french)),
+          ],
+          [speaker_icon()],
+        ),
+        html.button(
+          [
+            class("secondary"),
+            attribute.type_("button"),
+            event.on_click(UserAskedToHearSlowly(exercise.french)),
+          ],
+          [html.text("Lyssna långsamt")],
+        ),
+      ])
     Transform(translation:, ..) ->
       html.div([class("sentence")], [
         html.p([class("prompt"), attribute.lang("fr")], {
@@ -807,6 +933,33 @@ fn degree_name(degree: lexicon.Degree) -> String {
   }
 }
 
+/// The title, French and Swedish of the text a question is about.
+fn text_of(exercise: Exercise) -> Result(#(String, String, String), Nil) {
+  case content.entry(exercise.entry_id) {
+    Ok(lexicon.Entry(word: lexicon.Text(title:, french:, swedish:, ..), ..)) ->
+      Ok(#(title, french, swedish))
+    _ -> Error(Nil)
+  }
+}
+
+fn view_text(title: String, text: String) -> Element(Msg) {
+  html.article([class("text"), attribute.lang("fr")], [
+    html.h3([], [html.text(title)]),
+    ..list.map(string.split(text, "\n"), fn(line) {
+      html.p([], [html.text(line)])
+    })
+  ])
+}
+
+/// What to call an exercise in a list: a question about a text by the
+/// text's title, anything else by its French.
+fn exercise_label(exercise: Exercise) -> String {
+  case exercise.kind, text_of(exercise) {
+    Comprehend(..), Ok(#(title, _, _)) -> title <> ": " <> exercise.prompt
+    _, _ -> exercise.french
+  }
+}
+
 fn adjective_form_name(form: lexicon.AdjectiveForm) -> String {
   case form {
     lexicon.FeminineSingular -> "feminin singular"
@@ -827,17 +980,26 @@ const article_choices = ["le", "la"]
 
 /// The answer a shortcut key picks: 1 for le, 2 for la.
 pub fn article_shortcut(key: String) -> Result(String, Nil) {
+  choice_shortcut(article_choices, key)
+}
+
+/// The choice a number key picks: 1 for the first, 2 for the second, ...
+pub fn choice_shortcut(
+  choices: List(String),
+  key: String,
+) -> Result(String, Nil) {
   case int.parse(key) {
-    Ok(n) if n >= 1 -> list.drop(article_choices, n - 1) |> list.first
+    Ok(n) if n >= 1 -> list.drop(choices, n - 1) |> list.first
     _ -> Error(Nil)
   }
 }
 
-/// Answers on 1 or 2 without typing the digit; other keys type as usual.
-fn on_article_shortcut() -> attribute.Attribute(Msg) {
+/// Answers on a number key without typing the digit; other keys work as
+/// usual.
+fn on_choice_shortcut(choices: List(String)) -> attribute.Attribute(Msg) {
   event.advanced("keydown", {
     use key <- decode.field("key", decode.string)
-    case article_shortcut(key) {
+    case choice_shortcut(choices, key) {
       Ok(choice) ->
         decode.success(event.handler(
           UserChoseAnswer(choice),
@@ -853,15 +1015,24 @@ fn on_article_shortcut() -> attribute.Attribute(Msg) {
   })
 }
 
-fn view_choices() -> Element(Msg) {
+fn view_choices(choices: List(String), lang: String) -> Element(Msg) {
   html.div(
-    [class("choices")],
-    list.index_map(article_choices, fn(choice, index) {
+    [
+      class("choices"),
+      // Keys typed on a focused choice pick a choice too.
+      on_choice_shortcut(choices),
+    ],
+    list.index_map(choices, fn(choice, index) {
       html.button(
         [
+          // The first choice takes the focus, so the number keys work.
+          case index {
+            0 -> attribute.id(answer_input_id)
+            _ -> attribute.none()
+          },
           class("secondary"),
           attribute.type_("button"),
-          attribute.lang("fr"),
+          attribute.lang(lang),
           attribute.aria_keyshortcuts(int.to_string(index + 1)),
           event.on_click(UserChoseAnswer(choice)),
         ],
@@ -907,6 +1078,15 @@ fn view_feedback(
     Almost(..) -> "almost"
     Wrong(..) -> "wrong"
   }
+  use <- bool.guard(
+    case exercise.kind {
+      Comprehend(..) -> True
+      _ -> False
+    },
+    html.div([class("feedback " <> tone), attribute.role("status")], [
+      html.p([], [html.text(answer.explain(grade))]),
+    ]),
+  )
   html.div([class("feedback " <> tone), attribute.role("status")], [
     html.p([], [html.text(answer.explain(grade))]),
     html.div([class("reveal")], [
@@ -984,6 +1164,13 @@ fn view_finished(session: Session, round: Round) -> Element(Msg) {
     ])
   }
 
+  // After a text round, show the text with its translation.
+  let texts =
+    session.answers
+    |> list.reverse
+    |> list.filter_map(fn(answer) { text_of(answer.0) })
+    |> list.unique
+
   html.section([class("card")], [
     html.h2([], [html.text("Bra jobbat!")]),
     html.div([class("stats")], [
@@ -991,6 +1178,23 @@ fn view_finished(session: Session, round: Round) -> Element(Msg) {
       stat(summary.almost, "nästan", "almost"),
       stat(summary.wrong, "fel", "wrong"),
     ]),
+    element.fragment(
+      list.map(texts, fn(text) {
+        let #(title, french, swedish) = text
+        html.div([class("text-summary")], [
+          view_text(title, french),
+          html.details([], [
+            html.summary([], [html.text("Visa översättningen")]),
+            html.div(
+              [class("translation"), attribute.lang("sv")],
+              list.map(string.split(swedish, "\n"), fn(line) {
+                html.p([], [html.text(line)])
+              }),
+            ),
+          ]),
+        ])
+      }),
+    ),
     html.div([class("actions")], [
       html.button(
         [
@@ -1132,7 +1336,9 @@ fn view_difficult(difficult: List(#(Exercise, srs.CardState))) -> Element(Msg) {
           list.map(list.take(difficult, round_size), fn(pair) {
             let #(exercise, card) = pair
             html.li([], [
-              html.span([attribute.lang("fr")], [html.text(exercise.french)]),
+              html.span([attribute.lang("fr")], [
+                html.text(exercise_label(exercise)),
+              ]),
               html.span([class("muted")], [
                 html.text(
                   drill_name(exercise.drill(exercise.kind))

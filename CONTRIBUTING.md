@@ -76,6 +76,10 @@ sentence("je-suis-suedois", "Jag är svensk.", "Je ___ suédois.", ["suis"], "ê
 - **Sentences** take a theme (such as `"partitiv"`) and have exactly one gap, written `___`, then the answers for
   the gap and a hint shown in brackets (use `""` for none). They only make
   a gap-fill exercise, so keep the Swedish translation natural.
+- **Texts** use `text(id, title, french_lines, swedish_lines, questions)`,
+  with lines joined by `\n` and each `question(swedish_question, options,
+  index_of_right_option)`. Keep the questions answerable from the text
+  alone, and the options short.
 - **Spell French correctly,** with accents and the œ ligature. The grading
   is lenient about learners' accents, not about the content's.
 

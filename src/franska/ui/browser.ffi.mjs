@@ -20,7 +20,7 @@ export function can_speak() {
   return typeof window !== "undefined" && "speechSynthesis" in window;
 }
 
-export function speak(text) {
+export function speak(text, rate) {
   if (!can_speak()) return;
   const synth = window.speechSynthesis;
   synth.cancel();
@@ -31,7 +31,7 @@ export function speak(text) {
     voices.find((v) => v.lang === "fr-FR") ??
     voices.find((v) => v.lang.startsWith("fr"));
   if (voice) utterance.voice = voice;
-  utterance.rate = 0.9;
+  utterance.rate = rate;
   synth.speak(utterance);
 }
 

@@ -68,8 +68,10 @@ must work on both targets, has no FFI and never reads the clock.
   (présent forms, participle, auxiliary and whether it is reflexive), an
   `Adjective` (four forms,
   plurals derived by `lexicon.adjective`), an `Expression`, a
-  `Rewrite` (a sentence to transform, such as negating it) or a `Sentence`
-  with one `___` gap. Other tenses are generated from the verb
+  `Rewrite` (a sentence to transform, such as negating it), a `Sentence`
+  with one `___` gap, or a `Text` with Swedish multiple-choice questions.
+  Each text question becomes a reading and a listening exercise; a text
+  round in the app is one text with all its questions. Other tenses are generated from the verb
   data. Build nouns with `lexicon.noun`, which
   works out l' elision; use `noun_aspirated_h` for exceptions.
 - `exercise.gleam`: derives all exercises from an entry: translation in both
@@ -97,11 +99,12 @@ must work on both targets, has no FFI and never reads the clock.
 
 ## Conventions
 
-- Test UI changes in the browser on the dev server. Synthetic DOM events from
-  injected scripts do not reach Lustre's handlers, so drive the app with real
-  clicks and keystrokes. Hover before clicking after a screen change (a
-  click without a prior mouse move can be ignored), and leave a moment
-  before typing.
+- Test UI changes in the browser on the dev server, with real clicks and
+  keystrokes. An automated browser tab may report itself as hidden, and then
+  `requestAnimationFrame` never fires, so Lustre updates the model but does
+  not redraw. Clicks and keys then look ignored although they were handled.
+  Take a screenshot after each step (it forces a frame), and check
+  `document.visibilityState` before suspecting the app.
 - Entry ids are stored with the learner's progress. Never rename or reuse an
   id once it exists.
 - Add new content as `Entry` values. Never hand-write exercises.

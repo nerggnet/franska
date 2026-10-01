@@ -2,8 +2,9 @@
 //// or reuse one. Put the canonical translation first in `sv`.
 
 import franska/lexicon.{
-  type Entry, type Word, A2, Avoir, Entry, Etre, Expression, Feminine, Masculine,
-  Negate, Present, Rewrite, Sentence, UsePronoun, Verb,
+  type Entry, type Question, type Word, A2, Avoir, Entry, Etre, Expression,
+  Feminine, Masculine, Negate, Present, Question, Rewrite, Sentence, Text,
+  UsePronoun, Verb,
 }
 
 pub fn entries() -> List(Entry) {
@@ -1280,6 +1281,150 @@ pub fn entries() -> List(Entry) {
       "Je vais acheter [le pain].",
       ["Je vais l'acheter."],
     ),
+    // Texter
+    text(
+      "text-vacances-nice",
+      "Les vacances à Nice",
+      "L'été dernier, nous sommes allés à Nice en train. Le voyage a duré six heures.\nNous avons loué un petit appartement près de la mer. Tous les jours, nous sommes allés à la plage et nous avons nagé.\nUn soir, nous avons mangé du poisson dans un restaurant sur le port. C'était délicieux !\nMalheureusement, il a plu le dernier jour.",
+      "I somras åkte vi till Nice med tåg. Resan tog sex timmar.\nVi hyrde en liten lägenhet nära havet. Varje dag gick vi till stranden och badade.\nEn kväll åt vi fisk på en restaurang i hamnen. Det var jättegott!\nTyvärr regnade det den sista dagen.",
+      [
+        question(
+          "Hur reste de till Nice?",
+          ["Med flyg", "Med tåg", "Med bil"],
+          1,
+        ),
+        question(
+          "Hur lång tid tog resan?",
+          ["Fyra timmar", "Sex timmar", "Åtta timmar"],
+          1,
+        ),
+        question(
+          "Var bodde de?",
+          ["På ett hotell", "I en liten lägenhet nära havet", "Hos vänner"],
+          1,
+        ),
+        question(
+          "Hur var vädret den sista dagen?",
+          ["Soligt", "Det regnade", "Det snöade"],
+          1,
+        ),
+      ],
+    ),
+    text(
+      "text-message-paul",
+      "Un message de Paul",
+      "Salut Sophie !\nSamedi prochain, je ferai une fête chez moi pour mon anniversaire. Il y aura beaucoup d'amis et nous mangerons une pizza.\nMon frère viendra avec sa guitare. Tu pourras venir ? La fête commencera à huit heures.\nRéponds-moi vite ! À bientôt, Paul",
+      "Hej Sophie!\nNästa lördag ska jag ha fest hemma hos mig för att jag fyller år. Det kommer många vänner och vi ska äta pizza.\nMin bror kommer med sin gitarr. Kan du komma? Festen börjar klockan åtta.\nSvara snabbt! Vi ses snart, Paul",
+      [
+        question(
+          "Varför har Paul fest?",
+          ["Han har fått ett nytt jobb", "Han fyller år", "Han har flyttat"],
+          1,
+        ),
+        question(
+          "Vem tar med sig en gitarr?",
+          ["Sophie", "Pauls bror", "Pauls syster"],
+          1,
+        ),
+        question(
+          "När börjar festen?",
+          ["Klockan sju", "Klockan åtta", "Klockan nio"],
+          1,
+        ),
+      ],
+    ),
+    text(
+      "text-medecin",
+      "Chez le médecin",
+      "— Bonjour, docteur.\n— Bonjour, madame. Qu'est-ce qui ne va pas ?\n— J'ai mal à la tête et j'ai de la fièvre depuis deux jours.\n— Vous toussez ?\n— Oui, un peu.\n— C'est la grippe. Restez à la maison et reposez-vous. Prenez ce médicament trois fois par jour.\n— Merci, docteur.",
+      "– Hej, doktorn.\n– Hej. Vad är det som är fel?\n– Jag har ont i huvudet och har haft feber i två dagar.\n– Hostar ni?\n– Ja, lite.\n– Det är influensa. Stanna hemma och vila. Ta den här medicinen tre gånger om dagen.\n– Tack, doktorn.",
+      [
+        question(
+          "Hur länge har kvinnan haft feber?",
+          ["En dag", "Två dagar", "En vecka"],
+          1,
+        ),
+        question(
+          "Vad säger läkaren att hon har?",
+          ["En förkylning", "Influensa", "Huvudvärk"],
+          1,
+        ),
+        question(
+          "Hur ofta ska hon ta medicinen?",
+          ["En gång om dagen", "Två gånger om dagen", "Tre gånger om dagen"],
+          2,
+        ),
+      ],
+    ),
+    text(
+      "text-quand-j-etais-petit",
+      "Quand j'étais petit",
+      "Quand j'étais petit, j'habitais dans un village à la campagne.\nNotre maison était vieille mais très grande. Il y avait un grand jardin avec des arbres et des fleurs.\nTous les matins, j'allais à l'école à pied avec mon voisin.\nLe mercredi, nous jouions au football dans le champ derrière l'église. J'étais très heureux.",
+      "När jag var liten bodde jag i en by på landet.\nVårt hus var gammalt men väldigt stort. Det fanns en stor trädgård med träd och blommor.\nVarje morgon gick jag till skolan med min granne.\nPå onsdagarna spelade vi fotboll på fältet bakom kyrkan. Jag var väldigt lycklig.",
+      [
+        question(
+          "Var bodde personen som barn?",
+          ["I en stor stad", "I en by på landet", "Vid havet"],
+          1,
+        ),
+        question(
+          "Hur var huset?",
+          ["Litet och nytt", "Gammalt men väldigt stort", "Modernt"],
+          1,
+        ),
+        question(
+          "Vad gjorde de på onsdagarna?",
+          ["De badade", "De spelade fotboll", "De läste"],
+          1,
+        ),
+      ],
+    ),
+    text(
+      "text-nouvel-appartement",
+      "Un nouvel appartement",
+      "Le mois dernier, j'ai trouvé un nouvel appartement au centre-ville.\nIl est plus petit que mon ancien appartement, mais il est moins cher.\nIl y a un salon, une chambre, une cuisine et une salle de bain. La cuisine est moderne et le salon a deux grandes fenêtres.\nLe seul problème : il n'y a pas d'ascenseur et j'habite au cinquième étage !",
+      "Förra månaden hittade jag en ny lägenhet i centrum.\nDen är mindre än min gamla lägenhet, men den är billigare.\nDet finns ett vardagsrum, ett sovrum, ett kök och ett badrum. Köket är modernt och vardagsrummet har två stora fönster.\nDet enda problemet: det finns ingen hiss och jag bor på femte våningen!",
+      [
+        question(
+          "Var ligger den nya lägenheten?",
+          ["I centrum", "På landet", "Nära flygplatsen"],
+          0,
+        ),
+        question(
+          "Hur är den jämfört med den gamla?",
+          ["Större och dyrare", "Mindre men billigare", "Lika stor"],
+          1,
+        ),
+        question(
+          "Vad är problemet?",
+          ["Köket är gammalt", "Det finns ingen hiss", "Den är för dyr"],
+          1,
+        ),
+      ],
+    ),
+    text(
+      "text-au-travail",
+      "Au travail",
+      "Je m'appelle Karim et je suis cuisinier dans un restaurant à Paris.\nJe commence à travailler à dix heures et je finis tard le soir.\nLe travail est difficile mais j'aime beaucoup mon métier. Mes collègues sont très sympathiques.\nL'année prochaine, je voudrais ouvrir mon propre restaurant.",
+      "Jag heter Karim och är kock på en restaurang i Paris.\nJag börjar jobba klockan tio och slutar sent på kvällen.\nJobbet är tungt men jag tycker mycket om mitt yrke. Mina kollegor är väldigt trevliga.\nNästa år skulle jag vilja öppna en egen restaurang.",
+      [
+        question(
+          "Vad arbetar Karim med?",
+          ["Han är servitör", "Han är kock", "Han är bagare"],
+          1,
+        ),
+        question(
+          "När börjar han jobba?",
+          ["Klockan åtta", "Klockan tio", "Klockan tolv"],
+          1,
+        ),
+        question(
+          "Vad vill han göra nästa år?",
+          ["Flytta till Lyon", "Öppna en egen restaurang", "Sluta jobba"],
+          1,
+        ),
+      ],
+    ),
   ]
 }
 
@@ -1351,4 +1496,13 @@ fn negate(id, sv, source, answers) -> Entry {
 /// Swedish meaning of the answer and the accepted answers.
 fn pronoun(id, sv, source, answers) -> Entry {
   entry(id, "pronomen", [sv], Rewrite(task: UsePronoun, source:, answers:))
+}
+
+/// A text with its Swedish translation and comprehension questions.
+fn text(id, title, french, swedish, questions) -> Entry {
+  entry(id, "texter", [title], Text(title:, french:, swedish:, questions:))
+}
+
+fn question(question, options, answer) -> Question {
+  Question(question:, options:, answer:)
 }

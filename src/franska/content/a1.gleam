@@ -2,8 +2,8 @@
 //// or reuse one. Put the canonical translation first in `sv`.
 
 import franska/lexicon.{
-  type Entry, type Word, A1, Avoir, Entry, Etre, Expression, Feminine, Masculine,
-  Negate, Present, Rewrite, Sentence, Verb,
+  type Entry, type Question, type Word, A1, Avoir, Entry, Etre, Expression,
+  Feminine, Masculine, Negate, Present, Question, Rewrite, Sentence, Text, Verb,
 }
 
 pub fn entries() -> List(Entry) {
@@ -1180,6 +1180,140 @@ pub fn entries() -> List(Entry) {
     negate("neg-je-comprends", "Jag förstår inte.", "Je comprends.", [
       "Je ne comprends pas.",
     ]),
+    // Texter
+    text(
+      "text-lea",
+      "Je m'appelle Léa",
+      "Bonjour ! Je m'appelle Léa. J'ai vingt-deux ans et j'habite à Lyon.\nJe suis étudiante à l'université. J'ai un frère, Tom. Il a seize ans.\nNous avons un chat noir. Le week-end, j'aime lire et jouer de la guitare.",
+      "Hej! Jag heter Léa. Jag är tjugotvå år och bor i Lyon.\nJag studerar på universitetet. Jag har en bror, Tom. Han är sexton år.\nVi har en svart katt. På helgen tycker jag om att läsa och spela gitarr.",
+      [
+        question("Var bor Léa?", ["I Paris", "I Lyon", "I Nice"], 1),
+        question(
+          "Hur gammal är Tom?",
+          ["Sexton år", "Tjugotvå år", "Tolv år"],
+          0,
+        ),
+        question(
+          "Vilket djur har de?",
+          ["En hund", "En svart katt", "En vit katt"],
+          1,
+        ),
+        question(
+          "Vad gör Léa på helgen?",
+          ["Läser och spelar gitarr", "Simmar", "Arbetar"],
+          0,
+        ),
+      ],
+    ),
+    text(
+      "text-au-cafe",
+      "Au café",
+      "— Bonjour, madame. Qu'est-ce que vous voulez ?\n— Bonjour. Un café et un croissant, s'il vous plaît.\n— Avec du lait ?\n— Non, merci. Sans lait.\n— Voilà. Ça fait quatre euros cinquante.\n— Merci, au revoir !",
+      "– Hej. Vad vill ni ha?\n– Hej. En kaffe och en croissant, tack.\n– Med mjölk?\n– Nej tack. Utan mjölk.\n– Varsågod. Det blir fyra euro och femtio cent.\n– Tack, hej då!",
+      [
+        question(
+          "Vad beställer kvinnan?",
+          ["Ett te och en kaka", "En kaffe och en croissant", "En juice"],
+          1,
+        ),
+        question("Vill hon ha mjölk i kaffet?", ["Ja", "Nej", "Lite"], 1),
+        question(
+          "Hur mycket kostar det?",
+          ["4,50 euro", "5,40 euro", "4 euro"],
+          0,
+        ),
+      ],
+    ),
+    text(
+      "text-ma-journee",
+      "Ma journée",
+      "Le matin, je me lève à sept heures. Je prends une douche et je mange du pain avec de la confiture.\nJe vais au travail en bus. À midi, je mange au restaurant avec mes collègues.\nLe soir, je rentre à la maison et je regarde la télévision. Je me couche à onze heures.",
+      "På morgonen går jag upp klockan sju. Jag duschar och äter bröd med sylt.\nJag åker buss till jobbet. Mitt på dagen äter jag på restaurang med mina kollegor.\nPå kvällen åker jag hem och tittar på tv. Jag lägger mig klockan elva.",
+      [
+        question(
+          "När går personen upp?",
+          ["Klockan sex", "Klockan sju", "Klockan åtta"],
+          1,
+        ),
+        question(
+          "Hur tar sig personen till jobbet?",
+          ["Med bil", "Med buss", "Till fots"],
+          1,
+        ),
+        question(
+          "Var äter personen lunch?",
+          ["Hemma", "På restaurang", "På kontoret"],
+          1,
+        ),
+        question(
+          "Vad gör personen på kvällen?",
+          ["Tittar på tv", "Läser en bok", "Springer"],
+          0,
+        ),
+      ],
+    ),
+    text(
+      "text-ma-famille",
+      "Ma famille",
+      "Voici ma famille. Mon père s'appelle Marc. Il est médecin.\nMa mère s'appelle Claire. Elle est professeur de français.\nJ'ai deux sœurs, Julie et Emma. Julie a dix ans et Emma a quatorze ans.\nNos grands-parents habitent à la campagne. Nous allons chez eux en été.",
+      "Det här är min familj. Min pappa heter Marc. Han är läkare.\nMin mamma heter Claire. Hon är lärare i franska.\nJag har två systrar, Julie och Emma. Julie är tio år och Emma är fjorton år.\nVåra far- och morföräldrar bor på landet. Vi hälsar på dem på sommaren.",
+      [
+        question(
+          "Vad arbetar pappan med?",
+          ["Han är lärare", "Han är läkare", "Han är kock"],
+          1,
+        ),
+        question("Hur många systrar har personen?", ["En", "Två", "Tre"], 1),
+        question(
+          "Var bor far- och morföräldrarna?",
+          ["I stan", "På landet", "Vid havet"],
+          1,
+        ),
+        question(
+          "När hälsar familjen på dem?",
+          ["På vintern", "På sommaren", "Varje helg"],
+          1,
+        ),
+      ],
+    ),
+    text(
+      "text-boulangerie",
+      "À la boulangerie",
+      "— Bonjour, monsieur !\n— Bonjour ! Je voudrais une baguette et deux croissants, s'il vous plaît.\n— Bien sûr. Et avec ça ?\n— Un gâteau au chocolat, aussi.\n— D'accord. Ça fait huit euros.\n— Voilà dix euros.\n— Merci. Voici votre monnaie.",
+      "– Hej!\n– Hej! Jag skulle vilja ha en baguette och två croissanter, tack.\n– Självklart. Något mer?\n– En chokladtårta också.\n– Okej. Det blir åtta euro.\n– Här är tio euro.\n– Tack. Här är er växel.",
+      [
+        question("Hur många croissanter köper mannen?", ["En", "Två", "Tre"], 1),
+        question(
+          "Vilken sorts tårta köper han?",
+          ["Jordgubbstårta", "Chokladtårta", "Citrontårta"],
+          1,
+        ),
+        question(
+          "Hur mycket betalar han med?",
+          ["Åtta euro", "Tio euro", "Tjugo euro"],
+          1,
+        ),
+      ],
+    ),
+    text(
+      "text-le-week-end",
+      "Le week-end",
+      "Le samedi, il fait souvent beau. Avec mes amis, nous allons au parc.\nNous jouons au football et nous mangeons des sandwichs.\nLe dimanche, je reste à la maison. Je lis un livre, j'écoute de la musique et je téléphone à ma grand-mère.",
+      "På lördagarna är det ofta fint väder. Jag och mina vänner går till parken.\nVi spelar fotboll och äter smörgåsar.\nPå söndagarna är jag hemma. Jag läser en bok, lyssnar på musik och ringer till min mormor.",
+      [
+        question(
+          "Vad gör vännerna i parken?",
+          ["Spelar fotboll", "Spelar tennis", "Simmar"],
+          0,
+        ),
+        question("Vad äter de?", ["Pizza", "Smörgåsar", "Glass"], 1),
+        question(
+          "Vem ringer personen till på söndagen?",
+          ["Sin mormor", "Sin bror", "Sin mamma"],
+          0,
+        ),
+      ],
+    ),
   ]
 }
 
@@ -1249,4 +1383,13 @@ fn reflexive(id, sv, infinitive, forms, participle) -> Entry {
 /// the accepted negative sentences.
 fn negate(id, sv, source, answers) -> Entry {
   entry(id, "negation", [sv], Rewrite(task: Negate, source:, answers:))
+}
+
+/// A text with its Swedish translation and comprehension questions.
+fn text(id, title, french, swedish, questions) -> Entry {
+  entry(id, "texter", [title], Text(title:, french:, swedish:, questions:))
+}
+
+fn question(question, options, answer) -> Question {
+  Question(question:, options:, answer:)
 }

@@ -17,8 +17,9 @@ pub fn can_speak() -> Bool {
   False
 }
 
+/// Reads French aloud; `rate` 1.0 is normal speed.
 @external(javascript, "./browser.ffi.mjs", "speak")
-pub fn speak(_text: String) -> Nil {
+pub fn speak(_text: String, _rate: Float) -> Nil {
   Nil
 }
 

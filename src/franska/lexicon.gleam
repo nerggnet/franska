@@ -77,6 +77,14 @@ pub type Word {
   /// A sentence to rewrite as `task` says; `answers` are the rewritten
   /// sentence, canonical first.
   Rewrite(task: Task, source: String, answers: List(String))
+  /// A short text to read or listen to, with comprehension questions in
+  /// Swedish. Lines in `french` and `swedish` are separated by "\n".
+  Text(
+    title: String,
+    french: String,
+    swedish: String,
+    questions: List(Question),
+  )
   /// A sentence with one gap, written `___` in `text`. `answers` fill the
   /// gap, canonical first; `hint` (such as the verb's infinitive) may be "".
   Sentence(text: String, answers: List(String), hint: String)
@@ -157,6 +165,12 @@ pub fn noun(fr: String, gender: Gender) -> Word {
 
 pub fn noun_aspirated_h(fr: String, gender: Gender) -> Word {
   Noun(fr:, gender:, elides: False)
+}
+
+/// A multiple-choice question about a `Text`; `answer` is the index of the
+/// right option.
+pub type Question {
+  Question(question: String, options: List(String), answer: Int)
 }
 
 pub type Task {
@@ -308,8 +322,12 @@ pub fn definite_article(word: Word) -> Result(String, Nil) {
     Noun(elides: True, ..) -> Ok("l'")
     Noun(gender: Masculine, ..) -> Ok("le")
     Noun(gender: Feminine, ..) -> Ok("la")
-    Verb(..) | Adjective(..) | Expression(..) | Rewrite(..) | Sentence(..) ->
-      Error(Nil)
+    Verb(..)
+    | Adjective(..)
+    | Expression(..)
+    | Rewrite(..)
+    | Sentence(..)
+    | Text(..) -> Error(Nil)
   }
 }
 
@@ -330,6 +348,7 @@ pub fn french(word: Word) -> String {
     Sentence(text:, answers: [], ..) -> text
     Rewrite(answers: [first, ..], ..) -> first
     Rewrite(source:, answers: [], ..) -> source
+    Text(french:, ..) -> french
   }
 }
 

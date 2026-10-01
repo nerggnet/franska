@@ -275,3 +275,31 @@ pub fn agreement_and_endings_are_not_typos_test() {
   assert exercise.check(etre, "vous etes alles")
     == Almost("vous êtes allés", MissingAccents)
 }
+
+pub fn a_text_yields_reading_and_listening_questions_test() {
+  let entry =
+    Entry(
+      id: "text-test",
+      level: A1,
+      theme: "texter",
+      sv: ["Test"],
+      word: lexicon.Text("Test", "Je m'appelle Léa.", "Jag heter Léa.", [
+        lexicon.Question("Vad heter hon?", ["Léa", "Tom"], 0),
+        lexicon.Question("Är hon svensk?", ["Ja", "Nej", "Vet ej"], 2),
+      ]),
+    )
+  let exercises = exercise.from_entry(entry)
+  assert list.map(exercises, fn(e) { e.id })
+    == [
+      "text-test:read:1", "text-test:read:2", "text-test:listen:1",
+      "text-test:listen:2",
+    ]
+  let read = find(entry, "text-test:read:2")
+  assert read.prompt == "Är hon svensk?"
+  assert read.french == "Je m'appelle Léa."
+  assert exercise.drill(read.kind) == exercise.ReadingTexts
+  assert exercise.check(read, "Vet ej") == Correct
+  assert exercise.check(read, "Ja") == Wrong("Vet ej")
+  assert exercise.drill(find(entry, "text-test:listen:1").kind)
+    == exercise.ListeningTexts
+}

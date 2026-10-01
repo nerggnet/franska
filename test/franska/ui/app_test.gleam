@@ -266,3 +266,36 @@ pub fn number_keys_pick_le_and_la_test() {
   assert app.article_shortcut("0") == Error(Nil)
   assert app.article_shortcut("l") == Error(Nil)
 }
+
+pub fn a_text_round_is_one_text_with_all_its_questions_test() {
+  let model =
+    start()
+    |> send([UserPickedDrill(exercise.ReadingTexts), UserStartedRound])
+  let assert Practising(session:, ..) = model.screen
+  let assert [first, ..] = session.queue
+  assert list.all(session.queue, fn(e) { e.entry_id == first.entry_id })
+  let assert Ok(lexicon.Entry(word: lexicon.Text(questions:, ..), ..)) =
+    content.entry(first.entry_id)
+  assert list.map(session.queue, fn(e) { e.prompt })
+    == list.map(questions, fn(q) { q.question })
+}
+
+pub fn questions_are_answered_with_the_options_test() {
+  let model =
+    start()
+    |> send([UserPickedDrill(exercise.ReadingTexts), UserStartedRound])
+  let assert [right, ..] = current(model).accepted
+  let model = send(model, [app.UserChoseAnswer(right)])
+  let assert Practising(grade: Some(Correct), ..) = model.screen
+}
+
+pub fn listening_is_hidden_without_speech_test() {
+  let html = element.to_string(app.view(start()))
+  assert !string.contains(html, "Hörförståelse")
+  assert string.contains(html, "Läsförståelse")
+}
+
+pub fn number_keys_pick_options_test() {
+  assert app.choice_shortcut(["Ja", "Nej", "Vet ej"], "3") == Ok("Vet ej")
+  assert app.choice_shortcut(["Ja", "Nej"], "3") == Error(Nil)
+}

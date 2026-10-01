@@ -531,3 +531,50 @@ input:focus-visible {
   text-decoration-thickness: 3px;
   text-underline-offset: 6px;
 }
+
+.text {
+  margin: 0.75rem 0 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.text h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
+
+.text p {
+  margin: 0 0 0.4rem;
+  line-height: 1.6;
+}
+
+.question {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 1rem 0 0.25rem;
+}
+
+.choices:has(button:nth-child(3)) {
+  grid-template-columns: 1fr;
+}
+
+.choices:has(button:nth-child(3)) button {
+  font-size: 1rem;
+  text-align: left;
+}
+
+.text-summary {
+  margin-bottom: 1.5rem;
+}
+
+.text-summary summary {
+  cursor: pointer;
+  color: var(--accent);
+}
+
+.translation p {
+  margin: 0.4rem 0;
+  color: var(--muted);
+}

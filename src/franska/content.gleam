@@ -62,11 +62,18 @@ pub fn themes_for(drill: Drill) -> List(String) {
 
 /// Groups of exercise ids that share a kind and a prompt. Such exercises
 /// cannot both be answered right, since each only accepts its own answers.
-/// Dictation is left out: its stimulus is the audio, the prompt only a hint.
+/// Dictation is left out (its stimulus is the audio, the prompt only a
+/// hint), and so are questions about texts.
 pub fn ambiguous_prompts(entries: List(Entry)) -> List(List(String)) {
   entries
   |> list.flat_map(exercise.from_entry)
-  |> list.filter(fn(e) { e.kind != exercise.Listen })
+  |> list.filter(fn(e) {
+    case e.kind {
+      // Questions about texts are asked in the context of their text.
+      exercise.Listen | exercise.Comprehend(..) -> False
+      _ -> True
+    }
+  })
   |> list.group(fn(e) { #(e.kind, answer.normalise(e.prompt, answer.Swedish)) })
   |> dict.values
   |> list.filter(fn(group) { list.length(group) > 1 })

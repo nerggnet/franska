@@ -4,10 +4,18 @@
 import franska/answer.{type Grade, type Language}
 import franska/lexicon.{
   type AdjectiveForm, type Entry, type Level, type Person, type Tense, Adjective,
-  Expression, Noun, Rewrite, Sentence, Verb,
+  Expression, Noun, Rewrite, Sentence, Text, Verb,
 }
+import gleam/int
 import gleam/list
+import gleam/result
 import gleam/string
+
+/// Whether a text is read or only heard.
+pub type Medium {
+  Reading
+  Hearing
+}
 
 pub type Direction {
   ToFrench
@@ -32,6 +40,9 @@ pub type Kind {
   /// Rewrite a sentence; the prompt is the sentence and `translation` the
   /// Swedish meaning of the answer.
   Transform(task: lexicon.Task, translation: String)
+  /// Answer a question about a text (see `lexicon.Text`); the prompt is the
+  /// question, and the text is looked up through the entry.
+  Comprehend(medium: Medium, options: List(String))
   /// Fill the gap in a sentence. The prompt is the sentence with its gap;
   /// `translation` is the Swedish meaning and `hint` may be "".
   FillGap(hint: String, translation: String)
@@ -49,6 +60,8 @@ pub type Drill {
   Negation
   Pronouns
   Comparisons
+  ReadingTexts
+  ListeningTexts
   Conjugation(Tense)
 }
 
@@ -64,6 +77,8 @@ pub fn drills() -> List(Drill) {
     Negation,
     Pronouns,
     Comparisons,
+    ReadingTexts,
+    ListeningTexts,
     ..list.map(lexicon.tenses, Conjugation)
   ]
 }
@@ -96,6 +111,8 @@ pub fn drill(kind: Kind) -> Drill {
     FillGap(..) -> Sentences
     Agree(_) -> Adjectives
     Compare(..) -> Comparisons
+    Comprehend(medium: Reading, ..) -> ReadingTexts
+    Comprehend(medium: Hearing, ..) -> ListeningTexts
     Transform(task: lexicon.Negate, ..) -> Negation
     Transform(task: lexicon.UsePronoun, ..) -> Pronouns
   }
@@ -130,6 +147,26 @@ pub fn from_entry(entry: Entry) -> List(Exercise) {
         french,
       ),
     ]
+    Text(french:, questions:, ..) -> {
+      use medium <- list.flat_map([Reading, Hearing])
+      use question, index <- list.index_map(questions)
+      let correct =
+        list.drop(question.options, question.answer)
+        |> list.first
+        |> result.unwrap("")
+      exercise(
+        case medium {
+          Reading -> "read:"
+          Hearing -> "listen:"
+        }
+          <> int.to_string(index + 1),
+        Comprehend(medium:, options: question.options),
+        question.question,
+        [correct],
+        answer.Swedish,
+        french,
+      )
+    }
     Rewrite(task:, source:, answers:) -> [
       exercise(
         "rewrite",
@@ -259,7 +296,7 @@ fn word_exercises(
         })
       list.append(list.reverse(exercises), comparisons)
     }
-    Expression(..) | Rewrite(..) | Sentence(..) -> []
+    Expression(..) | Rewrite(..) | Sentence(..) | Text(..) -> []
   }
 
   list.append(translations, extras)

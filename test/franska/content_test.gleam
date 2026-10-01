@@ -145,3 +145,40 @@ pub fn pronoun_sentences_mark_one_part_test() {
     })
   assert bad == []
 }
+
+pub fn text_questions_are_well_formed_test() {
+  let bad =
+    content.entries()
+    |> list.flat_map(fn(e) {
+      case e.word {
+        lexicon.Text(questions:, ..) ->
+          list.filter_map(questions, fn(q) {
+            let options = list.length(q.options)
+            case
+              options >= 2
+              && q.answer >= 0
+              && q.answer < options
+              && list.unique(q.options) == q.options
+            {
+              True -> Error(Nil)
+              False -> Ok(e.id <> ": " <> q.question)
+            }
+          })
+        _ -> []
+      }
+    })
+  assert bad == []
+}
+
+pub fn there_are_texts_at_both_levels_test() {
+  let levels =
+    content.entries()
+    |> list.filter_map(fn(e) {
+      case e.word {
+        lexicon.Text(..) -> Ok(e.level)
+        _ -> Error(Nil)
+      }
+    })
+  assert list.contains(levels, lexicon.A1)
+  assert list.contains(levels, lexicon.A2)
+}
