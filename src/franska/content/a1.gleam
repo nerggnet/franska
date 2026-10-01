@@ -176,6 +176,36 @@ pub fn entries() -> List(Entry) {
       "bu",
       Avoir,
     ),
+    // Adjektiv
+    adjective("grand", "egenskaper", ["stor"], "grand", "grande"),
+    adjective("petit", "egenskaper", ["liten"], "petit", "petite"),
+    adjective("bon", "egenskaper", ["bra", "god"], "bon", "bonne"),
+    adjective("mauvais", "egenskaper", ["dålig"], "mauvais", "mauvaise"),
+    adjective("beau", "egenskaper", ["vacker", "snygg", "fin"], "beau", "belle"),
+    adjective("joli", "egenskaper", ["söt", "fin", "vacker"], "joli", "jolie"),
+    adjective("nouveau", "egenskaper", ["ny"], "nouveau", "nouvelle"),
+    adjective("vieux", "egenskaper", ["gammal"], "vieux", "vieille"),
+    adjective("jeune", "egenskaper", ["ung"], "jeune", "jeune"),
+    adjective("long", "egenskaper", ["lång"], "long", "longue"),
+    adjective("court", "egenskaper", ["kort"], "court", "courte"),
+    adjective("chaud", "egenskaper", ["varm"], "chaud", "chaude"),
+    adjective("froid", "egenskaper", ["kall"], "froid", "froide"),
+    adjective("cher", "egenskaper", ["dyr"], "cher", "chère"),
+    adjective("facile", "egenskaper", ["lätt", "enkel"], "facile", "facile"),
+    adjective("difficile", "egenskaper", ["svår"], "difficile", "difficile"),
+    adjective("content", "egenskaper", ["glad", "nöjd"], "content", "contente"),
+    adjective("fatigue", "egenskaper", ["trött"], "fatigué", "fatiguée"),
+    adjective("gentil", "egenskaper", ["snäll"], "gentil", "gentille"),
+    adjective("rouge", "färger", ["röd"], "rouge", "rouge"),
+    adjective("bleu", "färger", ["blå"], "bleu", "bleue"),
+    adjective("vert", "färger", ["grön"], "vert", "verte"),
+    adjective("jaune", "färger", ["gul"], "jaune", "jaune"),
+    adjective("noir", "färger", ["svart"], "noir", "noire"),
+    adjective("blanc", "färger", ["vit"], "blanc", "blanche"),
+    adjective("gris", "färger", ["grå"], "gris", "grise"),
+    adjective("rose", "färger", ["rosa"], "rose", "rose"),
+    invariable("marron", "färger", ["brun"], "marron"),
+    invariable("orange", "färger", ["orange"], "orange"),
     // Meningar
     sentence(
       "je-suis-suedois",
@@ -325,4 +355,12 @@ fn verb(id, sv, infinitive, forms, participle, auxiliary) -> Entry {
 /// answers for the gap and a hint ("" for none).
 fn sentence(id, sv, text, answers, hint) -> Entry {
   entry(id, "meningar", [sv], Sentence(text:, answers:, hint:))
+}
+
+fn adjective(id, theme, sv, masculine, feminine) -> Entry {
+  entry(id, theme, sv, lexicon.adjective(masculine, feminine))
+}
+
+fn invariable(id, theme, sv, form) -> Entry {
+  entry(id, theme, sv, lexicon.invariable_adjective(form))
 }

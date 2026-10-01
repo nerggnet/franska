@@ -3,8 +3,8 @@
 
 import franska/answer.{type Grade, type Language}
 import franska/lexicon.{
-  type Entry, type Level, type Person, type Tense, Expression, Noun, Sentence,
-  Verb,
+  type AdjectiveForm, type Entry, type Level, type Person, type Tense, Adjective,
+  Expression, Noun, Sentence, Verb,
 }
 import gleam/list
 
@@ -24,6 +24,8 @@ pub type Kind {
   Listen
   /// Write a number in words (see `franska/numbers`).
   WriteNumber(Int)
+  /// Give an adjective in another form; the prompt is the masculine.
+  Agree(AdjectiveForm)
   /// Fill the gap in a sentence. The prompt is the sentence with its gap;
   /// `translation` is the Swedish meaning and `hint` may be "".
   FillGap(hint: String, translation: String)
@@ -37,6 +39,7 @@ pub type Drill {
   Dictation
   Numbers
   Sentences
+  Adjectives
   Conjugation(Tense)
 }
 
@@ -47,6 +50,7 @@ pub fn drills() -> List(Drill) {
     Articles,
     Dictation,
     Numbers,
+    Adjectives,
     Sentences,
     ..list.map(lexicon.tenses, Conjugation)
   ]
@@ -78,6 +82,7 @@ pub fn drill(kind: Kind) -> Drill {
     Listen -> Dictation
     WriteNumber(_) -> Numbers
     FillGap(..) -> Sentences
+    Agree(_) -> Adjectives
   }
 }
 
@@ -122,6 +127,8 @@ fn word_exercises(
 ) -> List(Exercise) {
   let to_french_accepted = case entry.word {
     Expression(fr:) -> fr
+    // Without context either gender is a right translation.
+    Adjective(masculine:, feminine:, ..) -> list.unique([masculine, feminine])
     _ -> [french]
   }
 
@@ -177,6 +184,33 @@ fn word_exercises(
         answer.French,
         lexicon.conjugated(verb, tense, person),
       )
+    }
+    Adjective(masculine:, ..) as adjective -> {
+      // A form that is the same as the masculine or an earlier form is
+      // nothing new to practise (rouge, rouges, rouges).
+      let #(_, exercises) =
+        list.fold(lexicon.adjective_forms, #([masculine], []), fn(acc, form) {
+          let #(seen, exercises) = acc
+          case lexicon.adjective_form(adjective, form) {
+            Ok(agreed) ->
+              case list.contains(seen, agreed) {
+                True -> acc
+                False -> #([agreed, ..seen], [
+                  exercise(
+                    "agree:" <> lexicon.adjective_form_id(form),
+                    Agree(form),
+                    masculine,
+                    [agreed],
+                    answer.French,
+                    agreed,
+                  ),
+                  ..exercises
+                ])
+              }
+            Error(Nil) -> acc
+          }
+        })
+      list.reverse(exercises)
     }
     Expression(..) | Sentence(..) -> []
   }

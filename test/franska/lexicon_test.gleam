@@ -80,3 +80,16 @@ pub fn imparfait_spelling_changes_before_i_test() {
   assert lexicon.conjugated(commencer, lexicon.Imparfait, lexicon.Nous)
     == "nous commencions"
 }
+
+pub fn adjective_plurals_follow_the_usual_rules_test() {
+  assert lexicon.adjective("grand", "grande")
+    == lexicon.Adjective("grand", "grande", "grands", "grandes")
+  assert lexicon.adjective("gris", "grise")
+    == lexicon.Adjective("gris", "grise", "gris", "grises")
+  assert lexicon.adjective("heureux", "heureuse")
+    == lexicon.Adjective("heureux", "heureuse", "heureux", "heureuses")
+  assert lexicon.adjective("beau", "belle")
+    == lexicon.Adjective("beau", "belle", "beaux", "belles")
+  assert lexicon.adjective("normal", "normale")
+    == lexicon.Adjective("normal", "normale", "normaux", "normales")
+}

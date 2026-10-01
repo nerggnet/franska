@@ -4,6 +4,7 @@ import franska/exercise.{
 }
 import franska/lexicon.{A1, Entry, Expression, Feminine, Present, Verb}
 import gleam/list
+import gleam/string
 
 fn maison() {
   Entry(
@@ -185,4 +186,31 @@ pub fn a_sentence_yields_only_a_gap_exercise_test() {
   assert ex.french == "Je suis suédois."
   assert exercise.check(ex, "suis") == Correct
   assert exercise.check(ex, "es") == Wrong("suis")
+}
+
+fn adjective(id: String, word: lexicon.Word) {
+  Entry(id:, level: A1, theme: "egenskaper", sv: ["x"], word:)
+}
+
+pub fn adjectives_practise_the_forms_that_differ_test() {
+  let grand = adjective("grand", lexicon.adjective("grand", "grande"))
+  let ids = exercise.from_entry(grand) |> list.map(fn(e) { e.id })
+  assert list.filter(ids, string.starts_with(_, "grand:agree"))
+    == ["grand:agree:fs", "grand:agree:mp", "grand:agree:fp"]
+  let fp = find(grand, "grand:agree:fp")
+  assert fp.prompt == "grand"
+  assert exercise.check(fp, "grandes") == Correct
+  // rouge is rouge in the feminine, so only the plural is practised.
+  let rouge = adjective("rouge", lexicon.adjective("rouge", "rouge"))
+  assert exercise.from_entry(rouge)
+    |> list.filter(fn(e) { string.starts_with(e.id, "rouge:agree") })
+    |> list.map(fn(e) { e.id })
+    == ["rouge:agree:mp"]
+}
+
+pub fn either_gender_translates_an_adjective_test() {
+  let petit = adjective("petit", lexicon.adjective("petit", "petite"))
+  let ex = find(petit, "petit:to-fr")
+  assert exercise.check(ex, "petit") == Correct
+  assert exercise.check(ex, "petite") == Correct
 }

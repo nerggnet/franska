@@ -45,6 +45,7 @@ noun("maison", "hemmet", "maison", Feminine, ["hus", "hem"]),
 verb("parler", ["tala", "prata"], "parler", #(
   "parle", "parles", "parle", "parlons", "parlez", "parlent",
 ), "parlé", Avoir),
+adjective("grand", "egenskaper", ["stor"], "grand", "grande"),
 phrase("merci", "hälsningar", ["tack"], ["merci"]),
 sentence("je-suis-suedois", "Jag är svensk.", "Je ___ suédois.", ["suis"], "être"),
 ```
@@ -62,6 +63,9 @@ sentence("je-suis-suedois", "Jag är svensk.", "Je ___ suédois.", ["suis"], "ê
 - **Verbs** list their présent forms, then the past participle and the
   auxiliary for the passé composé (`Avoir`, or `Etre` for verbs like
   *aller*, *venir* and *partir*). Other tenses are generated from these.
+- **Adjectives** give the masculine and feminine singular; the plurals
+  follow the usual rules (beau → beaux, gris → gris). Use `invariable` for
+  adjectives like *marron* that never change.
 - **Sentences** have exactly one gap, written `___`, then the answers for
   the gap and a hint shown in brackets (use `""` for none). They only make
   a gap-fill exercise, so keep the Swedish translation natural.

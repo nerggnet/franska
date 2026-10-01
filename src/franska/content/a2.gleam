@@ -292,6 +292,21 @@ pub fn entries() -> List(Entry) {
       "écouté",
       Avoir,
     ),
+    // Adjektiv
+    adjective("heureux", "egenskaper", ["lycklig"], "heureux", "heureuse"),
+    adjective("triste", "egenskaper", ["ledsen"], "triste", "triste"),
+    adjective("important", "egenskaper", ["viktig"], "important", "importante"),
+    adjective("libre", "egenskaper", ["fri", "ledig"], "libre", "libre"),
+    adjective("plein", "egenskaper", ["full"], "plein", "pleine"),
+    adjective("vide", "egenskaper", ["tom"], "vide", "vide"),
+    adjective("rapide", "egenskaper", ["snabb"], "rapide", "rapide"),
+    adjective("lent", "egenskaper", ["långsam"], "lent", "lente"),
+    adjective("propre", "egenskaper", ["ren"], "propre", "propre"),
+    adjective("sale", "egenskaper", ["smutsig"], "sale", "sale"),
+    adjective("fort", "egenskaper", ["stark"], "fort", "forte"),
+    adjective("malade", "egenskaper", ["sjuk"], "malade", "malade"),
+    adjective("pret", "egenskaper", ["redo", "klar"], "prêt", "prête"),
+    adjective("gros", "egenskaper", ["tjock"], "gros", "grosse"),
     // Meningar
     sentence(
       "demain-je-vais-partir",
@@ -441,4 +456,8 @@ fn verb(id, sv, infinitive, forms, participle, auxiliary) -> Entry {
 /// answers for the gap and a hint ("" for none).
 fn sentence(id, sv, text, answers, hint) -> Entry {
   entry(id, "meningar", [sv], Sentence(text:, answers:, hint:))
+}
+
+fn adjective(id, theme, sv, masculine, feminine) -> Entry {
+  entry(id, theme, sv, lexicon.adjective(masculine, feminine))
 }

@@ -62,6 +62,14 @@ pub type Word {
     participle: String,
     auxiliary: Auxiliary,
   )
+  /// The four forms of an adjective. Build with `adjective` or
+  /// `invariable_adjective`.
+  Adjective(
+    masculine: String,
+    feminine: String,
+    masculine_plural: String,
+    feminine_plural: String,
+  )
   /// Any fixed phrase. The first French variant is the canonical one.
   Expression(fr: List(String))
   /// A sentence with one gap, written `___` in `text`. `answers` fill the
@@ -119,12 +127,64 @@ pub fn noun_aspirated_h(fr: String, gender: Gender) -> Word {
   Noun(fr:, gender:, elides: False)
 }
 
+pub type AdjectiveForm {
+  FeminineSingular
+  MasculinePlural
+  FemininePlural
+}
+
+pub const adjective_forms = [FeminineSingular, MasculinePlural, FemininePlural]
+
+/// An adjective from its masculine and feminine singular, with the plurals
+/// by the usual rules: +s, no change after s or x, -eau gives -eaux and
+/// -al gives -aux.
+pub fn adjective(masculine: String, feminine: String) -> Word {
+  let masculine_plural = case
+    string.ends_with(masculine, "s") || string.ends_with(masculine, "x"),
+    string.ends_with(masculine, "eau"),
+    string.ends_with(masculine, "al")
+  {
+    True, _, _ -> masculine
+    _, True, _ -> masculine <> "x"
+    _, _, True -> string.drop_end(masculine, 1) <> "ux"
+    _, _, _ -> masculine <> "s"
+  }
+  let feminine_plural = case string.ends_with(feminine, "s") {
+    True -> feminine
+    False -> feminine <> "s"
+  }
+  Adjective(masculine:, feminine:, masculine_plural:, feminine_plural:)
+}
+
+/// An adjective with one form for everything, like marron and orange.
+pub fn invariable_adjective(form: String) -> Word {
+  Adjective(form, form, form, form)
+}
+
+pub fn adjective_form(word: Word, form: AdjectiveForm) -> Result(String, Nil) {
+  case word, form {
+    Adjective(feminine:, ..), FeminineSingular -> Ok(feminine)
+    Adjective(masculine_plural:, ..), MasculinePlural -> Ok(masculine_plural)
+    Adjective(feminine_plural:, ..), FemininePlural -> Ok(feminine_plural)
+    _, _ -> Error(Nil)
+  }
+}
+
+/// Stable id of an adjective form, part of exercise ids.
+pub fn adjective_form_id(form: AdjectiveForm) -> String {
+  case form {
+    FeminineSingular -> "fs"
+    MasculinePlural -> "mp"
+    FemininePlural -> "fp"
+  }
+}
+
 pub fn definite_article(word: Word) -> Result(String, Nil) {
   case word {
     Noun(elides: True, ..) -> Ok("l'")
     Noun(gender: Masculine, ..) -> Ok("le")
     Noun(gender: Feminine, ..) -> Ok("la")
-    Verb(..) | Expression(..) | Sentence(..) -> Error(Nil)
+    Verb(..) | Adjective(..) | Expression(..) | Sentence(..) -> Error(Nil)
   }
 }
 
@@ -136,6 +196,7 @@ pub fn french(word: Word) -> String {
     Noun(fr:, gender: Masculine, ..) -> "le " <> fr
     Noun(fr:, gender: Feminine, ..) -> "la " <> fr
     Verb(infinitive:, ..) -> infinitive
+    Adjective(masculine:, ..) -> masculine
     Expression(fr: [first, ..]) -> first
     Expression(fr: []) -> ""
     Sentence(text:, answers: [first, ..], ..) ->

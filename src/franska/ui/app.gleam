@@ -6,9 +6,10 @@
 import franska/answer.{type Grade, Almost, Correct, Wrong}
 import franska/content
 import franska/exercise.{
-  type Drill, type Exercise, Articles, ChooseArticle, Conjugate, Conjugation,
-  Dictation, FillGap, Listen, Numbers, Sentences, ToFrench, ToSwedish, Translate,
-  TranslateToFrench, TranslateToSwedish, WriteNumber,
+  type Drill, type Exercise, Adjectives, Agree, Articles, ChooseArticle,
+  Conjugate, Conjugation, Dictation, FillGap, Listen, Numbers, Sentences,
+  ToFrench, ToSwedish, Translate, TranslateToFrench, TranslateToSwedish,
+  WriteNumber,
 }
 import franska/gender
 import franska/lexicon
@@ -432,28 +433,27 @@ fn view_drill_picker(
   stats: progress.Stats,
   streak: Int,
 ) -> Element(Msg) {
+  let group = fn(heading: String, group: DrillGroup) {
+    let drills =
+      list.filter(available_drills(model.env), fn(drill) {
+        drill_group(drill) == group
+      })
+    element.fragment([
+      html.h2([class("subheading")], [html.text(heading)]),
+      html.div(
+        [class("chips")],
+        list.map(drills, fn(drill) {
+          chip(chip_label(drill), drill == model.drill, UserPickedDrill(drill))
+        }),
+      ),
+    ])
+  }
+
   html.section([class("card")], [
     html.h2([], [html.text("Vad vill du öva?")]),
-    html.div(
-      [class("chips")],
-      available_drills(model.env)
-        |> list.filter(fn(drill) { conjugation_tense(drill) == Error(Nil) })
-        |> list.map(fn(drill) {
-          chip(drill_name(drill), drill == model.drill, UserPickedDrill(drill))
-        }),
-    ),
-    html.h2([class("subheading")], [html.text("Böj verb")]),
-    html.div(
-      [class("chips")],
-      list.map(lexicon.tenses, fn(tense) {
-        let drill = Conjugation(tense)
-        chip(
-          string.capitalise(tense_name(tense)),
-          drill == model.drill,
-          UserPickedDrill(drill),
-        )
-      }),
-    ),
+    group("Ord", WordDrills),
+    group("Grammatik", GrammarDrills),
+    group("Böj verb", VerbDrills),
     // A single theme is not worth choosing between.
     case themes {
       [] | [_] -> element.none()
@@ -548,13 +548,31 @@ fn drill_name(drill: Drill) -> String {
     Dictation -> "Diktamen"
     Numbers -> "Tal"
     Sentences -> "Meningar"
+    Adjectives -> "Böj adjektiv"
   }
 }
 
-fn conjugation_tense(drill: Drill) -> Result(lexicon.Tense, Nil) {
+type DrillGroup {
+  WordDrills
+  GrammarDrills
+  VerbDrills
+}
+
+/// Which row of the menu a drill is shown in.
+fn drill_group(drill: Drill) -> DrillGroup {
   case drill {
-    Conjugation(tense) -> Ok(tense)
-    _ -> Error(Nil)
+    TranslateToFrench | TranslateToSwedish | Articles | Dictation | Numbers ->
+      WordDrills
+    Adjectives | Sentences -> GrammarDrills
+    Conjugation(_) -> VerbDrills
+  }
+}
+
+/// A drill's name in the menu, where the row heading gives the context.
+fn chip_label(drill: Drill) -> String {
+  case drill {
+    Conjugation(tense) -> string.capitalise(tense_name(tense))
+    _ -> drill_name(drill)
   }
 }
 
@@ -655,6 +673,7 @@ fn instruction(exercise: Exercise) -> String {
     Listen -> "Skriv det du hör"
     WriteNumber(_) -> "Skriv talet med bokstäver"
     FillGap(..) -> "Fyll i luckan"
+    Agree(_) -> "Böj adjektivet"
   }
 }
 
@@ -694,6 +713,13 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
       ])
     WriteNumber(_) ->
       html.p([class("prompt number")], [html.text(exercise.prompt)])
+    Agree(form) ->
+      html.p([class("prompt"), attribute.lang("fr")], [
+        html.text(exercise.prompt),
+        html.span([class("infinitive")], [
+          html.text(" → " <> adjective_form_name(form)),
+        ]),
+      ])
     FillGap(hint:, translation:) -> {
       let #(before, after) =
         string.split_once(exercise.prompt, lexicon.gap)
@@ -721,6 +747,14 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
           html.text(" (" <> exercise.prompt <> ")"),
         ]),
       ])
+  }
+}
+
+fn adjective_form_name(form: lexicon.AdjectiveForm) -> String {
+  case form {
+    lexicon.FeminineSingular -> "feminin singular"
+    lexicon.MasculinePlural -> "maskulin plural"
+    lexicon.FemininePlural -> "feminin plural"
   }
 }
 

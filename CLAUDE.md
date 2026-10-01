@@ -65,7 +65,8 @@ must work on both targets, has no FFI and never reads the clock.
 
 - `lexicon.gleam`: the content model. An `Entry(id, level, theme, sv, word)`
   holds a `Word`, which is a `Noun` (with gender and elision), a `Verb`
-  (présent forms, participle and auxiliary), an `Expression` or a
+  (présent forms, participle and auxiliary), an `Adjective` (four forms,
+  plurals derived by `lexicon.adjective`), an `Expression` or a
   `Sentence` with one `___` gap. Other tenses are generated from the verb
   data. Build nouns with `lexicon.noun`, which
   works out l' elision; use `noun_aspirated_h` for exceptions.
