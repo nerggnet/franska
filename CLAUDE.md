@@ -23,15 +23,20 @@ gleam format src test           # CI runs `gleam format --check src test`
 
 ## Architecture
 
-The project target is JavaScript. The pure core lives in `src/franska/`: it
-only uses `gleam_stdlib`, must work on both targets, has no FFI and never
-reads the clock.
+The project target is JavaScript. The pure core lives in `src/franska/`
+(everything outside `ui/`): it only uses `gleam_stdlib` and `gleam_json`,
+must work on both targets, has no FFI and never reads the clock.
 
-- `src/franska.gleam`: the Lustre app (model, update, view), the only place
-  with UI state. The menu picks a `Drill` and a theme. Browser FFI (focus,
-  inserting accents at the caret, speech synthesis) is in
-  `src/franska.ffi.mjs`. Give every external a Gleam fallback body so the
-  package still compiles for Erlang.
+- `src/franska.gleam`: `main` only. It loads progress and starts the app
+  with a real `Env` (clock, `list.shuffle`, speech support).
+- `src/franska/ui/app.gleam`: the Lustre app (model, update, view), the only
+  place with UI state. Time and randomness come from `model.env`, never
+  from FFI directly, so `update` is tested in `test/franska/ui/app_test.gleam`
+  with a fixed clock and no shuffling. The menu picks a `Drill` and a theme.
+- `src/franska/ui/browser.gleam` and `browser.ffi.mjs`: all browser access
+  (storage, speech, focus, inserting accents at the caret, the clock). Give
+  every external a Gleam fallback body so the package still compiles for
+  Erlang.
 - `assets/franska.css`: styles, served at `/` by the dev tools. Page config
   (lang, title, stylesheet) is under `[tools.lustre.html]` in `gleam.toml`.
   Keep asset paths relative (`franska.css`, not `/franska.css`), because the
@@ -72,7 +77,9 @@ reads the clock.
 
 - Test UI changes in the browser on the dev server. Synthetic DOM events from
   injected scripts do not reach Lustre's handlers, so drive the app with real
-  clicks and keystrokes, and leave a moment after each screen change.
+  clicks and keystrokes. Hover before clicking after a screen change (a
+  click without a prior mouse move can be ignored), and leave a moment
+  before typing.
 - Entry ids are stored with the learner's progress. Never rename or reuse an
   id once it exists.
 - Add new content as `Entry` values. Never hand-write exercises.
