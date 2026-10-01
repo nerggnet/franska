@@ -10,6 +10,7 @@ import franska/exercise.{
   Dictation, FillGap, Listen, Numbers, Sentences, ToFrench, ToSwedish, Translate,
   TranslateToFrench, TranslateToSwedish, WriteNumber,
 }
+import franska/gender
 import franska/lexicon
 import franska/progress.{type Progress, Progress}
 import franska/session.{type Session}
@@ -757,7 +758,28 @@ fn view_feedback(
       html.span([attribute.lang("fr")], [html.text(exercise.french)]),
       speaker_button(exercise.french, can_speak),
     ]),
+    case gender_hint(exercise, grade) {
+      Some(hint) -> html.p([class("gender-hint")], [html.text(hint)])
+      None -> element.none()
+    },
   ])
+}
+
+/// A rule of thumb for the noun's gender after a le/la exercise, or after
+/// getting the article wrong in a translation.
+fn gender_hint(exercise: Exercise, grade: Grade) -> Option(String) {
+  let relevant = case exercise.kind, grade {
+    ChooseArticle, _ -> True
+    _, Almost(mistake: answer.WrongArticle, ..)
+    | _, Almost(mistake: answer.MissingArticle, ..)
+    -> True
+    _, _ -> False
+  }
+  case relevant, content.entry(exercise.entry_id) {
+    True, Ok(lexicon.Entry(word: lexicon.Noun(fr:, gender:, ..), ..)) ->
+      gender.hint(fr, gender)
+    _, _ -> None
+  }
 }
 
 fn speaker_button(text: String, can_speak: Bool) -> Element(Msg) {

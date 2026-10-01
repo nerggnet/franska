@@ -57,6 +57,9 @@ must work on both targets, has no FFI and never reads the clock.
 - `numbers.gleam`: French number words (traditional spelling, 1990 reform
   also accepted) and the generated `Numbers` drill. Number exercises are
   not entries; `content.exercises` and `content.all_exercises` add them.
+- `gender.gleam`: gender rules of thumb by noun ending (-tion feminine,
+  -age masculine, ...), shown after le/la exercises and article mistakes,
+  including when a noun is an exception.
 - `session.gleam`: one practice round. A wrong answer comes back 3 exercises
   later.
 

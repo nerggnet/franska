@@ -478,3 +478,9 @@ input:focus-visible {
 .sentence .hint {
   margin: 0 0 1.25rem;
 }
+
+.gender-hint {
+  margin: 0.5rem 0 0 !important;
+  font-weight: 400;
+  color: var(--text);
+}

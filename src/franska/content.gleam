@@ -22,6 +22,11 @@ pub fn themes() -> List(String) {
   |> list.unique
 }
 
+/// The entry with the given id.
+pub fn entry(id: String) -> Result(Entry, Nil) {
+  list.find(entries(), fn(entry) { entry.id == id })
+}
+
 /// Every exercise of every drill.
 pub fn all_exercises() -> List(Exercise) {
   list.flat_map(entries(), exercise.from_entry)
