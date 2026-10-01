@@ -2,6 +2,7 @@ import franska/answer.{Correct}
 import franska/content
 import franska/exercise
 import franska/lexicon.{Expression}
+import gleam/dict
 import gleam/list
 import gleam/option
 import gleam/string
@@ -70,4 +71,20 @@ pub fn content_has_both_levels_with_a1_first_test() {
   assert a1 != []
   assert rest != []
   assert list.all(rest, fn(l) { l == lexicon.A2 })
+}
+
+pub fn prompts_are_unambiguous_test() {
+  assert content.ambiguous_prompts(content.entries()) == []
+}
+
+pub fn ambiguous_prompts_are_found_test() {
+  let entry = fn(id, sv, fr) {
+    lexicon.Entry(id:, level: lexicon.A1, theme: "t", sv:, word: Expression(fr))
+  }
+  let entries = [
+    entry("hej", ["hej"], ["salut"]),
+    entry("hej-igen", ["Hej!"], ["coucou"]),
+    entry("tack", ["tack"], ["merci"]),
+  ]
+  assert content.ambiguous_prompts(entries) == [["hej:to-fr", "hej-igen:to-fr"]]
 }

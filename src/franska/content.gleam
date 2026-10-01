@@ -1,9 +1,11 @@
 //// All curated content. Add a new level or content module here.
 
+import franska/answer
 import franska/content/a1
 import franska/content/a2
 import franska/exercise.{type Drill, type Exercise}
 import franska/lexicon.{type Entry}
+import gleam/dict
 import gleam/list
 import gleam/option.{type Option, None, Some}
 
@@ -35,4 +37,15 @@ pub fn exercises(drill: Drill, theme: Option(String)) -> List(Exercise) {
 /// The themes that have at least one exercise for the drill.
 pub fn themes_for(drill: Drill) -> List(String) {
   list.filter(themes(), fn(theme) { exercises(drill, Some(theme)) != [] })
+}
+
+/// Groups of exercise ids that share a kind and a prompt. Such exercises
+/// cannot both be answered right, since each only accepts its own answers.
+pub fn ambiguous_prompts(entries: List(Entry)) -> List(List(String)) {
+  entries
+  |> list.flat_map(exercise.from_entry)
+  |> list.group(fn(e) { #(e.kind, answer.normalise(e.prompt, answer.Swedish)) })
+  |> dict.values
+  |> list.filter(fn(group) { list.length(group) > 1 })
+  |> list.map(fn(group) { list.reverse(list.map(group, fn(e) { e.id })) })
 }
