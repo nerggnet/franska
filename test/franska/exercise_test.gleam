@@ -1,6 +1,6 @@
 import franska/answer.{Almost, Correct, MissingArticle, Wrong}
 import franska/exercise.{
-  ChooseArticle, Conjugate, ToFrench, ToSwedish, Translate,
+  ChooseArticle, Conjugate, Listen, ToFrench, ToSwedish, Translate,
 }
 import franska/lexicon.{A1, Entry, Expression, Feminine, Present, Verb}
 import gleam/list
@@ -34,9 +34,10 @@ fn find(entry, id) {
   found
 }
 
-pub fn noun_yields_translations_and_article_exercise_test() {
+pub fn noun_yields_translations_dictation_and_article_exercise_test() {
   let kinds = exercise.from_entry(maison()) |> list.map(fn(e) { e.kind })
-  assert kinds == [Translate(ToFrench), Translate(ToSwedish), ChooseArticle]
+  assert kinds
+    == [Translate(ToFrench), Translate(ToSwedish), Listen, ChooseArticle]
 }
 
 pub fn noun_to_french_requires_article_test() {
@@ -102,4 +103,11 @@ pub fn drill_matches_kind_test() {
   assert exercise.drill(ChooseArticle) == exercise.Articles
   assert exercise.drill(Conjugate(lexicon.Nous)) == exercise.Conjugation
   assert exercise.drill(Translate(ToSwedish)) == exercise.TranslateToSwedish
+}
+
+pub fn dictation_hints_the_meaning_and_expects_the_french_test() {
+  let ex = find(maison(), "maison:listen")
+  assert ex.prompt == "hus"
+  assert ex.french == "la maison"
+  assert exercise.check(ex, "la maison") == Correct
 }

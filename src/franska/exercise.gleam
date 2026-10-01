@@ -18,6 +18,9 @@ pub type Kind {
   ChooseArticle
   /// Give the présent form of a verb for a person.
   Conjugate(Person)
+  /// Write down French that is read aloud. The prompt is the Swedish
+  /// meaning, shown as a hint since some words sound the same.
+  Listen
 }
 
 /// The kinds of practice a learner can choose between.
@@ -26,9 +29,16 @@ pub type Drill {
   TranslateToSwedish
   Articles
   Conjugation
+  Dictation
 }
 
-pub const drills = [TranslateToFrench, TranslateToSwedish, Articles, Conjugation]
+pub const drills = [
+  TranslateToFrench,
+  TranslateToSwedish,
+  Articles,
+  Conjugation,
+  Dictation,
+]
 
 /// `id` is stable and unique, so it can key the learner's progress.
 /// `prompt` is the bare stimulus; the UI adds instructions per `kind`.
@@ -53,6 +63,7 @@ pub fn drill(kind: Kind) -> Drill {
     Translate(ToSwedish) -> TranslateToSwedish
     ChooseArticle -> Articles
     Conjugate(_) -> Conjugation
+    Listen -> Dictation
   }
 }
 
@@ -94,6 +105,14 @@ pub fn from_entry(entry: Entry) -> List(Exercise) {
       french,
       entry.sv,
       answer.Swedish,
+      french,
+    ),
+    exercise(
+      "listen",
+      Listen,
+      swedish,
+      to_french_accepted,
+      answer.French,
       french,
     ),
   ]

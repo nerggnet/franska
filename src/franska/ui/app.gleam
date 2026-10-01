@@ -7,7 +7,8 @@ import franska/answer.{type Grade, Almost, Correct, Wrong}
 import franska/content
 import franska/exercise.{
   type Drill, type Exercise, Articles, ChooseArticle, Conjugate, Conjugation,
-  ToFrench, ToSwedish, Translate, TranslateToFrench, TranslateToSwedish,
+  Dictation, Listen, ToFrench, ToSwedish, Translate, TranslateToFrench,
+  TranslateToSwedish,
 }
 import franska/lexicon
 import franska/progress.{type Progress, Progress}
@@ -246,8 +247,9 @@ fn update_progress(model: Model, progress: Progress) -> #(Model, Effect(Msg)) {
 
 fn show_exercise(model: Model, session: Session) -> #(Model, Effect(Msg)) {
   let screen = Practising(session:, input: "", grade: None)
-  // A French prompt is read aloud as soon as it is shown.
+  // Dictation is always read out; a French prompt is if read-aloud is on.
   let speech = case session.current(session), model.progress.read_aloud {
+    Ok(exercise), _ if exercise.kind == Listen -> speak_effect(exercise.french)
     Ok(exercise), True if exercise.kind == Translate(ToSwedish) ->
       speak_effect(exercise.french)
     _, _ -> effect.none()
@@ -279,7 +281,7 @@ fn check_answer(
       }
       // Hear the right French after answering, unless it was just read out.
       let speech = case model.progress.read_aloud, exercise.kind {
-        True, Translate(ToSwedish) | False, _ -> effect.none()
+        True, Translate(ToSwedish) | True, Listen | False, _ -> effect.none()
         True, _ -> speak_effect(exercise.french)
       }
       let screen = Practising(session:, input:, grade: Some(grade))
@@ -340,6 +342,7 @@ pub fn view(model: Model) -> Element(Msg) {
       Statistics(confirming_reset:, notice:) ->
         view_statistics(
           model.progress,
+          available_drills(model.env),
           model.env.now(),
           confirming_reset,
           notice,
@@ -405,7 +408,7 @@ fn view_drill_picker(
     html.h2([], [html.text("Vad vill du öva?")]),
     html.div(
       [class("chips")],
-      list.map(exercise.drills, fn(drill) {
+      list.map(available_drills(model.env), fn(drill) {
         chip(drill_name(drill), drill == model.drill, UserPickedDrill(drill))
       }),
     ),
@@ -500,6 +503,15 @@ fn drill_name(drill: Drill) -> String {
     TranslateToSwedish -> "Franska → svenska"
     Articles -> "le eller la?"
     Conjugation -> "Böj verb"
+    Dictation -> "Diktamen"
+  }
+}
+
+/// Dictation needs speech synthesis.
+fn available_drills(env: Env) -> List(Drill) {
+  case env.can_speak {
+    True -> exercise.drills
+    False -> list.filter(exercise.drills, fn(drill) { drill != Dictation })
   }
 }
 
@@ -576,6 +588,7 @@ fn instruction(exercise: Exercise) -> String {
     Translate(ToSwedish) -> "Översätt till svenska"
     ChooseArticle -> "Heter det le eller la?"
     Conjugate(_) -> "Böj verbet i presens"
+    Listen -> "Skriv det du hör"
   }
 }
 
@@ -596,6 +609,22 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
       html.p([class("prompt"), attribute.lang("fr")], [
         html.span([class("blank")], [html.text("___")]),
         html.text(" " <> exercise.prompt),
+      ])
+    Listen ->
+      html.div([class("listen")], [
+        html.button(
+          [
+            class("speaker large"),
+            attribute.type_("button"),
+            attribute.aria_label("Lyssna igen"),
+            attribute.title("Lyssna igen"),
+            event.on_click(UserAskedToHear(exercise.french)),
+          ],
+          [speaker_icon()],
+        ),
+        html.p([class("hint"), attribute.lang("sv")], [
+          html.text("Betyder: " <> exercise.prompt),
+        ]),
       ])
     Conjugate(person) ->
       html.p([class("prompt"), attribute.lang("fr")], [
@@ -749,6 +778,7 @@ fn view_finished(session: Session, reviewing: Bool) -> Element(Msg) {
 
 fn view_statistics(
   progress: Progress,
+  drills: List(Drill),
   now: Int,
   confirming_reset: Bool,
   notice: Option(Notice),
@@ -780,7 +810,7 @@ fn view_statistics(
             column("Inlärda"),
           ]),
         ]),
-        html.tbody([], list.map(exercise.drills, row)),
+        html.tbody([], list.map(drills, row)),
       ]),
     ]),
     html.p([class("hint")], [

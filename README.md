@@ -18,6 +18,7 @@ one theme:
 - Swedish → French and French → Swedish translation
 - le or la? for nouns
 - Verb conjugation in the present tense
+- Dictation: write down French read aloud
 
 It has accent buttons for French answers and reads French aloud with the
 browser's speech synthesis. Spaced repetition decides what each round

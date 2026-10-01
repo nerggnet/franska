@@ -13,6 +13,7 @@ import gleam/dict
 import gleam/list
 import gleam/option.{None, Some}
 import gleam/string
+import lustre/element
 
 const now = 1_000_000
 
@@ -214,4 +215,12 @@ pub fn importing_an_unreadable_file_keeps_progress_test() {
   assert model.progress == before
   assert model.screen
     == Statistics(confirming_reset: False, notice: Some(app.CouldNotImport))
+}
+
+pub fn dictation_is_hidden_without_speech_test() {
+  let model = start()
+  let html = element.to_string(app.view(model))
+  assert !string.contains(html, "Diktamen")
+  let speaking = app.Model(..model, env: Env(..model.env, can_speak: True))
+  assert string.contains(element.to_string(app.view(speaking)), "Diktamen")
 }

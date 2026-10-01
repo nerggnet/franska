@@ -441,3 +441,26 @@ input:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+.listen {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.75rem 0 1.25rem;
+}
+
+.listen .hint {
+  margin: 0;
+}
+
+.speaker.large {
+  width: 3.5rem;
+  height: 3.5rem;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.speaker.large svg {
+  width: 28px;
+  height: 28px;
+}
