@@ -39,9 +39,14 @@ pub fn interval(box: Int) -> Int {
   }
 }
 
+/// Records a review. Answering right before a card is due does not move it
+/// up, so practising ahead never skips the spacing; a wrong answer always
+/// counts.
 pub fn review(state: CardState, grade: Grade, now: Int) -> CardState {
   let reviews = state.reviews + 1
+  let early = state.box > 0 && now < state.due
   case grade {
+    Correct | Almost(..) if early -> CardState(..state, reviews:)
     Correct -> {
       let box = int.min(state.box + 1, max_box)
       CardState(..state, box:, due: now + interval(box), reviews:)

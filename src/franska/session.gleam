@@ -46,6 +46,13 @@ pub fn record(session: Session, grade: Grade) -> Session {
   }
 }
 
+/// True until the exercise has been answered once in this round. Only first
+/// attempts count towards spaced repetition, since a retry comes right after
+/// seeing the answer.
+pub fn is_first_attempt(session: Session, exercise: Exercise) -> Bool {
+  !list.any(session.answers, fn(answer) { { answer.0 }.id == exercise.id })
+}
+
 /// Counts every answer given, including retries.
 pub fn summary(session: Session) -> Summary {
   list.fold(session.answers, Summary(0, 0, 0), fn(summary, answer) {

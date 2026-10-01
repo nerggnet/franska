@@ -52,3 +52,14 @@ pub fn due_lists_most_overdue_first_test() {
     ])
   assert srs.due(cards, now) == ["c", "a"]
 }
+
+pub fn early_correct_review_does_not_promote_test() {
+  let state = CardState(box: 2, due: now + day, reviews: 3, lapses: 0)
+  assert srs.review(state, Correct, now)
+    == CardState(box: 2, due: now + day, reviews: 4, lapses: 0)
+}
+
+pub fn early_wrong_review_still_demotes_test() {
+  let state = CardState(box: 4, due: now + day, reviews: 3, lapses: 0)
+  assert srs.review(state, Wrong("x"), now).box == 1
+}

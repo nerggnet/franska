@@ -34,3 +34,31 @@ export function speak(text) {
   utterance.rate = 0.9;
   synth.speak(utterance);
 }
+
+/// Returns the stored string, or "" if there is none or storage is blocked.
+export function load(key) {
+  try {
+    return window.localStorage.getItem(key) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+export function save(key, value) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // Storage can be full or blocked (private mode); progress is then kept
+    // for this visit only.
+  }
+}
+
+export function now_seconds() {
+  return Math.floor(Date.now() / 1000);
+}
+
+/// Days since 1970-01-01 in the browser's time zone.
+export function local_day() {
+  const now = new Date();
+  return Math.floor((now.getTime() - now.getTimezoneOffset() * 60_000) / 86_400_000);
+}

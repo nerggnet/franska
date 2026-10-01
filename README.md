@@ -19,7 +19,10 @@ exercises from 67 A1 entries, optionally limited to one theme:
 - Verb conjugation in the present tense
 
 It has accent buttons for French answers and reads French aloud with the
-browser's speech synthesis. Progress is not saved yet.
+browser's speech synthesis. Spaced repetition decides what each round
+contains, so due reviews come first and then new words. Progress, a
+statistics page and the practice streak are saved in the browser's local
+storage. Nothing leaves your device.
 
 Every push to `main` deploys to GitHub Pages
 (`.github/workflows/pages.yml`).
@@ -32,6 +35,11 @@ gleam test                      # JavaScript target (the default)
 gleam test --target erlang      # the core must work on Erlang too
 gleam format src test
 ```
+
+## Contributing
+
+Corrections to the vocabulary are especially welcome. See
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Licence
 

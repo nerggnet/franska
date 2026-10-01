@@ -103,7 +103,8 @@ body {
 }
 
 button.primary,
-button.secondary {
+button.secondary,
+button.danger {
   font: inherit;
   font-weight: 600;
   padding: 0.65rem 1.25rem;
@@ -120,6 +121,12 @@ button.primary {
 button.secondary {
   background: transparent;
   color: var(--accent);
+}
+
+button.danger {
+  background: transparent;
+  border-color: var(--wrong);
+  color: var(--wrong);
 }
 
 button.link {
@@ -349,4 +356,43 @@ input:focus-visible {
 .prompt-row .speaker {
   color: var(--accent);
   border-color: var(--border);
+}
+
+.streak {
+  margin: 1.25rem 0 0;
+  color: var(--muted);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-table th,
+.stats-table td {
+  padding: 0.5rem 0.4rem;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+}
+
+.stats-table th[scope="row"] {
+  text-align: left;
+  font-weight: 500;
+}
+
+.stats-table th[scope="col"] {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.confirm p {
+  margin: 0 0 0.75rem;
+  font-weight: 500;
+  color: var(--wrong);
 }

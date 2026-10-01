@@ -1,0 +1,188 @@
+//// The learner's saved state: spaced-repetition cards, settings and the
+//// practice streak, plus how it is stored as JSON and used to plan rounds.
+
+import franska/answer.{type Grade}
+import franska/exercise.{type Exercise}
+import franska/srs.{type CardState, CardState}
+import gleam/dict.{type Dict}
+import gleam/dynamic/decode.{type Decoder}
+import gleam/int
+import gleam/json
+import gleam/list
+import gleam/result
+
+/// Bump when the stored format changes incompatibly.
+const version = 1
+
+/// Cards in this box or higher count as learned (next review in 7+ days).
+pub const learned_box = 3
+
+pub type Progress {
+  Progress(cards: Dict(String, CardState), read_aloud: Bool, streak: Streak)
+}
+
+/// `last_day` is the last local day number (days since 1970-01-01) with
+/// practice, `days` the number of consecutive days up to it.
+pub type Streak {
+  Streak(last_day: Int, days: Int)
+}
+
+pub type Stats {
+  Stats(new: Int, due: Int, learning: Int, learned: Int)
+}
+
+pub fn new() -> Progress {
+  Progress(cards: dict.new(), read_aloud: True, streak: Streak(-1, 0))
+}
+
+/// Records the first answer to an exercise in a round.
+pub fn record(
+  progress: Progress,
+  exercise_id: String,
+  grade: Grade,
+  now now: Int,
+  today today: Int,
+) -> Progress {
+  let card =
+    dict.get(progress.cards, exercise_id)
+    |> result.unwrap(srs.new(now))
+    |> srs.review(grade, now)
+  Progress(
+    ..progress,
+    cards: dict.insert(progress.cards, exercise_id, card),
+    streak: extend_streak(progress.streak, today),
+  )
+}
+
+fn extend_streak(streak: Streak, today: Int) -> Streak {
+  case today - streak.last_day {
+    0 -> streak
+    1 -> Streak(last_day: today, days: streak.days + 1)
+    _ -> Streak(last_day: today, days: 1)
+  }
+}
+
+/// Consecutive practice days, still counting today if the learner practised
+/// yesterday but not yet today.
+pub fn streak_days(progress: Progress, today: Int) -> Int {
+  case today - progress.streak.last_day {
+    0 | 1 -> progress.streak.days
+    _ -> 0
+  }
+}
+
+/// Picks up to `size` exercises: due ones first, most overdue first, then
+/// new ones in the given order. If that is not enough, the rest are the
+/// ones due soonest, which can be practised ahead without being promoted.
+pub fn plan_round(
+  progress: Progress,
+  exercises: List(Exercise),
+  now now: Int,
+  size size: Int,
+) -> List(Exercise) {
+  let #(seen, new) =
+    list.partition(exercises, fn(e) { dict.has_key(progress.cards, e.id) })
+  let by_due =
+    seen
+    |> list.map(fn(e) {
+      let assert Ok(card) = dict.get(progress.cards, e.id)
+      #(e, card)
+    })
+    |> list.sort(fn(a, b) { int.compare({ a.1 }.due, { b.1 }.due) })
+  let #(due, later) =
+    list.partition(by_due, fn(pair) { srs.is_due(pair.1, now) })
+
+  list.flatten([
+    list.map(due, fn(p) { p.0 }),
+    new,
+    list.map(later, fn(p) { p.0 }),
+  ])
+  |> list.take(size)
+}
+
+pub fn stats(
+  progress: Progress,
+  exercises: List(Exercise),
+  now now: Int,
+) -> Stats {
+  list.fold(exercises, Stats(0, 0, 0, 0), fn(stats, exercise) {
+    case dict.get(progress.cards, exercise.id) {
+      Error(Nil) -> Stats(..stats, new: stats.new + 1)
+      Ok(card) ->
+        case srs.is_due(card, now), card.box >= learned_box {
+          True, _ -> Stats(..stats, due: stats.due + 1)
+          False, True -> Stats(..stats, learned: stats.learned + 1)
+          False, False -> Stats(..stats, learning: stats.learning + 1)
+        }
+    }
+  })
+}
+
+// JSON ------------------------------------------------------------------------
+
+pub fn to_json(progress: Progress) -> String {
+  json.object([
+    #("version", json.int(version)),
+    #("read_aloud", json.bool(progress.read_aloud)),
+    #(
+      "streak",
+      json.object([
+        #("last_day", json.int(progress.streak.last_day)),
+        #("days", json.int(progress.streak.days)),
+      ]),
+    ),
+    #(
+      "cards",
+      json.dict(progress.cards, fn(id) { id }, fn(card) {
+        json.object([
+          #("box", json.int(card.box)),
+          #("due", json.int(card.due)),
+          #("reviews", json.int(card.reviews)),
+          #("lapses", json.int(card.lapses)),
+        ])
+      }),
+    ),
+  ])
+  |> json.to_string
+}
+
+/// Fails on anything that is not progress in the current format.
+pub fn from_json(text: String) -> Result(Progress, Nil) {
+  json.parse(text, progress_decoder())
+  |> result.replace_error(Nil)
+}
+
+fn progress_decoder() -> Decoder(Progress) {
+  use stored_version <- decode.field("version", decode.int)
+  case stored_version == version {
+    False ->
+      decode.failure(new(), "progress version " <> int.to_string(version))
+    True -> {
+      use read_aloud <- decode.optional_field("read_aloud", True, decode.bool)
+      use streak <- decode.optional_field(
+        "streak",
+        Streak(-1, 0),
+        streak_decoder(),
+      )
+      use cards <- decode.field(
+        "cards",
+        decode.dict(decode.string, card_decoder()),
+      )
+      decode.success(Progress(cards:, read_aloud:, streak:))
+    }
+  }
+}
+
+fn streak_decoder() -> Decoder(Streak) {
+  use last_day <- decode.field("last_day", decode.int)
+  use days <- decode.field("days", decode.int)
+  decode.success(Streak(last_day:, days:))
+}
+
+fn card_decoder() -> Decoder(CardState) {
+  use box <- decode.field("box", decode.int)
+  use due <- decode.field("due", decode.int)
+  use reviews <- decode.field("reviews", decode.int)
+  use lapses <- decode.field("lapses", decode.int)
+  decode.success(CardState(box:, due:, reviews:, lapses:))
+}

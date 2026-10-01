@@ -8,10 +8,12 @@ import franska/exercise.{
   ToFrench, ToSwedish, Translate, TranslateToFrench, TranslateToSwedish,
 }
 import franska/lexicon
+import franska/progress.{type Progress, Progress}
 import franska/session.{type Session}
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
+import gleam/result
 import gleam/string
 import lustre
 import lustre/attribute.{attribute, class}
@@ -25,31 +27,37 @@ const round_size = 10
 
 const answer_input_id = "answer"
 
+const storage_key = "franska:progress"
+
 const accents = ["é", "è", "ê", "ë", "à", "â", "ç", "î", "ï", "ô", "ù", "û", "œ"]
 
 pub fn main() -> Nil {
+  // Unreadable or outdated progress starts over rather than breaking the app.
+  let progress =
+    progress.from_json(load(storage_key))
+    |> result.unwrap(progress.new())
   let app = lustre.application(init, update, view)
-  let assert Ok(_) = lustre.start(app, "#app", Nil)
+  let assert Ok(_) = lustre.start(app, "#app", progress)
   Nil
 }
 
 // MODEL -----------------------------------------------------------------------
 
-/// `theme` is the chosen theme, or `None` for all themes. `read_aloud` says
-/// whether French is spoken automatically.
+/// `theme` is the chosen theme, or `None` for all themes.
 pub type Model {
-  Model(drill: Drill, theme: Option(String), read_aloud: Bool, screen: Screen)
+  Model(drill: Drill, theme: Option(String), progress: Progress, screen: Screen)
 }
 
 pub type Screen {
   Menu
   Practising(session: Session, input: String, grade: Option(Grade))
   Finished(session: Session)
+  Statistics(confirming_reset: Bool)
 }
 
-fn init(_: Nil) -> #(Model, Effect(Msg)) {
+fn init(progress: Progress) -> #(Model, Effect(Msg)) {
   #(
-    Model(drill: TranslateToFrench, theme: None, read_aloud: True, screen: Menu),
+    Model(drill: TranslateToFrench, theme: None, progress:, screen: Menu),
     effect.none(),
   )
 }
@@ -67,6 +75,10 @@ pub type Msg {
   UserSubmittedAnswer
   UserAskedToHear(String)
   UserQuitRound
+  UserOpenedStatistics
+  UserAskedToReset
+  UserConfirmedReset
+  UserCancelledReset
 }
 
 fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
@@ -86,16 +98,17 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
 
     Menu, UserPickedTheme(theme) -> #(Model(..model, theme:), effect.none())
 
-    Menu, UserToggledReadAloud(read_aloud) -> #(
-      Model(..model, read_aloud:),
-      effect.none(),
-    )
+    Menu, UserToggledReadAloud(read_aloud) ->
+      update_progress(model, Progress(..model.progress, read_aloud:))
 
     Menu, UserStartedRound | Finished(..), UserStartedRound -> {
+      // Shuffle first so new exercises come in random order, and again so
+      // the round does not start with all the reviews.
       let session =
         content.exercises(model.drill, model.theme)
         |> list.shuffle
-        |> list.take(round_size)
+        |> progress.plan_round(model.progress, _, now: now(), size: round_size)
+        |> list.shuffle
         |> session.new
       show_exercise(model, session)
     }
@@ -126,19 +139,46 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
 
     Practising(..), UserAskedToHear(text) -> #(model, speak_effect(text))
 
-    Practising(..), UserQuitRound | Finished(..), UserQuitRound -> #(
-      Model(..model, screen: Menu),
+    Practising(..), UserQuitRound
+    | Finished(..), UserQuitRound
+    | Statistics(..), UserQuitRound
+    -> #(Model(..model, screen: Menu), effect.none())
+
+    Menu, UserOpenedStatistics -> #(
+      Model(..model, screen: Statistics(confirming_reset: False)),
       effect.none(),
     )
+
+    Statistics(..), UserAskedToReset -> #(
+      Model(..model, screen: Statistics(confirming_reset: True)),
+      effect.none(),
+    )
+
+    Statistics(..), UserCancelledReset -> #(
+      Model(..model, screen: Statistics(confirming_reset: False)),
+      effect.none(),
+    )
+
+    Statistics(confirming_reset: True), UserConfirmedReset -> {
+      // Only learning progress is reset; the read-aloud setting stays.
+      let fresh =
+        Progress(..progress.new(), read_aloud: model.progress.read_aloud)
+      let #(model, save) = update_progress(model, fresh)
+      #(Model(..model, screen: Statistics(confirming_reset: False)), save)
+    }
 
     _, _ -> #(model, effect.none())
   }
 }
 
+fn update_progress(model: Model, progress: Progress) -> #(Model, Effect(Msg)) {
+  #(Model(..model, progress:), save_effect(progress))
+}
+
 fn show_exercise(model: Model, session: Session) -> #(Model, Effect(Msg)) {
   let screen = Practising(session:, input: "", grade: None)
   // A French prompt is read aloud as soon as it is shown.
-  let speech = case session.current(session), model.read_aloud {
+  let speech = case session.current(session), model.progress.read_aloud {
     Ok(exercise), True if exercise.kind == Translate(ToSwedish) ->
       speak_effect(exercise.french)
     _, _ -> effect.none()
@@ -155,13 +195,21 @@ fn check_answer(
     _, "" | Error(Nil), _ -> #(model, focus_answer())
     Ok(exercise), _ -> {
       let grade = exercise.check(exercise, input)
-      let screen = Practising(session:, input:, grade: Some(grade))
+      // Only first attempts count: a retry comes right after the answer.
+      let #(model, save) = case session.is_first_attempt(session, exercise) {
+        True ->
+          model.progress
+          |> progress.record(exercise.id, grade, now: now(), today: local_day())
+          |> update_progress(model, _)
+        False -> #(model, effect.none())
+      }
       // Hear the right French after answering, unless it was just read out.
-      let speech = case model.read_aloud, exercise.kind {
+      let speech = case model.progress.read_aloud, exercise.kind {
         True, Translate(ToSwedish) | False, _ -> effect.none()
         True, _ -> speak_effect(exercise.french)
       }
-      #(Model(..model, screen:), effect.batch([focus_answer(), speech]))
+      let screen = Practising(session:, input:, grade: Some(grade))
+      #(Model(..model, screen:), effect.batch([focus_answer(), speech, save]))
     }
   }
 }
@@ -174,6 +222,11 @@ fn focus_answer() -> Effect(Msg) {
 fn insert_accent(accent: String) -> Effect(Msg) {
   use dispatch <- effect.from
   dispatch(UserTypedAnswer(insert_at_cursor(answer_input_id, accent)))
+}
+
+fn save_effect(progress: Progress) -> Effect(Msg) {
+  use _ <- effect.from
+  save(storage_key, progress.to_json(progress))
 }
 
 fn speak_effect(text: String) -> Effect(Msg) {
@@ -201,6 +254,26 @@ fn speak(_text: String) -> Nil {
   Nil
 }
 
+@external(javascript, "./franska.ffi.mjs", "load")
+fn load(_key: String) -> String {
+  ""
+}
+
+@external(javascript, "./franska.ffi.mjs", "save")
+fn save(_key: String, _value: String) -> Nil {
+  Nil
+}
+
+@external(javascript, "./franska.ffi.mjs", "now_seconds")
+fn now() -> Int {
+  0
+}
+
+@external(javascript, "./franska.ffi.mjs", "local_day")
+fn local_day() -> Int {
+  0
+}
+
 // VIEW ------------------------------------------------------------------------
 
 fn view(model: Model) -> Element(Msg) {
@@ -217,13 +290,21 @@ fn view(model: Model) -> Element(Msg) {
           Error(Nil) -> element.none()
         }
       Finished(session:) -> view_finished(session)
+      Statistics(confirming_reset:) ->
+        view_statistics(model.progress, confirming_reset)
     },
   ])
 }
 
 fn view_menu(model: Model) -> Element(Msg) {
   let themes = content.themes_for(model.drill)
-  let available = list.length(content.exercises(model.drill, model.theme))
+  let stats =
+    progress.stats(
+      model.progress,
+      content.exercises(model.drill, model.theme),
+      now: now(),
+    )
+  let streak = progress.streak_days(model.progress, local_day())
 
   html.section([class("card")], [
     html.h2([], [html.text("Vad vill du öva?")]),
@@ -256,24 +337,51 @@ fn view_menu(model: Model) -> Element(Msg) {
         html.label([class("toggle")], [
           html.input([
             attribute.type_("checkbox"),
-            attribute.checked(model.read_aloud),
+            attribute.checked(model.progress.read_aloud),
             event.on_check(UserToggledReadAloud),
           ]),
           html.text("Läs upp franskan"),
         ])
       False -> element.none()
     },
-    html.p([class("hint")], [
-      html.text(
-        "En runda har "
-        <> int.to_string(int.min(round_size, available))
-        <> " övningar.",
-      ),
+    html.p([class("hint")], [html.text(round_hint(stats))]),
+    html.div([class("actions")], [
+      html.button([class("primary"), event.on_click(UserStartedRound)], [
+        html.text("Börja öva"),
+      ]),
+      html.button([class("secondary"), event.on_click(UserOpenedStatistics)], [
+        html.text("Statistik"),
+      ]),
     ]),
-    html.button([class("primary"), event.on_click(UserStartedRound)], [
-      html.text("Börja öva"),
-    ]),
+    case streak {
+      0 -> element.none()
+      days ->
+        html.p([class("streak")], [
+          html.text("Du har övat " <> plural(days, "dag", "dagar") <> " i rad."),
+        ])
+    },
   ])
+}
+
+fn round_hint(stats: progress.Stats) -> String {
+  case stats.due, stats.new {
+    0, 0 -> "Allt är repeterat! Du kan öva i förväg."
+    due, 0 -> plural(due, "övning", "övningar") <> " att repetera."
+    0, new -> plural(new, "ny övning", "nya övningar") <> "."
+    due, new ->
+      plural(due, "övning", "övningar")
+      <> " att repetera och "
+      <> plural(new, "ny", "nya")
+      <> "."
+  }
+}
+
+fn plural(count: Int, one: String, many: String) -> String {
+  let word = case count {
+    1 -> one
+    _ -> many
+  }
+  int.to_string(count) <> " " <> word
 }
 
 fn chip(label: String, pressed: Bool, msg: Msg) -> Element(Msg) {
@@ -529,5 +637,71 @@ fn view_finished(session: Session) -> Element(Msg) {
         html.text("Till menyn"),
       ]),
     ]),
+  ])
+}
+
+fn view_statistics(progress: Progress, confirming_reset: Bool) -> Element(Msg) {
+  let now = now()
+  let row = fn(drill: Drill) {
+    let stats = progress.stats(progress, content.exercises(drill, None), now:)
+    html.tr([], [
+      html.th([attribute("scope", "row")], [html.text(drill_name(drill))]),
+      html.td([], [html.text(int.to_string(stats.new))]),
+      html.td([], [html.text(int.to_string(stats.due))]),
+      html.td([], [html.text(int.to_string(stats.learning))]),
+      html.td([], [html.text(int.to_string(stats.learned))]),
+    ])
+  }
+  let column = fn(label: String) {
+    html.th([attribute("scope", "col")], [html.text(label)])
+  }
+
+  html.section([class("card")], [
+    html.h2([], [html.text("Statistik")]),
+    html.div([class("table-wrap")], [
+      html.table([class("stats-table")], [
+        html.thead([], [
+          html.tr([], [
+            html.td([], []),
+            column("Nya"),
+            column("Repetera"),
+            column("Pågår"),
+            column("Inlärda"),
+          ]),
+        ]),
+        html.tbody([], list.map(exercise.drills, row)),
+      ]),
+    ]),
+    html.p([class("hint")], [
+      html.text(
+        "En övning räknas som inlärd när nästa repetition är minst en vecka bort.",
+      ),
+    ]),
+    case confirming_reset {
+      False ->
+        html.div([class("actions")], [
+          html.button([class("primary"), event.on_click(UserQuitRound)], [
+            html.text("Tillbaka"),
+          ]),
+          html.button([class("danger"), event.on_click(UserAskedToReset)], [
+            html.text("Nollställ framsteg"),
+          ]),
+        ])
+      True ->
+        html.div([class("confirm"), attribute.role("alert")], [
+          html.p([], [
+            html.text("Vill du radera alla framsteg? Det går inte att ångra."),
+          ]),
+          html.div([class("actions")], [
+            html.button([class("danger"), event.on_click(UserConfirmedReset)], [
+              html.text("Ja, radera"),
+            ]),
+            html.button(
+              [class("secondary"), event.on_click(UserCancelledReset)],
+              [html.text("Avbryt")],
+            ),
+          ]),
+        ])
+    },
   ])
 }

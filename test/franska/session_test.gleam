@@ -56,3 +56,11 @@ pub fn summary_counts_every_answer_test() {
     |> session.record(Almost("a", MissingAccents))
   assert session.summary(s) == Summary(correct: 1, almost: 1, wrong: 1)
 }
+
+pub fn only_the_first_answer_is_a_first_attempt_test() {
+  let s = session.new([exercise("a"), exercise("b")])
+  assert session.is_first_attempt(s, exercise("a"))
+  let s = session.record(s, Wrong("a"))
+  assert !session.is_first_attempt(s, exercise("a"))
+  assert session.is_first_attempt(s, exercise("b"))
+}

@@ -6,8 +6,8 @@ Guidance for Claude Code when working in this repository.
 
 `franska` is a web tool for a Swedish speaker (the author) to practise French
 at CEFR A1/A2 level. The content is curated by hand but must be easy to
-extend. It is single-user: progress will live in the browser, and there is
-no backend.
+extend. It is single-user: progress lives in the browser's localStorage,
+and there is no backend. The repo is public (see CONTRIBUTING.md).
 
 The user interface and all learner-facing text are in **Swedish**. Code,
 identifiers and comments are in English.
@@ -57,7 +57,14 @@ reads the clock.
   `Almost(expected, mistake)` or `Wrong(expected)`; `explain` gives Swedish
   feedback. Swedish å/ä/ö are letters, not accents, so they are never folded.
 - `srs.gleam`: Leitner spaced repetition with 6 boxes. Times are Unix
-  seconds passed in by the caller.
+  seconds passed in by the caller. A correct answer before a card is due
+  does not promote it.
+- `progress.gleam`: the saved state (cards by exercise id, read-aloud
+  setting, streak), its JSON format, `plan_round` (due first, then new,
+  then due soonest) and `stats`. The app stores it under the
+  localStorage key `franska:progress`. Bump `version` when the format
+  changes incompatibly; unreadable data falls back to a fresh start.
+  Only the first attempt at an exercise in a round is recorded.
 
 ## Conventions
 
@@ -78,4 +85,7 @@ reads the clock.
 2. ~~Lustre app with Swedish→French translation and about 50 A1 entries~~
 3. ~~le/la and conjugation drills, accent buttons, text-to-speech~~
    ~~(Web Speech API, fr-FR), deploy to GitHub Pages~~
-4. Progress in `localStorage`, plus a stats view
+4. ~~Progress in `localStorage`, spaced repetition picks rounds, stats view~~
+
+Ideas for later: A2 content, passé composé and other tenses, mixed-drill
+rounds, export/import of progress.
