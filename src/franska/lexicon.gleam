@@ -418,13 +418,17 @@ fn future_stems(infinitive: String, present: Present) -> List(String) {
       case string.ends_with(infinitive, "er") {
         True -> {
           let from_je = present.je <> "r"
-          case
-            from_je != infinitive
-            && string.contains(present.je, "è")
-            && string.contains(infinitive, "é")
-          {
-            True -> [infinitive, from_je]
-            False -> [from_je]
+          let reformed_e =
+            string.contains(present.je, "è") && string.contains(infinitive, "é")
+          case from_je != infinitive, reformed_e {
+            True, True -> [infinitive, from_je]
+            // -ayer verbs have both spellings: essaierai and essayerai.
+            True, False ->
+              case string.ends_with(infinitive, "ayer") {
+                True -> [from_je, infinitive]
+                False -> [from_je]
+              }
+            False, _ -> [from_je]
           }
         }
         False ->
@@ -449,6 +453,10 @@ fn irregular_future_stem(infinitive: String) -> Result(String, Nil) {
     "savoir" -> Ok("saur")
     "devoir" -> Ok("devr")
     "courir" -> Ok("courr")
+    "envoyer" -> Ok("enverr")
+    "devenir" -> Ok("deviendr")
+    "revenir" -> Ok("reviendr")
+    "recevoir" -> Ok("recevr")
     _ -> Error(Nil)
   }
 }

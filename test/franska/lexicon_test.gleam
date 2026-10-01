@@ -382,3 +382,14 @@ pub fn conditionnel_of_reflexive_verbs_test() {
   assert lexicon.conjugated(lever, lexicon.Conditionnel, lexicon.Tu)
     == "tu te lèverais"
 }
+
+pub fn ayer_verbs_accept_both_future_spellings_test() {
+  let essayer =
+    verb("essayer", [
+      "essaie", "essaies", "essaie", "essayons", "essayez", "essaient",
+    ])
+  let answers =
+    lexicon.conjugation_answers(essayer, lexicon.FuturSimple, lexicon.Je)
+  assert list.contains(answers, "j'essaierai")
+  assert list.contains(answers, "j'essayerai")
+}
