@@ -66,7 +66,11 @@ sentence("je-suis-suedois", "Jag är svensk.", "Je ___ suédois.", ["suis"], "ê
 - **Adjectives** give the masculine and feminine singular; the plurals
   follow the usual rules (beau → beaux, gris → gris). Use `invariable` for
   adjectives like *marron* that never change.
-- **Sentences** have exactly one gap, written `___`, then the answers for
+- **Reflexive verbs** use `reflexive(...)` with the verb without its
+  pronoun (`"lever"` for *se lever*); they take être in the passé composé.
+- **Negation exercises** use `negate(id, swedish, sentence, answers)` with
+  the negative sentence as the answer.
+- **Sentences** take a theme (such as `"partitiv"`) and have exactly one gap, written `___`, then the answers for
   the gap and a hint shown in brackets (use `""` for none). They only make
   a gap-fill exercise, so keep the Swedish translation natural.
 - **Spell French correctly,** with accents and the œ ligature. The grading

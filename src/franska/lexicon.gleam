@@ -55,12 +55,14 @@ pub type Word {
   /// article becomes l' ("l'école", "l'homme").
   Noun(fr: String, gender: Gender, elides: Bool)
   /// `participle` and `auxiliary` form the passé composé ("parlé" with
-  /// avoir, "allé" with être).
+  /// avoir, "allé" with être). A `reflexive` verb ("se lever") is given
+  /// without its pronoun; it always takes être in the passé composé.
   Verb(
     infinitive: String,
     present: Present,
     participle: String,
     auxiliary: Auxiliary,
+    reflexive: Bool,
   )
   /// The four forms of an adjective. Build with `adjective` or
   /// `invariable_adjective`.
@@ -72,6 +74,9 @@ pub type Word {
   )
   /// Any fixed phrase. The first French variant is the canonical one.
   Expression(fr: List(String))
+  /// A sentence to rewrite as `task` says; `answers` are the rewritten
+  /// sentence, canonical first.
+  Rewrite(task: Task, source: String, answers: List(String))
   /// A sentence with one gap, written `___` in `text`. `answers` fill the
   /// gap, canonical first; `hint` (such as the verb's infinitive) may be "".
   Sentence(text: String, answers: List(String), hint: String)
@@ -125,6 +130,11 @@ pub fn noun(fr: String, gender: Gender) -> Word {
 
 pub fn noun_aspirated_h(fr: String, gender: Gender) -> Word {
   Noun(fr:, gender:, elides: False)
+}
+
+pub type Task {
+  /// Make the sentence negative.
+  Negate
 }
 
 pub type AdjectiveForm {
@@ -184,7 +194,8 @@ pub fn definite_article(word: Word) -> Result(String, Nil) {
     Noun(elides: True, ..) -> Ok("l'")
     Noun(gender: Masculine, ..) -> Ok("le")
     Noun(gender: Feminine, ..) -> Ok("la")
-    Verb(..) | Adjective(..) | Expression(..) | Sentence(..) -> Error(Nil)
+    Verb(..) | Adjective(..) | Expression(..) | Rewrite(..) | Sentence(..) ->
+      Error(Nil)
   }
 }
 
@@ -195,13 +206,16 @@ pub fn french(word: Word) -> String {
     Noun(fr:, elides: True, ..) -> "l'" <> fr
     Noun(fr:, gender: Masculine, ..) -> "le " <> fr
     Noun(fr:, gender: Feminine, ..) -> "la " <> fr
-    Verb(infinitive:, ..) -> infinitive
+    Verb(infinitive:, reflexive: False, ..) -> infinitive
+    Verb(infinitive:, reflexive: True, ..) -> elide("se", infinitive)
     Adjective(masculine:, ..) -> masculine
     Expression(fr: [first, ..]) -> first
     Expression(fr: []) -> ""
     Sentence(text:, answers: [first, ..], ..) ->
       string.replace(text, gap, first)
     Sentence(text:, answers: [], ..) -> text
+    Rewrite(answers: [first, ..], ..) -> first
+    Rewrite(source:, answers: [], ..) -> source
   }
 }
 
@@ -222,10 +236,7 @@ pub fn with_pronoun(form: String, person: Person) -> String {
 }
 
 fn with_subject(subject: String, form: String) -> String {
-  case subject, starts_with_vowel_sound(form) {
-    "je", True -> "j'" <> form
-    _, _ -> subject <> " " <> form
-  }
+  elide(subject, form)
 }
 
 /// Every subject a person covers, the canonical one first.
@@ -246,21 +257,56 @@ fn forms(
   subject: String,
 ) -> List(String) {
   case word, tense {
-    Verb(present:, ..), Presens -> [conjugate(present, person)]
-    Verb(infinitive:, ..), FuturProche -> [
-      conjugate(aller, person) <> " " <> infinitive,
+    Verb(present:, ..), Presens -> [
+      reflexive(word, person, conjugate(present, person)),
     ]
-    Verb(participle:, auxiliary: Avoir, ..), PasseCompose -> [
+    // The pronoun goes with the infinitive: "je vais me lever".
+    Verb(infinitive:, ..), FuturProche -> [
+      conjugate(aller, person) <> " " <> reflexive(word, person, infinitive),
+    ]
+    Verb(participle:, auxiliary: Avoir, reflexive: False, ..), PasseCompose -> [
       conjugate(avoir, person) <> " " <> participle,
     ]
-    Verb(participle:, auxiliary: Etre, ..), PasseCompose ->
+    Verb(participle:, ..), PasseCompose ->
       list.map(agreements(subject), fn(ending) {
-        conjugate(etre, person) <> " " <> participle <> ending
+        reflexive(
+          word,
+          person,
+          conjugate(etre, person) <> " " <> participle <> ending,
+        )
       })
     Verb(infinitive:, present:, ..), Imparfait -> [
-      imparfait(infinitive, present, person),
+      reflexive(word, person, imparfait(infinitive, present, person)),
     ]
     _, _ -> []
+  }
+}
+
+/// Puts the reflexive pronoun before `form` if the verb is reflexive.
+fn reflexive(word: Word, person: Person, form: String) -> String {
+  case word {
+    Verb(reflexive: True, ..) -> elide(reflexive_pronoun(person), form)
+    _ -> form
+  }
+}
+
+fn reflexive_pronoun(person: Person) -> String {
+  case person {
+    Je -> "me"
+    Tu -> "te"
+    Il | Ils -> "se"
+    Nous -> "nous"
+    Vous -> "vous"
+  }
+}
+
+/// Joins a short word to the next one, eliding me, te, se and je before a
+/// vowel sound: "s'habiller", "je m'appelle".
+fn elide(word: String, next: String) -> String {
+  case word, starts_with_vowel_sound(next) {
+    "me", True | "te", True | "se", True | "je", True ->
+      string.drop_end(word, 1) <> "'" <> next
+    _, _ -> word <> " " <> next
   }
 }
 

@@ -27,6 +27,7 @@ fn aimer() {
       Present("aime", "aimes", "aime", "aimons", "aimez", "aiment"),
       "aimé",
       lexicon.Avoir,
+      False,
     ),
   )
 }
@@ -143,6 +144,7 @@ fn aller() {
       Present("vais", "vas", "va", "allons", "allez", "vont"),
       "allé",
       lexicon.Etre,
+      False,
     ),
   )
 }
@@ -213,4 +215,23 @@ pub fn either_gender_translates_an_adjective_test() {
   let ex = find(petit, "petit:to-fr")
   assert exercise.check(ex, "petit") == Correct
   assert exercise.check(ex, "petite") == Correct
+}
+
+pub fn a_negation_rewrite_takes_the_whole_sentence_test() {
+  let entry =
+    Entry(
+      id: "neg-tu-as",
+      level: A1,
+      theme: "negation",
+      sv: ["Du har ingen hund."],
+      word: lexicon.Rewrite(lexicon.Negate, "Tu as un chien.", [
+        "Tu n'as pas de chien.",
+      ]),
+    )
+  let assert [ex] = exercise.from_entry(entry)
+  assert exercise.drill(ex.kind) == exercise.Negation
+  assert ex.prompt == "Tu as un chien."
+  assert exercise.check(ex, "tu n’as pas de chien") == Correct
+  assert exercise.check(ex, "Tu n'as pas un chien.")
+    == Almost("Tu n'as pas de chien.", Typo)
 }

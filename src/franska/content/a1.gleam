@@ -3,7 +3,7 @@
 
 import franska/lexicon.{
   type Entry, type Word, A1, Avoir, Entry, Etre, Expression, Feminine, Masculine,
-  Present, Sentence, Verb,
+  Negate, Present, Rewrite, Sentence, Verb,
 }
 
 pub fn entries() -> List(Entry) {
@@ -385,6 +385,56 @@ pub fn entries() -> List(Entry) {
       "répondu",
       Avoir,
     ),
+    // Reflexiva verb
+    reflexive(
+      "se-lever",
+      ["stiga upp", "resa sig"],
+      "lever",
+      #("lève", "lèves", "lève", "levons", "levez", "lèvent"),
+      "levé",
+    ),
+    reflexive(
+      "s-appeler",
+      ["heta"],
+      "appeler",
+      #("appelle", "appelles", "appelle", "appelons", "appelez", "appellent"),
+      "appelé",
+    ),
+    reflexive(
+      "se-laver",
+      ["tvätta sig"],
+      "laver",
+      #("lave", "laves", "lave", "lavons", "lavez", "lavent"),
+      "lavé",
+    ),
+    reflexive(
+      "se-coucher",
+      ["lägga sig", "gå och lägga sig"],
+      "coucher",
+      #("couche", "couches", "couche", "couchons", "couchez", "couchent"),
+      "couché",
+    ),
+    reflexive(
+      "s-habiller",
+      ["klä på sig"],
+      "habiller",
+      #("habille", "habilles", "habille", "habillons", "habillez", "habillent"),
+      "habillé",
+    ),
+    reflexive(
+      "se-reveiller",
+      ["vakna"],
+      "réveiller",
+      #(
+        "réveille",
+        "réveilles",
+        "réveille",
+        "réveillons",
+        "réveillez",
+        "réveillent",
+      ),
+      "réveillé",
+    ),
     // Adjektiv
     adjective("grand", "egenskaper", ["stor"], "grand", "grande"),
     adjective("petit", "egenskaper", ["liten"], "petit", "petite"),
@@ -418,6 +468,7 @@ pub fn entries() -> List(Entry) {
     // Meningar
     sentence(
       "je-suis-suedois",
+      "blandat",
       "Jag är svensk.",
       "Je ___ suédois.",
       ["suis"],
@@ -425,6 +476,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "nous-habitons-a-paris",
+      "blandat",
       "Vi bor i Paris.",
       "Nous ___ à Paris.",
       ["habitons"],
@@ -432,6 +484,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "elle-a-un-chat",
+      "blandat",
       "Hon har en katt.",
       "Elle ___ un chat.",
       ["a"],
@@ -439,6 +492,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "tu-veux-du-cafe",
+      "blandat",
       "Vill du ha kaffe?",
       "Tu ___ du café ?",
       ["veux"],
@@ -446,6 +500,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "ils-parlent-francais",
+      "blandat",
       "De talar franska.",
       "Ils ___ français.",
       ["parlent"],
@@ -453,6 +508,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "il-va-au-cinema",
+      "blandat",
       "Han går på bio.",
       "Il ___ au cinéma.",
       ["va"],
@@ -460,6 +516,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "vous-avez-quel-age",
+      "blandat",
       "Hur gammal är ni?",
       "Vous ___ quel âge ?",
       ["avez"],
@@ -467,6 +524,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "nous-mangeons-une-pizza",
+      "blandat",
       "Vi äter en pizza.",
       "Nous ___ une pizza.",
       ["mangeons"],
@@ -474,6 +532,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "elles-vont-au-restaurant",
+      "blandat",
       "De går på restaurang.",
       "Elles ___ au restaurant.",
       ["vont"],
@@ -481,6 +540,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "je-fais-mes-devoirs",
+      "blandat",
       "Jag gör mina läxor.",
       "Je ___ mes devoirs.",
       ["fais"],
@@ -488,6 +548,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "j-aime-le-pain",
+      "blandat",
       "Jag tycker om bröd.",
       "J'aime ___ pain.",
       ["le"],
@@ -495,6 +556,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "la-maison-est-grande",
+      "blandat",
       "Huset är stort.",
       "___ maison est grande.",
       ["la"],
@@ -502,6 +564,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "c-est-le-livre-de-paul",
+      "blandat",
       "Det är Pauls bok.",
       "C'est ___ livre de Paul.",
       ["le"],
@@ -509,6 +572,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "et-toi",
+      "blandat",
       "Jag heter Anna, och du?",
       "Je m'appelle Anna, et ___ ?",
       ["toi", "vous"],
@@ -516,6 +580,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "j-ai-vingt-ans",
+      "blandat",
       "Jag är tjugo år.",
       "J'ai ___ ans.",
       ["vingt"],
@@ -523,11 +588,171 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "il-fait-beau-aujourd-hui",
+      "blandat",
       "Det är fint väder i dag.",
       "Il fait ___ aujourd'hui.",
       ["beau"],
       "",
     ),
+    sentence(
+      "partitiv-pain",
+      "partitiv",
+      "Jag äter bröd.",
+      "Je mange ___ pain.",
+      ["du"],
+      "du/de la/des",
+    ),
+    sentence(
+      "partitiv-fromage",
+      "partitiv",
+      "Vill du ha ost?",
+      "Tu veux ___ fromage ?",
+      ["du"],
+      "du/de la/des",
+    ),
+    sentence(
+      "partitiv-soupe",
+      "partitiv",
+      "Jag tar soppa.",
+      "Je prends ___ soupe.",
+      ["de la"],
+      "du/de la/des",
+    ),
+    sentence(
+      "partitiv-eau",
+      "partitiv",
+      "Hon dricker vatten.",
+      "Elle boit ___eau.",
+      ["de l'"],
+      "du/de la/de l'/des",
+    ),
+    sentence(
+      "partitiv-pommes",
+      "partitiv",
+      "Vi köper äpplen.",
+      "Nous achetons ___ pommes.",
+      ["des"],
+      "du/de la/des",
+    ),
+    sentence(
+      "partitiv-lait",
+      "partitiv",
+      "Det finns mjölk i kylskåpet.",
+      "Il y a ___ lait dans le frigo.",
+      ["du"],
+      "du/de la/des",
+    ),
+    sentence(
+      "partitiv-negation",
+      "partitiv",
+      "Jag äter inte kött.",
+      "Je ne mange pas ___ viande.",
+      ["de"],
+      "du/de la/des/de",
+    ),
+    sentence(
+      "possessiv-frere",
+      "possessiv",
+      "Det är min bror.",
+      "C'est ___ frère.",
+      ["mon"],
+      "min",
+    ),
+    sentence(
+      "possessiv-mere",
+      "possessiv",
+      "Här är min mamma.",
+      "Voici ___ mère.",
+      ["ma"],
+      "min",
+    ),
+    sentence(
+      "possessiv-amis",
+      "possessiv",
+      "Här är mina vänner.",
+      "Voici ___ amis.",
+      ["mes"],
+      "mina",
+    ),
+    sentence(
+      "possessiv-voiture",
+      "possessiv",
+      "Är det din bil?",
+      "C'est ___ voiture ?",
+      ["ta"],
+      "din",
+    ),
+    sentence(
+      "possessiv-ecole",
+      "possessiv",
+      "Jag tycker om min skola.",
+      "J'aime ___ école.",
+      ["mon"],
+      "min",
+    ),
+    sentence(
+      "demonstrativ-livre",
+      "demonstrativ",
+      "Jag tycker om den här boken.",
+      "J'aime ___ livre.",
+      ["ce"],
+      "den här",
+    ),
+    sentence(
+      "demonstrativ-maison",
+      "demonstrativ",
+      "Titta på det här huset!",
+      "Regarde ___ maison !",
+      ["cette"],
+      "det här",
+    ),
+    sentence(
+      "demonstrativ-homme",
+      "demonstrativ",
+      "Vem är den här mannen?",
+      "Qui est ___ homme ?",
+      ["cet"],
+      "den här",
+    ),
+    sentence(
+      "demonstrativ-fleurs",
+      "demonstrativ",
+      "Vill du ha de här blommorna?",
+      "Tu veux ___ fleurs ?",
+      ["ces"],
+      "de här",
+    ),
+    // Negation
+    negate("neg-je-parle", "Jag talar inte franska.", "Je parle français.", [
+      "Je ne parle pas français.",
+    ]),
+    negate("neg-il-aime", "Han tycker inte om kaffe.", "Il aime le café.", [
+      "Il n'aime pas le café.",
+    ]),
+    negate(
+      "neg-nous-habitons",
+      "Vi bor inte i Paris.",
+      "Nous habitons à Paris.",
+      ["Nous n'habitons pas à Paris."],
+    ),
+    negate("neg-elle-est", "Hon är inte trött.", "Elle est fatiguée.", [
+      "Elle n'est pas fatiguée.",
+    ]),
+    negate("neg-tu-as", "Du har ingen hund.", "Tu as un chien.", [
+      "Tu n'as pas de chien.",
+    ]),
+    negate(
+      "neg-ils-mangent",
+      "De äter inte kött.",
+      "Ils mangent de la viande.",
+      ["Ils ne mangent pas de viande."],
+    ),
+    negate("neg-c-est", "Det är inte svårt.", "C'est difficile.", [
+      "Ce n'est pas difficile.",
+    ]),
+    negate("neg-je-comprends", "Jag förstår inte.", "Je comprends.", [
+      "Je ne comprends pas.",
+    ]),
   ]
 }
 
@@ -556,14 +781,15 @@ fn verb(id, sv, infinitive, forms, participle, auxiliary) -> Entry {
       present: Present(je:, tu:, il:, nous:, vous:, ils:),
       participle:,
       auxiliary:,
+      reflexive: False,
     ),
   )
 }
 
 /// A sentence with a `___` gap, its Swedish translation, the accepted
 /// answers for the gap and a hint ("" for none).
-fn sentence(id, sv, text, answers, hint) -> Entry {
-  entry(id, "meningar", [sv], Sentence(text:, answers:, hint:))
+fn sentence(id, theme, sv, text, answers, hint) -> Entry {
+  entry(id, theme, [sv], Sentence(text:, answers:, hint:))
 }
 
 fn adjective(id, theme, sv, masculine, feminine) -> Entry {
@@ -572,4 +798,28 @@ fn adjective(id, theme, sv, masculine, feminine) -> Entry {
 
 fn invariable(id, theme, sv, form) -> Entry {
   entry(id, theme, sv, lexicon.invariable_adjective(form))
+}
+
+/// A reflexive verb, given without its pronoun ("lever" for se lever). It
+/// takes être in the passé composé.
+fn reflexive(id, sv, infinitive, forms, participle) -> Entry {
+  let #(je, tu, il, nous, vous, ils) = forms
+  entry(
+    id,
+    "verb",
+    sv,
+    Verb(
+      infinitive:,
+      present: Present(je:, tu:, il:, nous:, vous:, ils:),
+      participle:,
+      auxiliary: Etre,
+      reflexive: True,
+    ),
+  )
+}
+
+/// A sentence to make negative, the Swedish meaning of the negative one and
+/// the accepted negative sentences.
+fn negate(id, sv, source, answers) -> Entry {
+  entry(id, "negation", [sv], Rewrite(task: Negate, source:, answers:))
 }

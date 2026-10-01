@@ -4,7 +4,7 @@
 import franska/answer.{type Grade, type Language}
 import franska/lexicon.{
   type AdjectiveForm, type Entry, type Level, type Person, type Tense, Adjective,
-  Expression, Noun, Sentence, Verb,
+  Expression, Noun, Rewrite, Sentence, Verb,
 }
 import gleam/list
 
@@ -26,6 +26,9 @@ pub type Kind {
   WriteNumber(Int)
   /// Give an adjective in another form; the prompt is the masculine.
   Agree(AdjectiveForm)
+  /// Rewrite a sentence; the prompt is the sentence and `translation` the
+  /// Swedish meaning of the answer.
+  Transform(task: lexicon.Task, translation: String)
   /// Fill the gap in a sentence. The prompt is the sentence with its gap;
   /// `translation` is the Swedish meaning and `hint` may be "".
   FillGap(hint: String, translation: String)
@@ -40,6 +43,7 @@ pub type Drill {
   Numbers
   Sentences
   Adjectives
+  Negation
   Conjugation(Tense)
 }
 
@@ -52,6 +56,7 @@ pub fn drills() -> List(Drill) {
     Numbers,
     Adjectives,
     Sentences,
+    Negation,
     ..list.map(lexicon.tenses, Conjugation)
   ]
 }
@@ -83,6 +88,7 @@ pub fn drill(kind: Kind) -> Drill {
     WriteNumber(_) -> Numbers
     FillGap(..) -> Sentences
     Agree(_) -> Adjectives
+    Transform(task: lexicon.Negate, ..) -> Negation
   }
 }
 
@@ -110,6 +116,16 @@ pub fn from_entry(entry: Entry) -> List(Exercise) {
         "gap",
         FillGap(hint:, translation: swedish),
         text,
+        answers,
+        answer.French,
+        french,
+      ),
+    ]
+    Rewrite(task:, source:, answers:) -> [
+      exercise(
+        "rewrite",
+        Transform(task:, translation: swedish),
+        source,
         answers,
         answer.French,
         french,
@@ -173,13 +189,13 @@ fn word_exercises(
         french,
       ),
     ]
-    Verb(infinitive:, ..) as verb -> {
+    Verb(..) as verb -> {
       use tense <- list.flat_map(lexicon.tenses)
       use person <- list.map(lexicon.persons)
       exercise(
         lexicon.tense_id(tense) <> ":" <> lexicon.pronoun(person),
         Conjugate(tense, person),
-        infinitive,
+        french,
         lexicon.conjugation_answers(verb, tense, person),
         answer.French,
         lexicon.conjugated(verb, tense, person),
@@ -212,7 +228,7 @@ fn word_exercises(
         })
       list.reverse(exercises)
     }
-    Expression(..) | Sentence(..) -> []
+    Expression(..) | Rewrite(..) | Sentence(..) -> []
   }
 
   list.append(translations, extras)

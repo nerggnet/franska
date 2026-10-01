@@ -3,7 +3,7 @@
 
 import franska/lexicon.{
   type Entry, type Word, A2, Avoir, Entry, Etre, Expression, Feminine, Masculine,
-  Present, Sentence, Verb,
+  Negate, Present, Rewrite, Sentence, Verb,
 }
 
 pub fn entries() -> List(Entry) {
@@ -317,6 +317,35 @@ pub fn entries() -> List(Entry) {
       "rentré",
       Etre,
     ),
+    // Reflexiva verb
+    reflexive(
+      "se-promener",
+      ["promenera", "gå på promenad"],
+      "promener",
+      #("promène", "promènes", "promène", "promenons", "promenez", "promènent"),
+      "promené",
+    ),
+    reflexive(
+      "se-depecher",
+      ["skynda sig"],
+      "dépêcher",
+      #("dépêche", "dépêches", "dépêche", "dépêchons", "dépêchez", "dépêchent"),
+      "dépêché",
+    ),
+    reflexive(
+      "s-amuser",
+      ["ha roligt"],
+      "amuser",
+      #("amuse", "amuses", "amuse", "amusons", "amusez", "amusent"),
+      "amusé",
+    ),
+    reflexive(
+      "se-reposer",
+      ["vila sig", "vila"],
+      "reposer",
+      #("repose", "reposes", "repose", "reposons", "reposez", "reposent"),
+      "reposé",
+    ),
     // Adjektiv
     adjective("heureux", "egenskaper", ["lycklig"], "heureux", "heureuse"),
     adjective("triste", "egenskaper", ["ledsen"], "triste", "triste"),
@@ -335,6 +364,7 @@ pub fn entries() -> List(Entry) {
     // Meningar
     sentence(
       "demain-je-vais-partir",
+      "blandat",
       "I morgon ska jag åka.",
       "Demain, je ___ partir.",
       ["vais"],
@@ -342,6 +372,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "hier-nous-sommes-alles",
+      "blandat",
       "I går åkte vi till stranden.",
       "Hier, nous ___ allés à la plage.",
       ["sommes"],
@@ -349,6 +380,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "j-ai-mange-une-pomme",
+      "blandat",
       "Jag åt ett äpple.",
       "J'___ mangé une pomme.",
       ["ai"],
@@ -356,6 +388,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "elle-est-partie-hier-soir",
+      "blandat",
       "Hon åkte i går kväll.",
       "Elle est ___ hier soir.",
       ["partie"],
@@ -363,6 +396,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "ils-sont-sortis",
+      "blandat",
       "De gick ut ur huset.",
       "Ils sont ___ de la maison.",
       ["sortis"],
@@ -370,6 +404,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "ils-ont-regarde-un-film",
+      "blandat",
       "De tittade på en film.",
       "Ils ont ___ un film.",
       ["regardé"],
@@ -377,6 +412,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "je-lisais-beaucoup",
+      "blandat",
       "När jag var liten läste jag mycket.",
       "Quand j'étais petit, je ___ beaucoup.",
       ["lisais"],
@@ -384,6 +420,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "il-faisait-beau-hier",
+      "blandat",
       "Det var fint väder i går.",
       "Il ___ beau hier.",
       ["faisait"],
@@ -391,6 +428,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "nous-etions-a-la-maison",
+      "blandat",
       "Vi var hemma.",
       "Nous ___ à la maison.",
       ["étions"],
@@ -398,6 +436,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "je-ne-sais-pas-ou",
+      "blandat",
       "Jag vet inte var han är.",
       "Je ne ___ pas où il est.",
       ["sais"],
@@ -405,6 +444,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "nous-attendons-le-train",
+      "blandat",
       "Vi väntar på tåget.",
       "Nous ___ le train.",
       ["attendons"],
@@ -412,6 +452,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "tu-dois-mettre-ton-manteau",
+      "blandat",
       "Du måste ta på dig kappan.",
       "Tu ___ mettre ton manteau.",
       ["dois"],
@@ -419,6 +460,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "je-vais-voir-mes-amis",
+      "blandat",
       "Jag ska träffa mina vänner i kväll.",
       "Je vais ___ mes amis ce soir.",
       ["voir"],
@@ -426,6 +468,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "elle-travaille-au-bureau",
+      "blandat",
       "Hon arbetar på kontoret.",
       "Elle ___ au bureau.",
       ["travaille"],
@@ -433,6 +476,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "j-achete-un-billet",
+      "blandat",
       "Jag köper en biljett till Lyon.",
       "J'___ un billet pour Lyon.",
       ["achète"],
@@ -440,11 +484,106 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "on-part-a-quelle-heure",
+      "blandat",
       "Vilken tid åker vi?",
       "On ___ à quelle heure ?",
       ["part"],
       "partir",
     ),
+    sentence(
+      "partitiv-sucre",
+      "partitiv",
+      "Det finns inget socker kvar.",
+      "Il n'y a plus ___ sucre.",
+      ["de"],
+      "du/de la/des/de",
+    ),
+    sentence(
+      "possessiv-maison",
+      "possessiv",
+      "De tycker om sitt hus.",
+      "Ils aiment ___ maison.",
+      ["leur"],
+      "deras",
+    ),
+    sentence(
+      "possessiv-parents",
+      "possessiv",
+      "Vi träffar våra föräldrar.",
+      "Nous voyons ___ parents.",
+      ["nos"],
+      "våra",
+    ),
+    sentence(
+      "possessiv-cle",
+      "possessiv",
+      "Var är hans nyckel?",
+      "Où est ___ clé ?",
+      ["sa"],
+      "hans",
+    ),
+    sentence(
+      "possessiv-billets",
+      "possessiv",
+      "Har ni era biljetter?",
+      "Vous avez ___ billets ?",
+      ["vos"],
+      "era",
+    ),
+    sentence(
+      "negation-jamais",
+      "negation",
+      "Jag äter aldrig kött.",
+      "Je ne mange ___ de viande.",
+      ["jamais"],
+      "aldrig",
+    ),
+    sentence(
+      "negation-plus",
+      "negation",
+      "Han bor inte här längre.",
+      "Il n'habite ___ ici.",
+      ["plus"],
+      "inte längre",
+    ),
+    sentence(
+      "negation-rien",
+      "negation",
+      "Vi ser ingenting.",
+      "Nous ne voyons ___.",
+      ["rien"],
+      "ingenting",
+    ),
+    sentence(
+      "negation-personne",
+      "negation",
+      "Hon känner ingen.",
+      "Elle ne connaît ___.",
+      ["personne"],
+      "ingen",
+    ),
+    // Negation
+    negate(
+      "neg-je-suis-alle",
+      "Jag gick inte på bio.",
+      "Je suis allé au cinéma.",
+      ["Je ne suis pas allé au cinéma."],
+    ),
+    negate("neg-elle-a-mange", "Hon har inte ätit.", "Elle a mangé.", [
+      "Elle n'a pas mangé.",
+    ]),
+    negate("neg-je-vais-partir", "Jag ska inte åka.", "Je vais partir.", [
+      "Je ne vais pas partir.",
+    ]),
+    negate("neg-il-se-leve", "Han går inte upp tidigt.", "Il se lève tôt.", [
+      "Il ne se lève pas tôt.",
+    ]),
+    negate("neg-nous-avons", "Vi har inga barn.", "Nous avons des enfants.", [
+      "Nous n'avons pas d'enfants.",
+    ]),
+    negate("neg-vous-voulez", "Vill ni inte ha te?", "Vous voulez du thé ?", [
+      "Vous ne voulez pas de thé ?",
+    ]),
   ]
 }
 
@@ -473,16 +612,41 @@ fn verb(id, sv, infinitive, forms, participle, auxiliary) -> Entry {
       present: Present(je:, tu:, il:, nous:, vous:, ils:),
       participle:,
       auxiliary:,
+      reflexive: False,
     ),
   )
 }
 
 /// A sentence with a `___` gap, its Swedish translation, the accepted
 /// answers for the gap and a hint ("" for none).
-fn sentence(id, sv, text, answers, hint) -> Entry {
-  entry(id, "meningar", [sv], Sentence(text:, answers:, hint:))
+fn sentence(id, theme, sv, text, answers, hint) -> Entry {
+  entry(id, theme, [sv], Sentence(text:, answers:, hint:))
 }
 
 fn adjective(id, theme, sv, masculine, feminine) -> Entry {
   entry(id, theme, sv, lexicon.adjective(masculine, feminine))
+}
+
+/// A reflexive verb, given without its pronoun ("lever" for se lever). It
+/// takes être in the passé composé.
+fn reflexive(id, sv, infinitive, forms, participle) -> Entry {
+  let #(je, tu, il, nous, vous, ils) = forms
+  entry(
+    id,
+    "verb",
+    sv,
+    Verb(
+      infinitive:,
+      present: Present(je:, tu:, il:, nous:, vous:, ils:),
+      participle:,
+      auxiliary: Etre,
+      reflexive: True,
+    ),
+  )
+}
+
+/// A sentence to make negative, the Swedish meaning of the negative one and
+/// the accepted negative sentences.
+fn negate(id, sv, source, answers) -> Entry {
+  entry(id, "negation", [sv], Rewrite(task: Negate, source:, answers:))
 }

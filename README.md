@@ -12,16 +12,20 @@ Try it at **https://nerggnet.github.io/franska/**.
 ## Status
 
 The browser app ([Lustre](https://hexdocs.pm/lustre/)) offers rounds of 10
-exercises from 321 words and phrases (213 at A1 and 108 at A2) and 32
-sentences, optionally limited to one theme:
+exercises from 331 words and phrases (219 at A1 and 112 at A2), 57
+gap-fill sentences and 14 negation sentences, optionally limited to one
+theme:
 
 - Swedish → French and French → Swedish translation
 - le or la? for nouns
-- Verb conjugation: présent, futur proche, passé composé and imparfait
+- Verb conjugation: présent, futur proche, passé composé and imparfait,
+  including reflexive verbs (se lever, s'habiller)
 - Dictation: write down French read aloud
 - Numbers: write 0–100, the hundreds and a few thousands in words
-- Sentences: fill the gap in a sentence, with the Swedish meaning as context
+- Sentences: fill the gap in a sentence, with the Swedish meaning as context;
+  themes for partitive articles, possessives, demonstratives and negation
 - Adjectives: agreement in gender and number (grand, grande, grands, grandes)
+- Negation: make a sentence negative (Tu as un chien → Tu n'as pas de chien)
 
 It has accent buttons for French answers and reads French aloud with the
 browser's speech synthesis. Spaced repetition decides what each round

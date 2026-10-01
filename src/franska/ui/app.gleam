@@ -7,9 +7,9 @@ import franska/answer.{type Grade, Almost, Correct, Wrong}
 import franska/content
 import franska/exercise.{
   type Drill, type Exercise, Adjectives, Agree, Articles, ChooseArticle,
-  Conjugate, Conjugation, Dictation, FillGap, Listen, Numbers, Sentences,
-  ToFrench, ToSwedish, Translate, TranslateToFrench, TranslateToSwedish,
-  WriteNumber,
+  Conjugate, Conjugation, Dictation, FillGap, Listen, Negation, Numbers,
+  Sentences, ToFrench, ToSwedish, Transform, Translate, TranslateToFrench,
+  TranslateToSwedish, WriteNumber,
 }
 import franska/gender
 import franska/lexicon
@@ -549,6 +549,7 @@ fn drill_name(drill: Drill) -> String {
     Numbers -> "Tal"
     Sentences -> "Meningar"
     Adjectives -> "Böj adjektiv"
+    Negation -> "Negation"
   }
 }
 
@@ -563,7 +564,7 @@ fn drill_group(drill: Drill) -> DrillGroup {
   case drill {
     TranslateToFrench | TranslateToSwedish | Articles | Dictation | Numbers ->
       WordDrills
-    Adjectives | Sentences -> GrammarDrills
+    Adjectives | Sentences | Negation -> GrammarDrills
     Conjugation(_) -> VerbDrills
   }
 }
@@ -674,6 +675,7 @@ fn instruction(exercise: Exercise) -> String {
     WriteNumber(_) -> "Skriv talet med bokstäver"
     FillGap(..) -> "Fyll i luckan"
     Agree(_) -> "Böj adjektivet"
+    Transform(task: lexicon.Negate, ..) -> "Gör meningen negativ"
   }
 }
 
@@ -713,6 +715,13 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
       ])
     WriteNumber(_) ->
       html.p([class("prompt number")], [html.text(exercise.prompt)])
+    Transform(translation:, ..) ->
+      html.div([class("sentence")], [
+        html.p([class("prompt"), attribute.lang("fr")], [
+          html.text(exercise.prompt),
+        ]),
+        html.p([class("hint"), attribute.lang("sv")], [html.text(translation)]),
+      ])
     Agree(form) ->
       html.p([class("prompt"), attribute.lang("fr")], [
         html.text(exercise.prompt),

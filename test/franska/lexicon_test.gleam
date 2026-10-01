@@ -29,6 +29,7 @@ fn verb(infinitive: String, present: List(String)) -> lexicon.Word {
     present: lexicon.Present(je:, tu:, il:, nous:, vous:, ils:),
     participle: "",
     auxiliary: lexicon.Avoir,
+    reflexive: False,
   )
 }
 
@@ -92,4 +93,76 @@ pub fn adjective_plurals_follow_the_usual_rules_test() {
     == lexicon.Adjective("beau", "belle", "beaux", "belles")
   assert lexicon.adjective("normal", "normale")
     == lexicon.Adjective("normal", "normale", "normaux", "normales")
+}
+
+fn reflexive(infinitive: String, present: List(String), participle: String) {
+  let assert [je, tu, il, nous, vous, ils] = present
+  lexicon.Verb(
+    infinitive:,
+    present: lexicon.Present(je:, tu:, il:, nous:, vous:, ils:),
+    participle:,
+    auxiliary: lexicon.Etre,
+    reflexive: True,
+  )
+}
+
+fn all_persons(word: lexicon.Word, tense: lexicon.Tense) -> List(String) {
+  list.map(lexicon.persons, lexicon.conjugated(word, tense, _))
+}
+
+pub fn reflexive_verbs_take_their_pronoun_test() {
+  let lever =
+    reflexive(
+      "lever",
+      ["lève", "lèves", "lève", "levons", "levez", "lèvent"],
+      "levé",
+    )
+  assert lexicon.french(lever) == "se lever"
+  assert all_persons(lever, lexicon.Presens)
+    == [
+      "je me lève", "tu te lèves", "il se lève", "nous nous levons",
+      "vous vous levez", "ils se lèvent",
+    ]
+  assert all_persons(lever, lexicon.FuturProche)
+    == [
+      "je vais me lever", "tu vas te lever", "il va se lever",
+      "nous allons nous lever", "vous allez vous lever", "ils vont se lever",
+    ]
+  assert all_persons(lever, lexicon.PasseCompose)
+    == [
+      "je me suis levé", "tu t'es levé", "il s'est levé",
+      "nous nous sommes levés", "vous vous êtes levés", "ils se sont levés",
+    ]
+  assert lexicon.conjugated(lever, lexicon.Imparfait, lexicon.Je)
+    == "je me levais"
+}
+
+pub fn reflexive_pronouns_elide_before_a_vowel_sound_test() {
+  let habiller =
+    reflexive(
+      "habiller",
+      ["habille", "habilles", "habille", "habillons", "habillez", "habillent"],
+      "habillé",
+    )
+  assert lexicon.french(habiller) == "s'habiller"
+  assert all_persons(habiller, lexicon.Presens)
+    == [
+      "je m'habille", "tu t'habilles", "il s'habille", "nous nous habillons",
+      "vous vous habillez", "ils s'habillent",
+    ]
+  assert lexicon.conjugated(habiller, lexicon.FuturProche, lexicon.Je)
+    == "je vais m'habiller"
+}
+
+pub fn reflexive_passe_compose_agrees_with_the_subject_test() {
+  let lever =
+    reflexive(
+      "lever",
+      ["lève", "lèves", "lève", "levons", "levez", "lèvent"],
+      "levé",
+    )
+  let answers =
+    lexicon.conjugation_answers(lever, lexicon.PasseCompose, lexicon.Il)
+  assert list.contains(answers, "elle s'est levée")
+  assert list.contains(answers, "on s'est levés")
 }
