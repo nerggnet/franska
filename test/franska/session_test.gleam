@@ -11,6 +11,7 @@ fn exercise(id: String) {
     prompt: id,
     accepted: [id],
     answer_language: French,
+    french: id,
   )
 }
 

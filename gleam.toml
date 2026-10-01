@@ -24,4 +24,4 @@ lustre_dev_tools = ">= 2.4.0 and < 3.0.0"
 [tools.lustre.html]
 lang = "sv"
 title = "Franska"
-stylesheets = [{ href = "/franska.css" }]
+stylesheets = [{ href = "franska.css" }]

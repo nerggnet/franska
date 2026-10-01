@@ -185,6 +185,19 @@ input:focus-visible {
   font-weight: 500;
 }
 
+.feedback p {
+  margin: 0;
+}
+
+.reveal {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  font-size: 1.15rem;
+  font-weight: 650;
+}
+
 .feedback.correct {
   background: var(--correct-bg);
   color: var(--correct);
@@ -239,4 +252,101 @@ input:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
+}
+
+.subheading {
+  margin-top: 1.5rem !important;
+  font-size: 1rem !important;
+  color: var(--muted);
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  cursor: pointer;
+}
+
+.toggle input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--accent);
+}
+
+.prompt-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.prompt-row .prompt {
+  flex: 0 1 auto;
+}
+
+.blank {
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.infinitive {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 1.4rem;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.choices button {
+  font-size: 1.4rem;
+  padding: 0.75rem;
+}
+
+.accents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+}
+
+.accent {
+  font: inherit;
+  font-size: 1.05rem;
+  min-width: 2.4rem;
+  min-height: 2.4rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.accent:hover,
+.chip:hover,
+.speaker:hover {
+  border-color: var(--accent);
+}
+
+.speaker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex: none;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.prompt-row .speaker {
+  color: var(--accent);
+  border-color: var(--border);
 }

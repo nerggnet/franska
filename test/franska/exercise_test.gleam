@@ -91,3 +91,15 @@ pub fn expression_accepts_all_french_variants_test() {
     )
   assert exercise.check(find(entry, "hej:to-fr"), "coucou") == Correct
 }
+
+pub fn french_is_the_full_form_test() {
+  assert find(maison(), "maison:article").french == "la maison"
+  assert find(aimer(), "aimer:present:je").french == "j'aime"
+  assert find(aimer(), "aimer:to-sv").french == "aimer"
+}
+
+pub fn drill_matches_kind_test() {
+  assert exercise.drill(ChooseArticle) == exercise.Articles
+  assert exercise.drill(Conjugate(lexicon.Nous)) == exercise.Conjugation
+  assert exercise.drill(Translate(ToSwedish)) == exercise.TranslateToSwedish
+}

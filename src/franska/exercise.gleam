@@ -18,8 +18,20 @@ pub type Kind {
   Conjugate(Person)
 }
 
+/// The kinds of practice a learner can choose between.
+pub type Drill {
+  TranslateToFrench
+  TranslateToSwedish
+  Articles
+  Conjugation
+}
+
+pub const drills = [TranslateToFrench, TranslateToSwedish, Articles, Conjugation]
+
 /// `id` is stable and unique, so it can key the learner's progress.
 /// `prompt` is the bare stimulus; the UI adds instructions per `kind`.
+/// `french` is the complete French text the exercise is about ("l'école",
+/// "nous parlons"), for revealing after an answer and for reading aloud.
 pub type Exercise {
   Exercise(
     id: String,
@@ -28,7 +40,17 @@ pub type Exercise {
     prompt: String,
     accepted: List(String),
     answer_language: Language,
+    french: String,
   )
+}
+
+pub fn drill(kind: Kind) -> Drill {
+  case kind {
+    Translate(ToFrench) -> TranslateToFrench
+    Translate(ToSwedish) -> TranslateToSwedish
+    ChooseArticle -> Articles
+    Conjugate(_) -> Conjugation
+  }
 }
 
 pub fn from_entry(entry: Entry) -> List(Exercise) {
@@ -37,7 +59,7 @@ pub fn from_entry(entry: Entry) -> List(Exercise) {
     [first, ..] -> first
     [] -> ""
   }
-  let exercise = fn(suffix, kind, prompt, accepted, answer_language) {
+  let exercise = fn(suffix, kind, prompt, accepted, answer_language, french) {
     Exercise(
       id: entry.id <> ":" <> suffix,
       entry_id: entry.id,
@@ -45,6 +67,7 @@ pub fn from_entry(entry: Entry) -> List(Exercise) {
       prompt:,
       accepted:,
       answer_language:,
+      french:,
     )
   }
   let to_french_accepted = case entry.word {
@@ -59,8 +82,16 @@ pub fn from_entry(entry: Entry) -> List(Exercise) {
       swedish,
       to_french_accepted,
       answer.French,
+      french,
     ),
-    exercise("to-sv", Translate(ToSwedish), french, entry.sv, answer.Swedish),
+    exercise(
+      "to-sv",
+      Translate(ToSwedish),
+      french,
+      entry.sv,
+      answer.Swedish,
+      french,
+    ),
   ]
 
   let extras = case entry.word {
@@ -74,6 +105,7 @@ pub fn from_entry(entry: Entry) -> List(Exercise) {
           lexicon.Feminine -> ["la", "une"]
         },
         answer.French,
+        french,
       ),
     ]
     Verb(infinitive:, present:) ->
@@ -85,6 +117,7 @@ pub fn from_entry(entry: Entry) -> List(Exercise) {
           infinitive,
           conjugation_answers(form, person),
           answer.French,
+          lexicon.with_pronoun(form, person),
         )
       })
     Expression(..) -> []
