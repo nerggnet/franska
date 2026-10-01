@@ -46,11 +46,13 @@ pub fn wrong_accent_is_almost_test() {
 pub fn missing_article_is_almost_test() {
   assert fr("chat", ["le chat"]) == Almost("le chat", MissingArticle)
   assert fr("ecole", ["l'école"]) == Almost("l'école", MissingArticle)
+  assert fr("beure", ["le beurre"]) == Almost("le beurre", MissingArticle)
 }
 
 pub fn wrong_article_is_almost_test() {
   assert fr("la chat", ["le chat"]) == Almost("le chat", WrongArticle)
   assert fr("la école", ["l'école"]) == Almost("l'école", WrongArticle)
+  assert fr("le maisson", ["la maison"]) == Almost("la maison", WrongArticle)
 }
 
 pub fn small_typo_is_almost_test() {

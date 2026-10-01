@@ -21,7 +21,8 @@ pub type Mistake {
   MissingAccents
   /// One or two letters off.
   Typo
-  /// The noun is right but the article was left out: "chat" for "le chat".
+  /// The noun is right, give or take accents and a typo, but the article
+  /// was left out: "chat" for "le chat".
   MissingArticle
   /// The noun is right but the article is wrong: "la chat" for "le chat".
   WrongArticle
@@ -145,7 +146,9 @@ fn article_mistake(
   list.find_map(candidates, fn(candidate) {
     let #(original, normalised) = candidate
     let #(article, rest) = split_article(normalised)
-    let same_noun = given_rest == fold(rest, language)
+    let rest = fold(rest, language)
+    let same_noun =
+      distance(given_rest, rest) <= allowed_typos(string.length(rest))
     case article, given_article {
       Some(_), _ if !same_noun -> Error(Nil)
       Some(_), None -> Ok(Almost(original, MissingArticle))

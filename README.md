@@ -9,14 +9,16 @@ Swedish), and Leitner-style spaced repetition.
 
 ## Status
 
-The core logic is done: content model, exercise generation, grading and
-scheduling. The browser UI ([Lustre](https://hexdocs.pm/lustre/)) is next.
+The browser app ([Lustre](https://hexdocs.pm/lustre/)) has rounds of 10
+Swedish → French translations, optionally limited to one theme, drawn from
+67 A1 entries. Progress is not saved yet.
 
 ## Development
 
 ```sh
-gleam test                      # Erlang target
-gleam test --target javascript  # JavaScript target (what the web app uses)
+gleam run -m lustre/dev start   # dev server with live reload on http://localhost:1234
+gleam test                      # JavaScript target (the default)
+gleam test --target erlang      # the core must work on Erlang too
 gleam format src test
 ```
 
