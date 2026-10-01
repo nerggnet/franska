@@ -40,6 +40,26 @@ pub fn grade(
   accepted accepted: List(String),
   language language: Language,
 ) -> Grade {
+  grade_with(answer, accepted, language, allow_typos: True)
+}
+
+/// Like `grade`, but a small spelling difference is wrong rather than a
+/// typo. For rewriting whole sentences, where one or two letters are the
+/// point of the exercise: "Je le vois" for "Je la vois".
+pub fn grade_without_typos(
+  answer: String,
+  accepted accepted: List(String),
+  language language: Language,
+) -> Grade {
+  grade_with(answer, accepted, language, allow_typos: False)
+}
+
+fn grade_with(
+  answer: String,
+  accepted: List(String),
+  language: Language,
+  allow_typos allow_typos: Bool,
+) -> Grade {
   let canonical = list.first(accepted) |> result.unwrap("")
   let given = normalise(answer, language)
   let candidates = list.map(accepted, fn(a) { #(a, normalise(a, language)) })
@@ -56,6 +76,7 @@ pub fn grade(
   close(fn(c) { fold(c, language) == folded }, MissingAccents)
   |> result.lazy_or(fn() { article_mistake(given, candidates, language) })
   |> result.lazy_or(fn() {
+    use <- bool.guard(!allow_typos, Error(Nil))
     close(
       fn(c) {
         let c = fold(c, language)

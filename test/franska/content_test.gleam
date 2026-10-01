@@ -122,3 +122,19 @@ pub fn sentences_have_one_gap_and_an_answer_test() {
     })
   assert bad == []
 }
+
+pub fn pronoun_sentences_mark_one_part_test() {
+  let bad =
+    content.entries()
+    |> list.filter_map(fn(e) {
+      case e.word {
+        lexicon.Rewrite(task: lexicon.UsePronoun, source:, ..) ->
+          case lexicon.marked_part(source) {
+            Ok(_) -> Error(Nil)
+            Error(Nil) -> Ok(e.id)
+          }
+        _ -> Error(Nil)
+      }
+    })
+  assert bad == []
+}

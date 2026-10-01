@@ -3,7 +3,7 @@
 
 import franska/lexicon.{
   type Entry, type Word, A2, Avoir, Entry, Etre, Expression, Feminine, Masculine,
-  Negate, Present, Rewrite, Sentence, Verb,
+  Negate, Present, Rewrite, Sentence, UsePronoun, Verb,
 }
 
 pub fn entries() -> List(Entry) {
@@ -584,6 +584,145 @@ pub fn entries() -> List(Entry) {
     negate("neg-vous-voulez", "Vill ni inte ha te?", "Vous voulez du thé ?", [
       "Vous ne voulez pas de thé ?",
     ]),
+    sentence(
+      "pronomen-le",
+      "pronomen",
+      "Känner du Paul? Ja, jag känner honom.",
+      "Tu connais Paul ? Oui, je ___ connais.",
+      ["le"],
+      "honom",
+    ),
+    sentence(
+      "pronomen-y",
+      "pronomen",
+      "Ska du till marknaden? Ja, jag ska dit.",
+      "Tu vas au marché ? Oui, j'___ vais.",
+      ["y"],
+      "dit",
+    ),
+    sentence(
+      "pronomen-en",
+      "pronomen",
+      "Har du bröder? Ja, jag har två.",
+      "Tu as des frères ? Oui, j'___ ai deux.",
+      ["en"],
+      "",
+    ),
+    sentence(
+      "pronomen-lui",
+      "pronomen",
+      "Pratar du med din mamma? Ja, jag pratar med henne.",
+      "Tu parles à ta mère ? Oui, je ___ parle.",
+      ["lui"],
+      "med henne",
+    ),
+    sentence(
+      "pronomen-les",
+      "pronomen",
+      "Träffar ni era vänner? Ja, vi träffar dem.",
+      "Vous voyez vos amis ? Oui, nous ___ voyons.",
+      ["les"],
+      "dem",
+    ),
+    sentence(
+      "pronomen-leur",
+      "pronomen",
+      "Skriver du till dina föräldrar? Ja, jag skriver till dem.",
+      "Tu écris à tes parents ? Oui, je ___ écris.",
+      ["leur"],
+      "till dem",
+    ),
+    // Pronomen
+    pronoun("pron-je-vois-marie", "Jag ser henne.", "Je vois [Marie].", [
+      "Je la vois.",
+    ]),
+    pronoun("pron-il-mange-gateau", "Han äter den.", "Il mange [le gâteau].", [
+      "Il le mange.",
+    ]),
+    pronoun(
+      "pron-nous-regardons-photos",
+      "Vi tittar på dem.",
+      "Nous regardons [les photos].",
+      ["Nous les regardons."],
+    ),
+    pronoun("pron-tu-aimes-film", "Tycker du om den?", "Tu aimes [ce film] ?", [
+      "Tu l'aimes ?",
+    ]),
+    pronoun(
+      "pron-j-attends-train",
+      "Jag väntar på det.",
+      "J'attends [le train].",
+      ["Je l'attends."],
+    ),
+    pronoun(
+      "pron-elle-cherche-cles",
+      "Hon letar efter dem.",
+      "Elle cherche [ses clés].",
+      ["Elle les cherche."],
+    ),
+    pronoun(
+      "pron-je-parle-paul",
+      "Jag pratar med honom.",
+      "Je parle [à Paul].",
+      ["Je lui parle."],
+    ),
+    pronoun(
+      "pron-elle-telephone-mere",
+      "Hon ringer till henne.",
+      "Elle téléphone [à sa mère].",
+      ["Elle lui téléphone."],
+    ),
+    pronoun(
+      "pron-nous-donnons-amis",
+      "Vi ger dem en present.",
+      "Nous donnons un cadeau [à nos amis].",
+      ["Nous leur donnons un cadeau."],
+    ),
+    pronoun(
+      "pron-tu-reponds-professeur",
+      "Svarar du honom?",
+      "Tu réponds [au professeur] ?",
+      ["Tu lui réponds ?"],
+    ),
+    pronoun("pron-je-vais-paris", "Jag åker dit.", "Je vais [à Paris].", [
+      "J'y vais.",
+    ]),
+    pronoun(
+      "pron-elle-habite-france",
+      "Hon bor där.",
+      "Elle habite [en France].",
+      ["Elle y habite."],
+    ),
+    pronoun(
+      "pron-je-mange-soupe",
+      "Jag äter av den.",
+      "Je mange [de la soupe].",
+      ["J'en mange."],
+    ),
+    pronoun("pron-il-a-enfants", "Han har tre.", "Il a [trois enfants].", [
+      "Il en a trois.",
+    ]),
+    pronoun(
+      "pron-nous-voulons-cafe",
+      "Vi vill ha lite.",
+      "Nous voulons [du café].",
+      ["Nous en voulons."],
+    ),
+    pronoun(
+      "pron-je-ne-vois-pas-marie",
+      "Jag ser henne inte.",
+      "Je ne vois pas [Marie].",
+      ["Je ne la vois pas."],
+    ),
+    pronoun("pron-j-ai-vu-film", "Jag har sett den.", "J'ai vu [le film].", [
+      "Je l'ai vu.",
+    ]),
+    pronoun(
+      "pron-je-vais-acheter-pain",
+      "Jag ska köpa det.",
+      "Je vais acheter [le pain].",
+      ["Je vais l'acheter."],
+    ),
   ]
 }
 
@@ -649,4 +788,10 @@ fn reflexive(id, sv, infinitive, forms, participle) -> Entry {
 /// the accepted negative sentences.
 fn negate(id, sv, source, answers) -> Entry {
   entry(id, "negation", [sv], Rewrite(task: Negate, source:, answers:))
+}
+
+/// A sentence whose [marked] part is to be replaced by a pronoun, the
+/// Swedish meaning of the answer and the accepted answers.
+fn pronoun(id, sv, source, answers) -> Entry {
+  entry(id, "pronomen", [sv], Rewrite(task: UsePronoun, source:, answers:))
 }

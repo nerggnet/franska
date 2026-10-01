@@ -1,4 +1,6 @@
-import franska/answer.{Almost, Correct, MissingArticle, Typo, Wrong}
+import franska/answer.{
+  Almost, Correct, MissingAccents, MissingArticle, Typo, Wrong,
+}
 import franska/exercise.{
   ChooseArticle, Conjugate, Listen, ToFrench, ToSwedish, Translate,
 }
@@ -232,6 +234,9 @@ pub fn a_negation_rewrite_takes_the_whole_sentence_test() {
   assert exercise.drill(ex.kind) == exercise.Negation
   assert ex.prompt == "Tu as un chien."
   assert exercise.check(ex, "tu n’as pas de chien") == Correct
+  assert exercise.check(ex, "tu n'as pas de chien") == Correct
   assert exercise.check(ex, "Tu n'as pas un chien.")
-    == Almost("Tu n'as pas de chien.", Typo)
+    == Wrong("Tu n'as pas de chien.")
+  assert exercise.check(ex, "Tu n'as pas de chién.")
+    == Almost("Tu n'as pas de chien.", MissingAccents)
 }

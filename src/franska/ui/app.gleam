@@ -8,8 +8,8 @@ import franska/content
 import franska/exercise.{
   type Drill, type Exercise, Adjectives, Agree, Articles, ChooseArticle,
   Conjugate, Conjugation, Dictation, FillGap, Listen, Negation, Numbers,
-  Sentences, ToFrench, ToSwedish, Transform, Translate, TranslateToFrench,
-  TranslateToSwedish, WriteNumber,
+  Pronouns, Sentences, ToFrench, ToSwedish, Transform, Translate,
+  TranslateToFrench, TranslateToSwedish, WriteNumber,
 }
 import franska/gender
 import franska/lexicon
@@ -550,6 +550,7 @@ fn drill_name(drill: Drill) -> String {
     Sentences -> "Meningar"
     Adjectives -> "Böj adjektiv"
     Negation -> "Negation"
+    Pronouns -> "Pronomen"
   }
 }
 
@@ -564,7 +565,7 @@ fn drill_group(drill: Drill) -> DrillGroup {
   case drill {
     TranslateToFrench | TranslateToSwedish | Articles | Dictation | Numbers ->
       WordDrills
-    Adjectives | Sentences | Negation -> GrammarDrills
+    Adjectives | Sentences | Negation | Pronouns -> GrammarDrills
     Conjugation(_) -> VerbDrills
   }
 }
@@ -676,6 +677,8 @@ fn instruction(exercise: Exercise) -> String {
     FillGap(..) -> "Fyll i luckan"
     Agree(_) -> "Böj adjektivet"
     Transform(task: lexicon.Negate, ..) -> "Gör meningen negativ"
+    Transform(task: lexicon.UsePronoun, ..) ->
+      "Byt ut det markerade mot ett pronomen"
   }
 }
 
@@ -717,9 +720,16 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
       html.p([class("prompt number")], [html.text(exercise.prompt)])
     Transform(translation:, ..) ->
       html.div([class("sentence")], [
-        html.p([class("prompt"), attribute.lang("fr")], [
-          html.text(exercise.prompt),
-        ]),
+        html.p([class("prompt"), attribute.lang("fr")], {
+          case lexicon.marked_part(exercise.prompt) {
+            Ok(#(before, marked, after)) -> [
+              html.text(before),
+              html.mark([], [html.text(marked)]),
+              html.text(after),
+            ]
+            Error(Nil) -> [html.text(exercise.prompt)]
+          }
+        }),
         html.p([class("hint"), attribute.lang("sv")], [html.text(translation)]),
       ])
     Agree(form) ->

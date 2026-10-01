@@ -166,3 +166,10 @@ pub fn reflexive_passe_compose_agrees_with_the_subject_test() {
   assert list.contains(answers, "elle s'est levée")
   assert list.contains(answers, "on s'est levés")
 }
+
+pub fn marked_part_test() {
+  assert lexicon.marked_part("Je vois [Marie].")
+    == Ok(#("Je vois ", "Marie", "."))
+  assert lexicon.marked_part("Je vois Marie.") == Error(Nil)
+  assert lexicon.marked_part("[Je] vois [Marie].") == Error(Nil)
+}

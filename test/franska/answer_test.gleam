@@ -89,3 +89,10 @@ pub fn explanation_is_in_swedish_test() {
     == "Nästan! Glöm inte accenterna: l'école"
   assert answer.explain(Wrong("le chat")) == "Fel. Rätt svar: le chat"
 }
+
+pub fn grading_without_typos_test() {
+  assert answer.grade_without_typos("Je le vois.", ["Je la vois."], French)
+    == Wrong("Je la vois.")
+  assert answer.grade_without_typos("je la vois", ["Je la vois."], French)
+    == Correct
+}

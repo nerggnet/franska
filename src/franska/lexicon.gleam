@@ -135,6 +135,25 @@ pub fn noun_aspirated_h(fr: String, gender: Gender) -> Word {
 pub type Task {
   /// Make the sentence negative.
   Negate
+  /// Replace the part of the sentence marked with [brackets] by a pronoun.
+  UsePronoun
+}
+
+/// Splits a `UsePronoun` source into the text before, inside and after the
+/// [marked] part.
+pub fn marked_part(source: String) -> Result(#(String, String, String), Nil) {
+  case string.split_once(source, "[") {
+    Ok(#(before, rest)) ->
+      case string.split_once(rest, "]") {
+        Ok(#(marked, after)) ->
+          case string.contains(after, "[") || string.contains(marked, "[") {
+            True -> Error(Nil)
+            False -> Ok(#(before, marked, after))
+          }
+        Error(Nil) -> Error(Nil)
+      }
+    Error(Nil) -> Error(Nil)
+  }
 }
 
 pub type AdjectiveForm {

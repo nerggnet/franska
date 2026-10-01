@@ -69,7 +69,10 @@ sentence("je-suis-suedois", "Jag är svensk.", "Je ___ suédois.", ["suis"], "ê
 - **Reflexive verbs** use `reflexive(...)` with the verb without its
   pronoun (`"lever"` for *se lever*); they take être in the passé composé.
 - **Negation exercises** use `negate(id, swedish, sentence, answers)` with
-  the negative sentence as the answer.
+  the negative sentence as the answer. **Pronoun exercises** use
+  `pronoun(...)` the same way, with the part to replace in [brackets]:
+  `"Je vois [Marie]."`. Rewritten sentences are graded without typo
+  leniency, so list every acceptable answer.
 - **Sentences** take a theme (such as `"partitiv"`) and have exactly one gap, written `___`, then the answers for
   the gap and a hint shown in brackets (use `""` for none). They only make
   a gap-fill exercise, so keep the Swedish translation natural.

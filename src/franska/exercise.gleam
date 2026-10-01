@@ -44,6 +44,7 @@ pub type Drill {
   Sentences
   Adjectives
   Negation
+  Pronouns
   Conjugation(Tense)
 }
 
@@ -57,6 +58,7 @@ pub fn drills() -> List(Drill) {
     Adjectives,
     Sentences,
     Negation,
+    Pronouns,
     ..list.map(lexicon.tenses, Conjugation)
   ]
 }
@@ -89,6 +91,7 @@ pub fn drill(kind: Kind) -> Drill {
     FillGap(..) -> Sentences
     Agree(_) -> Adjectives
     Transform(task: lexicon.Negate, ..) -> Negation
+    Transform(task: lexicon.UsePronoun, ..) -> Pronouns
   }
 }
 
@@ -234,10 +237,12 @@ fn word_exercises(
   list.append(translations, extras)
 }
 
+/// Grades an answer. Rewritten sentences get no typo leniency, since a
+/// letter or two (le/la, pas un/pas de) is what they practise.
 pub fn check(exercise: Exercise, given: String) -> Grade {
-  answer.grade(
-    given,
-    accepted: exercise.accepted,
-    language: exercise.answer_language,
-  )
+  let grade = case exercise.kind {
+    Transform(..) -> answer.grade_without_typos
+    _ -> answer.grade
+  }
+  grade(given, exercise.accepted, exercise.answer_language)
 }
