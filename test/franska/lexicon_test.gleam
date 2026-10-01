@@ -344,3 +344,41 @@ pub fn futur_simple_of_reflexive_verbs_test() {
   assert lexicon.conjugated(lever, lexicon.FuturSimple, lexicon.Je)
     == "je me lèverai"
 }
+
+fn conditional(word: lexicon.Word) -> List(String) {
+  list.map(lexicon.persons, lexicon.conjugated(word, lexicon.Conditionnel, _))
+}
+
+pub fn conditionnel_is_the_future_stem_with_imparfait_endings_test() {
+  let parler =
+    verb("parler", ["parle", "parles", "parle", "parlons", "parlez", "parlent"])
+  assert conditional(parler)
+    == [
+      "je parlerais", "tu parlerais", "il parlerait", "nous parlerions",
+      "vous parleriez", "ils parleraient",
+    ]
+  let vouloir =
+    verb("vouloir", ["veux", "veux", "veut", "voulons", "voulez", "veulent"])
+  assert lexicon.conjugated(vouloir, lexicon.Conditionnel, lexicon.Je)
+    == "je voudrais"
+  let aller = verb("aller", ["vais", "vas", "va", "allons", "allez", "vont"])
+  assert lexicon.conjugated(aller, lexicon.Conditionnel, lexicon.Je)
+    == "j'irais"
+  let acheter =
+    verb("acheter", [
+      "achète", "achètes", "achète", "achetons", "achetez", "achètent",
+    ])
+  assert lexicon.conjugated(acheter, lexicon.Conditionnel, lexicon.Nous)
+    == "nous achèterions"
+}
+
+pub fn conditionnel_of_reflexive_verbs_test() {
+  let lever =
+    reflexive(
+      "lever",
+      ["lève", "lèves", "lève", "levons", "levez", "lèvent"],
+      "levé",
+    )
+  assert lexicon.conjugated(lever, lexicon.Conditionnel, lexicon.Tu)
+    == "tu te lèverais"
+}

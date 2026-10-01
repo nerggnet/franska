@@ -12,19 +12,19 @@ Try it at **https://nerggnet.github.io/franska/**.
 ## Status
 
 The browser app ([Lustre](https://hexdocs.pm/lustre/)) offers rounds of 10
-exercises from 331 words and phrases (219 at A1 and 112 at A2), 73
+exercises from 332 words and phrases (219 at A1 and 113 at A2), 78
 gap-fill sentences and 32 sentences to rewrite (negation and pronouns),
 optionally limited to one theme:
 
 - Swedish → French and French → Swedish translation
 - le or la? for nouns
 - Verb conjugation: présent, futur proche, futur simple, passé composé,
-  imparfait and imperative, including reflexive verbs (se lever, lève-toi)
+  imparfait, conditionnel and imperative, including reflexive verbs (se lever, lève-toi)
 - Dictation: write down French read aloud
 - Numbers: write 0–100, the hundreds and a few thousands in words
 - Sentences: fill the gap in a sentence, with the Swedish meaning as context;
   themes for partitive articles, possessives, demonstratives, negation,
-  pronouns, comparisons and the future
+  pronouns, comparisons, the future and the conditional
 - Adjectives: agreement in gender and number (grand, grande, grands, grandes)
 - Negation: make a sentence negative (Tu as un chien → Tu n'as pas de chien)
 - Pronouns: replace part of a sentence with le, la, les, lui, leur, y or en

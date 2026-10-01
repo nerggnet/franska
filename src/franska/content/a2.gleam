@@ -27,6 +27,14 @@ pub fn entries() -> List(Entry) {
     phrase("quelle-heure-est-il", "vardagsfraser", ["vad är klockan?"], [
       "quelle heure est-il ?", "il est quelle heure ?",
     ]),
+    phrase(
+      "je-voudrais",
+      "vardagsfraser",
+      ["jag skulle vilja", "jag vill gärna"],
+      [
+        "je voudrais",
+      ],
+    ),
     phrase("j-ai-faim", "vardagsfraser", ["jag är hungrig"], ["j'ai faim"]),
     phrase("j-ai-soif", "vardagsfraser", ["jag är törstig"], ["j'ai soif"]),
     phrase("j-ai-froid", "vardagsfraser", ["jag fryser"], ["j'ai froid"]),
@@ -711,6 +719,46 @@ pub fn entries() -> List(Entry) {
       "Quand tu ___ grand, tu comprendras.",
       ["seras"],
       "être",
+    ),
+    sentence(
+      "konditionalis-cafe",
+      "konditionalis",
+      "Jag skulle vilja ha en kaffe, tack.",
+      "Je ___ un café, s'il vous plaît.",
+      ["voudrais"],
+      "vouloir",
+    ),
+    sentence(
+      "konditionalis-pourriez",
+      "konditionalis",
+      "Skulle ni kunna hjälpa mig?",
+      "Vous ___ m'aider ?",
+      ["pourriez"],
+      "pouvoir",
+    ),
+    sentence(
+      "konditionalis-pourrais",
+      "konditionalis",
+      "Skulle du kunna följa med oss?",
+      "Tu ___ venir avec nous ?",
+      ["pourrais"],
+      "pouvoir",
+    ),
+    sentence(
+      "konditionalis-si-argent",
+      "konditionalis",
+      "Om jag hade pengar skulle jag köpa ett hus.",
+      "Si j'avais de l'argent, j'___ une maison.",
+      ["achèterais"],
+      "acheter",
+    ),
+    sentence(
+      "konditionalis-a-ta-place",
+      "konditionalis",
+      "I ditt ställe skulle jag ta tåget.",
+      "À ta place, je ___ le train.",
+      ["prendrais"],
+      "prendre",
     ),
     // Pronomen
     pronoun("pron-je-vois-marie", "Jag ser henne.", "Je vois [Marie].", [

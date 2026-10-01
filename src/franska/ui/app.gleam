@@ -586,6 +586,7 @@ fn tense_name(tense: lexicon.Tense) -> String {
     lexicon.FuturSimple -> "futur simple"
     lexicon.PasseCompose -> "passé composé"
     lexicon.Imparfait -> "imparfait"
+    lexicon.Conditionnel -> "konditionalis"
     lexicon.Imperatif -> "imperativ"
   }
 }

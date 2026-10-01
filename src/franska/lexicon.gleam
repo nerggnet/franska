@@ -111,6 +111,9 @@ pub type Tense {
   PasseCompose
   /// Generated from the nous stem: "nous parlons" gives "je parlais".
   Imparfait
+  /// The futur simple stem with the imparfait endings: "je parlerais",
+  /// "j'irais", "je voudrais".
+  Conditionnel
   /// Only tu, nous and vous: "parle", "parlons", "parlez", "lève-toi".
   Imperatif
 }
@@ -121,6 +124,7 @@ pub const tenses = [
   FuturSimple,
   PasseCompose,
   Imparfait,
+  Conditionnel,
   Imperatif,
 ]
 
@@ -140,6 +144,7 @@ pub fn tense_id(tense: Tense) -> String {
     FuturSimple -> "futur-simple"
     PasseCompose -> "passe-compose"
     Imparfait -> "imparfait"
+    Conditionnel -> "conditionnel"
     Imperatif -> "imperatif"
   }
 }
@@ -391,6 +396,10 @@ fn forms(
       list.map(future_stems(infinitive, present), fn(stem) {
         reflexive(word, person, stem <> future_ending(person))
       })
+    Verb(infinitive:, present:, ..), Conditionnel ->
+      list.map(future_stems(infinitive, present), fn(stem) {
+        reflexive(word, person, stem <> imparfait_ending(person))
+      })
     Verb(..), Imperatif -> imperative(word, person)
     _, _ -> []
   }
@@ -440,6 +449,17 @@ fn irregular_future_stem(infinitive: String) -> Result(String, Nil) {
     "savoir" -> Ok("saur")
     "devoir" -> Ok("devr")
     _ -> Error(Nil)
+  }
+}
+
+/// The endings of the imparfait, also used by the conditionnel.
+fn imparfait_ending(person: Person) -> String {
+  case person {
+    Je | Tu -> "ais"
+    Il -> "ait"
+    Nous -> "ions"
+    Vous -> "iez"
+    Ils -> "aient"
   }
 }
 
@@ -547,13 +567,7 @@ fn imparfait(infinitive: String, present: Present, person: Person) -> String {
     "être" -> "ét"
     _ -> string.drop_end(present.nous, 3)
   }
-  let ending = case person {
-    Je | Tu -> "ais"
-    Il -> "ait"
-    Nous -> "ions"
-    Vous -> "iez"
-    Ils -> "aient"
-  }
+  let ending = imparfait_ending(person)
   let stem = case string.starts_with(ending, "i") {
     False -> stem
     True ->
