@@ -210,6 +210,74 @@ pub fn adjective_form(word: Word, form: AdjectiveForm) -> Result(String, Nil) {
   }
 }
 
+pub type Degree {
+  More
+  Less
+  Equal
+  /// The superlative: "les plus grandes".
+  Most
+}
+
+pub const degrees = [More, Less, Equal, Most]
+
+/// Stable id of a degree, part of exercise ids.
+pub fn degree_id(degree: Degree) -> String {
+  case degree {
+    More -> "more"
+    Less -> "less"
+    Equal -> "equal"
+    Most -> "most"
+  }
+}
+
+/// The French sentence each degree is practised in. The subject decides the
+/// form: feminine, masculine plural, masculine and feminine plural.
+pub fn comparison_frame(degree: Degree) -> String {
+  case degree {
+    More -> "Elle est " <> gap <> " que lui."
+    Less -> "Ils sont " <> gap <> " que nous."
+    Equal -> "Il est " <> gap <> " que toi."
+    Most -> "Elles sont " <> gap <> " de toutes."
+  }
+}
+
+/// Accepted answers for the gap in `comparison_frame(degree)`, canonical
+/// first: "plus grande", "moins grands", "aussi grand", "les plus grandes".
+/// Bon is irregular (meilleure, les meilleures), and mauvais can also be
+/// pire. Invariable adjectives such as marron get none.
+pub fn compared(word: Word, degree: Degree) -> List(String) {
+  case word {
+    Adjective(masculine:, feminine:, masculine_plural:, feminine_plural:)
+      if masculine != feminine_plural
+    -> {
+      let #(form, irregular) = case degree, masculine {
+        More, "bon" -> #(feminine, ["meilleure"])
+        Most, "bon" -> #(feminine_plural, ["les meilleures"])
+        More, "mauvais" -> #(feminine, ["plus mauvaise", "pire"])
+        Most, "mauvais" -> #(feminine_plural, [
+          "les plus mauvaises",
+          "les pires",
+        ])
+        More, _ -> #(feminine, [])
+        Less, _ -> #(masculine_plural, [])
+        Equal, _ -> #(masculine, [])
+        Most, _ -> #(feminine_plural, [])
+      }
+      case irregular {
+        [_, ..] -> irregular
+        [] ->
+          case degree {
+            More -> ["plus " <> form]
+            Less -> ["moins " <> form]
+            Equal -> ["aussi " <> form]
+            Most -> ["les plus " <> form]
+          }
+      }
+    }
+    _ -> []
+  }
+}
+
 /// Stable id of an adjective form, part of exercise ids.
 pub fn adjective_form_id(form: AdjectiveForm) -> String {
   case form {

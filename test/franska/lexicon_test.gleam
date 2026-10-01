@@ -225,3 +225,39 @@ pub fn reflexive_imperative_puts_the_pronoun_after_test() {
     )
   assert imperative(lever) == ["lève-toi", "levons-nous", "levez-vous"]
 }
+
+fn compared(masculine: String, feminine: String) -> List(List(String)) {
+  list.map(lexicon.degrees, lexicon.compared(
+    lexicon.adjective(masculine, feminine),
+    _,
+  ))
+}
+
+pub fn comparisons_agree_with_the_subject_test() {
+  assert compared("grand", "grande")
+    == [
+      ["plus grande"],
+      ["moins grands"],
+      ["aussi grand"],
+      ["les plus grandes"],
+    ]
+  assert compared("beau", "belle")
+    == [["plus belle"], ["moins beaux"], ["aussi beau"], ["les plus belles"]]
+}
+
+pub fn bon_and_mauvais_are_irregular_test() {
+  assert compared("bon", "bonne")
+    == [["meilleure"], ["moins bons"], ["aussi bon"], ["les meilleures"]]
+  assert compared("mauvais", "mauvaise")
+    == [
+      ["plus mauvaise", "pire"],
+      ["moins mauvais"],
+      ["aussi mauvais"],
+      ["les plus mauvaises", "les pires"],
+    ]
+}
+
+pub fn invariable_adjectives_are_not_compared_test() {
+  assert lexicon.compared(lexicon.invariable_adjective("marron"), lexicon.More)
+    == []
+}

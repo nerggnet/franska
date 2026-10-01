@@ -6,9 +6,9 @@
 import franska/answer.{type Grade, Almost, Correct, Wrong}
 import franska/content
 import franska/exercise.{
-  type Drill, type Exercise, Adjectives, Agree, Articles, ChooseArticle,
-  Conjugate, Conjugation, Dictation, FillGap, Listen, Negation, Numbers,
-  Pronouns, Sentences, ToFrench, ToSwedish, Transform, Translate,
+  type Drill, type Exercise, Adjectives, Agree, Articles, ChooseArticle, Compare,
+  Comparisons, Conjugate, Conjugation, Dictation, FillGap, Listen, Negation,
+  Numbers, Pronouns, Sentences, ToFrench, ToSwedish, Transform, Translate,
   TranslateToFrench, TranslateToSwedish, WriteNumber,
 }
 import franska/gender
@@ -551,6 +551,7 @@ fn drill_name(drill: Drill) -> String {
     Adjectives -> "Böj adjektiv"
     Negation -> "Negation"
     Pronouns -> "Pronomen"
+    Comparisons -> "Jämförelse"
   }
 }
 
@@ -565,7 +566,7 @@ fn drill_group(drill: Drill) -> DrillGroup {
   case drill {
     TranslateToFrench | TranslateToSwedish | Articles | Dictation | Numbers ->
       WordDrills
-    Adjectives | Sentences | Negation | Pronouns -> GrammarDrills
+    Adjectives | Sentences | Negation | Pronouns | Comparisons -> GrammarDrills
     Conjugation(_) -> VerbDrills
   }
 }
@@ -677,6 +678,7 @@ fn instruction(exercise: Exercise) -> String {
     WriteNumber(_) -> "Skriv talet med bokstäver"
     FillGap(..) -> "Fyll i luckan"
     Agree(_) -> "Böj adjektivet"
+    Compare(..) -> "Jämför med adjektivet"
     Transform(task: lexicon.Negate, ..) -> "Gör meningen negativ"
     Transform(task: lexicon.UsePronoun, ..) ->
       "Byt ut det markerade mot ett pronomen"
@@ -740,6 +742,19 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
           html.text(" → " <> adjective_form_name(form)),
         ]),
       ])
+    Compare(degree:, adjective:) -> {
+      let #(before, after) =
+        string.split_once(exercise.prompt, lexicon.gap)
+        |> result.unwrap(#(exercise.prompt, ""))
+      html.p([class("prompt"), attribute.lang("fr")], [
+        html.text(before),
+        html.span([class("blank")], [html.text("___")]),
+        html.span([class("infinitive")], [
+          html.text(" (" <> adjective <> ", " <> degree_name(degree) <> ")"),
+        ]),
+        html.text(after),
+      ])
+    }
     FillGap(hint:, translation:) -> {
       let #(before, after) =
         string.split_once(exercise.prompt, lexicon.gap)
@@ -778,6 +793,15 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
           html.text(" (" <> exercise.prompt <> ")"),
         ]),
       ])
+  }
+}
+
+fn degree_name(degree: lexicon.Degree) -> String {
+  case degree {
+    lexicon.More -> "mer"
+    lexicon.Less -> "mindre"
+    lexicon.Equal -> "lika"
+    lexicon.Most -> "mest"
   }
 }
 

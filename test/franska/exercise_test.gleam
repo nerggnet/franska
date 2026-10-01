@@ -171,7 +171,8 @@ pub fn passe_compose_with_etre_agrees_with_the_subject_test() {
   let ils = find(aller(), "aller:passe-compose:ils")
   assert ils.french == "ils sont allés"
   assert exercise.check(ils, "elles sont allées") == Correct
-  assert exercise.check(ils, "ils sont allé") == Almost("ils sont allés", Typo)
+  // The missing agreement is the mistake, not a typo.
+  assert exercise.check(ils, "ils sont allé") == Wrong("sont allés")
 }
 
 pub fn a_sentence_yields_only_a_gap_exercise_test() {
@@ -251,5 +252,28 @@ pub fn imperative_exercises_are_for_tu_nous_and_vous_test() {
   let tu = find(aimer(), "aimer:imperatif:tu")
   assert tu.french == "aime"
   assert exercise.check(tu, "Aime !") == Correct
-  assert exercise.check(tu, "aimes") == Almost("aime", Typo)
+  assert exercise.check(tu, "aimes") == Wrong("aime")
+}
+
+pub fn adjectives_are_compared_in_a_sentence_test() {
+  let grand = adjective("grand", lexicon.adjective("grand", "grande"))
+  let more = find(grand, "grand:compare:more")
+  assert more.prompt == "Elle est ___ que lui."
+  assert more.french == "Elle est plus grande que lui."
+  assert exercise.check(more, "plus grande") == Correct
+  assert exercise.check(more, "plus grand") == Wrong("plus grande")
+  let most = find(grand, "grand:compare:most")
+  assert exercise.check(most, "les plus grandes") == Correct
+}
+
+pub fn agreement_and_endings_are_not_typos_test() {
+  let grand = adjective("grand", lexicon.adjective("grand", "grande"))
+  assert exercise.check(find(grand, "grand:agree:fs"), "grand")
+    == Wrong("grande")
+  let nous = find(aimer(), "aimer:present:nous")
+  assert exercise.check(nous, "aimez") == Wrong("aimons")
+  // Accents are still only almost wrong.
+  let etre = find(aller(), "aller:passe-compose:vous")
+  assert exercise.check(etre, "vous etes alles")
+    == Almost("vous êtes allés", MissingAccents)
 }

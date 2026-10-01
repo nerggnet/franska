@@ -7,6 +7,7 @@ import franska/lexicon.{
   Expression, Noun, Rewrite, Sentence, Verb,
 }
 import gleam/list
+import gleam/string
 
 pub type Direction {
   ToFrench
@@ -26,6 +27,8 @@ pub type Kind {
   WriteNumber(Int)
   /// Give an adjective in another form; the prompt is the masculine.
   Agree(AdjectiveForm)
+  /// Compare with an adjective in the gap of the prompt sentence.
+  Compare(degree: lexicon.Degree, adjective: String)
   /// Rewrite a sentence; the prompt is the sentence and `translation` the
   /// Swedish meaning of the answer.
   Transform(task: lexicon.Task, translation: String)
@@ -45,6 +48,7 @@ pub type Drill {
   Adjectives
   Negation
   Pronouns
+  Comparisons
   Conjugation(Tense)
 }
 
@@ -59,6 +63,7 @@ pub fn drills() -> List(Drill) {
     Sentences,
     Negation,
     Pronouns,
+    Comparisons,
     ..list.map(lexicon.tenses, Conjugation)
   ]
 }
@@ -90,6 +95,7 @@ pub fn drill(kind: Kind) -> Drill {
     WriteNumber(_) -> Numbers
     FillGap(..) -> Sentences
     Agree(_) -> Adjectives
+    Compare(..) -> Comparisons
     Transform(task: lexicon.Negate, ..) -> Negation
     Transform(task: lexicon.UsePronoun, ..) -> Pronouns
   }
@@ -234,7 +240,24 @@ fn word_exercises(
             Error(Nil) -> acc
           }
         })
-      list.reverse(exercises)
+      let comparisons =
+        list.filter_map(lexicon.degrees, fn(degree) {
+          case lexicon.compared(adjective, degree) {
+            [] -> Error(Nil)
+            [first, ..] as answers -> {
+              let frame = lexicon.comparison_frame(degree)
+              Ok(exercise(
+                "compare:" <> lexicon.degree_id(degree),
+                Compare(degree:, adjective: masculine),
+                frame,
+                answers,
+                answer.French,
+                string.replace(frame, lexicon.gap, first),
+              ))
+            }
+          }
+        })
+      list.append(list.reverse(exercises), comparisons)
     }
     Expression(..) | Rewrite(..) | Sentence(..) -> []
   }
@@ -242,11 +265,13 @@ fn word_exercises(
   list.append(translations, extras)
 }
 
-/// Grades an answer. Rewritten sentences get no typo leniency, since a
-/// letter or two (le/la, pas un/pas de) is what they practise.
+/// Grades an answer. Where a letter or two is what the exercise practises
+/// (an ending, agreement, le/la, pas un/pas de), a small difference is a
+/// mistake rather than a typo, so those get no typo leniency.
 pub fn check(exercise: Exercise, given: String) -> Grade {
   let grade = case exercise.kind {
-    Transform(..) -> answer.grade_without_typos
+    Transform(..) | Conjugate(..) | Agree(_) | Compare(..) ->
+      answer.grade_without_typos
     _ -> answer.grade
   }
   grade(given, exercise.accepted, exercise.answer_language)

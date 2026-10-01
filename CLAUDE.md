@@ -80,7 +80,9 @@ must work on both targets, has no FFI and never reads the clock.
   without a form get no exercise for it. `Exercise.french` is the full
   French form, used to reveal answers and for reading aloud. A `Drill` is
   the kind of practice picked in the menu.
-- `answer.gleam`: normalising and grading. A grade is `Correct`,
+- `answer.gleam`: normalising and grading. `exercise.check` uses
+  `grade_without_typos` for conjugation, agreement, comparisons and
+  rewrites, where a letter or two is the point of the exercise. A grade is `Correct`,
   `Almost(expected, mistake)` or `Wrong(expected)`; `explain` gives Swedish
   feedback. Swedish å/ä/ö are letters, not accents, so they are never folded.
 - `srs.gleam`: Leitner spaced repetition with 6 boxes. Times are Unix
