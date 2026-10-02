@@ -2137,6 +2137,203 @@ pub fn entries() -> List(Entry) {
         question("Vad ingår i priset?", ["Frukost", "Middag", "Parkering"], 0),
       ],
     ),
+    // Ännu fler texter
+    text(
+      "text-demenagement",
+      "Un e-mail de Camille",
+      "Salut Hugo !\nÇa y est, j'ai déménagé ! Mon nouvel appartement est au deuxième étage d'un vieil immeuble, près de la gare.\nIl est plus grand que l'ancien et il a un petit balcon. Le loyer est un peu plus cher, mais ça va.\nSamedi prochain, j'organiserai une petite fête pour mes amis. Tu viendras ? Apporte quelque chose à boire !\nBisous, Camille",
+      "Hej Hugo!\nNu är det klart, jag har flyttat! Min nya lägenhet ligger på andra våningen i ett gammalt hyreshus nära stationen.\nDen är större än den gamla och har en liten balkong. Hyran är lite dyrare, men det är okej.\nNästa lördag ska jag ha en liten fest för mina vänner. Kommer du? Ta med något att dricka!\nKram, Camille",
+      [
+        question(
+          "Var ligger Camilles nya lägenhet?",
+          ["Nära stationen", "Nära stranden", "I en ny förort"],
+          0,
+        ),
+        question(
+          "Vad har den nya lägenheten som den gamla inte hade?",
+          ["En stor trädgård", "Ett extra sovrum", "En liten balkong"],
+          2,
+        ),
+        question(
+          "Vad ska Hugo ta med till festen?",
+          ["En present", "Något att dricka", "Något att äta"],
+          1,
+        ),
+      ],
+    ),
+    text(
+      "text-coiffeur",
+      "Chez le coiffeur",
+      "— Bonjour, madame. Vous avez rendez-vous ?\n— Oui, à dix heures. Je m'appelle Nora Martin.\n— Parfait. Qu'est-ce que je vous fais aujourd'hui ?\n— Je voudrais les cheveux un peu plus courts, mais pas trop.\n— D'accord. Et la couleur ?\n— Non merci, je garde ma couleur naturelle.\n— Très bien. Asseyez-vous, s'il vous plaît.",
+      "– Hej. Har ni en bokad tid?\n– Ja, klockan tio. Jag heter Nora Martin.\n– Utmärkt. Vad ska vi göra i dag?\n– Jag skulle vilja ha håret lite kortare, men inte för mycket.\n– Okej. Och färgen?\n– Nej tack, jag behåller min naturliga hårfärg.\n– Bra. Sätt er, är ni snäll.",
+      [
+        question(
+          "Vilken tid har Nora bokat?",
+          ["Klockan nio", "Klockan tio", "Klockan elva"],
+          1,
+        ),
+        question(
+          "Vad vill hon göra med håret?",
+          ["Klippa det lite kortare", "Klippa det väldigt kort", "Färga det"],
+          0,
+        ),
+        question(
+          "Vad säger hon om färgen?",
+          [
+            "Hon vill ha blont hår",
+            "Hon vill ha mörkare hår",
+            "Hon behåller sin naturliga färg",
+          ],
+          2,
+        ),
+      ],
+    ),
+    text(
+      "text-recette-crepes",
+      "La recette des crêpes",
+      "Pour quatre personnes, il faut 250 grammes de farine, quatre œufs, un demi-litre de lait et un peu de sucre.\nD'abord, mettez la farine dans un grand bol. Ajoutez les œufs et mélangez.\nEnsuite, versez le lait petit à petit. Laissez reposer la pâte une heure.\nFaites chauffer une poêle avec un peu de beurre et faites cuire les crêpes une minute de chaque côté. Bon appétit !",
+      "För fyra personer behövs 250 gram mjöl, fyra ägg, en halv liter mjölk och lite socker.\nLägg först mjölet i en stor skål. Tillsätt äggen och blanda.\nHäll sedan i mjölken lite i taget. Låt smeten vila en timme.\nVärm en stekpanna med lite smör och stek pannkakorna en minut på varje sida. Smaklig måltid!",
+      [
+        question("Hur många ägg behövs?", ["Två", "Sex", "Fyra"], 2),
+        question(
+          "Hur länge ska smeten vila?",
+          ["En kvart", "En timme", "En hel natt"],
+          1,
+        ),
+        question(
+          "Hur länge steks varje sida?",
+          ["En minut", "Fem minuter", "Tio sekunder"],
+          0,
+        ),
+      ],
+    ),
+    text(
+      "text-entretien",
+      "Un entretien d'embauche",
+      "— Bonjour, monsieur Petit. Asseyez-vous. Pourquoi voulez-vous travailler chez nous ?\n— Parce que votre entreprise est très connue et j'aimerais apprendre beaucoup de choses.\n— Qu'est-ce que vous avez fait avant ?\n— J'ai travaillé deux ans dans un hôtel à Nice. Avant, j'ai fait un stage à Londres.\n— Vous parlez anglais ?\n— Oui, couramment. Et je parle aussi un peu d'espagnol.\n— Très bien. Vous pourriez commencer le mois prochain ?\n— Oui, bien sûr.",
+      "– God dag, herr Petit. Sätt er. Varför vill ni arbeta hos oss?\n– För att ert företag är välkänt och jag skulle vilja lära mig mycket.\n– Vad har ni gjort tidigare?\n– Jag har arbetat två år på ett hotell i Nice. Innan dess praktiserade jag i London.\n– Talar ni engelska?\n– Ja, flytande. Och jag talar lite spanska också.\n– Mycket bra. Skulle ni kunna börja nästa månad?\n– Ja, självklart.",
+      [
+        question(
+          "Var har herr Petit arbetat?",
+          [
+            "På ett hotell i Nice",
+            "På en bank i London",
+            "På en restaurang i Paris",
+          ],
+          0,
+        ),
+        question(
+          "Hur bra talar han engelska?",
+          ["Lite", "Flytande", "Inte alls"],
+          1,
+        ),
+        question(
+          "När skulle han kunna börja?",
+          ["I morgon", "Nästa år", "Nästa månad"],
+          2,
+        ),
+      ],
+    ),
+    text(
+      "text-transports-paris",
+      "Les transports à Paris",
+      "À Paris, le métro est souvent le moyen de transport le plus rapide. Il y a seize lignes et les trains passent toutes les deux ou trois minutes.\nLe bus est plus lent que le métro, mais on voit la ville.\nBeaucoup de Parisiens prennent aussi le vélo : c'est moins cher et meilleur pour l'environnement.\nLa voiture est le moyen le moins pratique, parce qu'il y a beaucoup de circulation et peu de places de parking.",
+      "I Paris är tunnelbanan ofta det snabbaste färdmedlet. Det finns sexton linjer och tågen går varannan eller var tredje minut.\nBussen är långsammare än tunnelbanan, men man ser staden.\nMånga parisare cyklar också: det är billigare och bättre för miljön.\nBilen är det minst praktiska färdmedlet, eftersom det är mycket trafik och få parkeringsplatser.",
+      [
+        question(
+          "Vilket färdmedel är ofta snabbast?",
+          ["Bussen", "Bilen", "Tunnelbanan"],
+          2,
+        ),
+        question(
+          "Vad är fördelen med bussen?",
+          ["Man ser staden", "Den är snabbast", "Den är gratis"],
+          0,
+        ),
+        question(
+          "Varför är bilen minst praktisk?",
+          [
+            "Bensinen är väldigt dyr i Paris",
+            "Mycket trafik och få parkeringsplatser",
+            "Gatorna är för smala för bilar",
+          ],
+          1,
+        ),
+      ],
+    ),
+    text(
+      "text-journee-campagne",
+      "Une journée à la campagne",
+      "Dimanche dernier, il faisait très beau, alors nous avons pris la voiture pour aller à la campagne.\nNous avons marché deux heures dans la forêt. Les arbres étaient verts et les oiseaux chantaient.\nÀ midi, nous avons mangé un pique-nique au bord d'un lac. Mon fils a voulu nager, mais l'eau était trop froide !\nLe soir, nous étions fatigués mais très contents de notre journée.",
+      "I söndags var det väldigt fint väder, så vi tog bilen ut på landet.\nVi gick i två timmar i skogen. Träden var gröna och fåglarna sjöng.\nMitt på dagen åt vi picknick vid en sjö. Min son ville bada, men vattnet var för kallt!\nPå kvällen var vi trötta men väldigt nöjda med dagen.",
+      [
+        question(
+          "Hur tog de sig ut på landet?",
+          ["Med tåg", "Med bil", "Med cykel"],
+          1,
+        ),
+        question(
+          "Var åt de lunch?",
+          ["På en restaurang", "Hemma", "Vid en sjö"],
+          2,
+        ),
+        question(
+          "Varför badade inte sonen?",
+          ["Vattnet var för kallt", "Han var för trött", "Det började regna"],
+          0,
+        ),
+      ],
+    ),
+    text(
+      "text-pharmacie",
+      "À la pharmacie",
+      "— Bonjour, madame. J'ai mal à la gorge et je tousse depuis trois jours.\n— Vous avez de la fièvre ?\n— Non, je ne crois pas.\n— Alors, je vous donne ce sirop. Prenez une cuillère trois fois par jour, après les repas.\n— Merci. Et si ça ne va pas mieux ?\n— Si vous toussez encore dans une semaine, allez chez le médecin.",
+      "– Hej. Jag har ont i halsen och har hostat i tre dagar.\n– Har ni feber?\n– Nej, jag tror inte det.\n– Då ger jag er den här hostmedicinen. Ta en sked tre gånger om dagen, efter måltiderna.\n– Tack. Och om det inte blir bättre?\n– Om ni fortfarande hostar om en vecka, gå till läkaren.",
+      [
+        question(
+          "Hur länge har kunden hostat?",
+          ["I tre dagar", "I en vecka", "Sedan i går"],
+          0,
+        ),
+        question(
+          "När ska kunden ta medicinen?",
+          ["Före frukost", "På kvällen", "Efter måltiderna"],
+          2,
+        ),
+        question(
+          "Vad ska kunden göra om hostan inte går över?",
+          ["Ta mer medicin", "Gå till läkaren", "Stanna hemma"],
+          1,
+        ),
+      ],
+    ),
+    text(
+      "text-resolutions",
+      "Mes bonnes résolutions",
+      "Cette année, je changerai beaucoup de choses !\nD'abord, je ferai du sport trois fois par semaine. Je nagerai le lundi et je courrai le jeudi.\nJe mangerai plus de légumes et moins de sucre.\nJ'apprendrai aussi une nouvelle langue : le français, bien sûr ! Et en été, je partirai en France pour le parler.",
+      "I år ska jag ändra på mycket!\nFörst ska jag träna tre gånger i veckan. Jag ska simma på måndagarna och springa på torsdagarna.\nJag ska äta mer grönsaker och mindre socker.\nJag ska också lära mig ett nytt språk: franska, förstås! Och på sommaren ska jag åka till Frankrike för att prata det.",
+      [
+        question(
+          "Hur ofta ska personen träna?",
+          ["Varje dag", "Tre gånger i veckan", "En gång i veckan"],
+          1,
+        ),
+        question(
+          "Vad ska personen äta mindre av?",
+          ["Socker", "Grönsaker", "Fisk"],
+          0,
+        ),
+        question(
+          "Varför ska personen åka till Frankrike?",
+          [
+            "För att arbeta",
+            "För att hälsa på familjen",
+            "För att prata franska",
+          ],
+          2,
+        ),
+      ],
+    ),
   ]
 }
 
