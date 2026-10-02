@@ -2,6 +2,7 @@ import franska/answer.{Correct}
 import franska/content
 import franska/exercise
 import franska/lexicon.{Expression}
+import gleam/int
 import gleam/list
 import gleam/option
 import gleam/string
@@ -181,4 +182,23 @@ pub fn there_are_texts_at_both_levels_test() {
     })
   assert list.contains(levels, lexicon.A1)
   assert list.contains(levels, lexicon.A2)
+}
+
+/// The right option is not always in the same place, so that guessing a
+/// position does not pay off.
+pub fn right_answers_are_spread_over_the_positions_test() {
+  let positions =
+    content.entries()
+    |> list.flat_map(fn(e) {
+      case e.word {
+        lexicon.Text(questions:, ..) -> list.map(questions, fn(q) { q.answer })
+        _ -> []
+      }
+    })
+  let total = list.length(positions)
+  let most =
+    [0, 1, 2]
+    |> list.map(fn(position) { list.count(positions, fn(p) { p == position }) })
+    |> list.fold(0, int.max)
+  assert most * 2 <= total
 }

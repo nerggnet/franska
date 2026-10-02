@@ -1187,11 +1187,11 @@ pub fn entries() -> List(Entry) {
       "Bonjour ! Je m'appelle Léa. J'ai vingt-deux ans et j'habite à Lyon.\nJe suis étudiante à l'université. J'ai un frère, Tom. Il a seize ans.\nNous avons un chat noir. Le week-end, j'aime lire et jouer de la guitare.",
       "Hej! Jag heter Léa. Jag är tjugotvå år och bor i Lyon.\nJag studerar på universitetet. Jag har en bror, Tom. Han är sexton år.\nVi har en svart katt. På helgen tycker jag om att läsa och spela gitarr.",
       [
-        question("Var bor Léa?", ["I Paris", "I Lyon", "I Nice"], 1),
+        question("Var bor Léa?", ["I Lyon", "I Paris", "I Nice"], 0),
         question(
           "Hur gammal är Tom?",
-          ["Sexton år", "Tjugotvå år", "Tolv år"],
-          0,
+          ["Tjugotvå år", "Tolv år", "Sexton år"],
+          2,
         ),
         question(
           "Vilket djur har de?",
@@ -1213,8 +1213,8 @@ pub fn entries() -> List(Entry) {
       [
         question(
           "Vad beställer kvinnan?",
-          ["Ett te och en kaka", "En kaffe och en croissant", "En juice"],
-          1,
+          ["Ett te och en kaka", "En juice", "En kaffe och en croissant"],
+          2,
         ),
         question("Vill hon ha mjölk i kaffet?", ["Ja", "Nej", "Lite"], 1),
         question(
@@ -1232,8 +1232,8 @@ pub fn entries() -> List(Entry) {
       [
         question(
           "När går personen upp?",
-          ["Klockan sex", "Klockan sju", "Klockan åtta"],
-          1,
+          ["Klockan sex", "Klockan åtta", "Klockan sju"],
+          2,
         ),
         question(
           "Hur tar sig personen till jobbet?",
@@ -1242,13 +1242,13 @@ pub fn entries() -> List(Entry) {
         ),
         question(
           "Var äter personen lunch?",
-          ["Hemma", "På restaurang", "På kontoret"],
-          1,
+          ["På restaurang", "Hemma", "På kontoret"],
+          0,
         ),
         question(
           "Vad gör personen på kvällen?",
-          ["Tittar på tv", "Läser en bok", "Springer"],
-          0,
+          ["Läser en bok", "Springer", "Tittar på tv"],
+          2,
         ),
       ],
     ),
@@ -1263,11 +1263,11 @@ pub fn entries() -> List(Entry) {
           ["Han är lärare", "Han är läkare", "Han är kock"],
           1,
         ),
-        question("Hur många systrar har personen?", ["En", "Två", "Tre"], 1),
+        question("Hur många systrar har personen?", ["Två", "En", "Tre"], 0),
         question(
           "Var bor far- och morföräldrarna?",
-          ["I stan", "På landet", "Vid havet"],
-          1,
+          ["I stan", "Vid havet", "På landet"],
+          2,
         ),
         question(
           "När hälsar familjen på dem?",
@@ -1282,11 +1282,11 @@ pub fn entries() -> List(Entry) {
       "— Bonjour, monsieur !\n— Bonjour ! Je voudrais une baguette et deux croissants, s'il vous plaît.\n— Bien sûr. Et avec ça ?\n— Un gâteau au chocolat, aussi.\n— D'accord. Ça fait huit euros.\n— Voilà dix euros.\n— Merci. Voici votre monnaie.",
       "– Hej!\n– Hej! Jag skulle vilja ha en baguette och två croissanter, tack.\n– Självklart. Något mer?\n– En chokladtårta också.\n– Okej. Det blir åtta euro.\n– Här är tio euro.\n– Tack. Här är er växel.",
       [
-        question("Hur många croissanter köper mannen?", ["En", "Två", "Tre"], 1),
+        question("Hur många croissanter köper mannen?", ["Två", "En", "Tre"], 0),
         question(
           "Vilken sorts tårta köper han?",
-          ["Jordgubbstårta", "Chokladtårta", "Citrontårta"],
-          1,
+          ["Jordgubbstårta", "Citrontårta", "Chokladtårta"],
+          2,
         ),
         question(
           "Hur mycket betalar han med?",
@@ -1306,11 +1306,163 @@ pub fn entries() -> List(Entry) {
           ["Spelar fotboll", "Spelar tennis", "Simmar"],
           0,
         ),
-        question("Vad äter de?", ["Pizza", "Smörgåsar", "Glass"], 1),
+        question("Vad äter de?", ["Pizza", "Glass", "Smörgåsar"], 2),
         question(
           "Vem ringer personen till på söndagen?",
-          ["Sin mormor", "Sin bror", "Sin mamma"],
+          ["Sin bror", "Sin mormor", "Sin mamma"],
+          1,
+        ),
+      ],
+    ),
+    // Fler texter
+    text(
+      "text-a-la-gare",
+      "À la gare",
+      "— Bonjour, un billet pour Paris, s'il vous plaît.\n— Aller simple ou aller-retour ?\n— Aller-retour.\n— Pour quel jour ?\n— Pour demain matin.\n— Le train part à huit heures et quart. Ça fait quarante-deux euros.\n— Voilà. Merci !",
+      "– Hej, en biljett till Paris, tack.\n– Enkel eller tur och retur?\n– Tur och retur.\n– För vilken dag?\n– För i morgon bitti.\n– Tåget går kvart över åtta. Det blir fyrtiotvå euro.\n– Varsågod. Tack!",
+      [
+        question(
+          "Vart ska personen åka?",
+          ["Till Paris", "Till Lyon", "Till Marseille"],
           0,
+        ),
+        question(
+          "Vilken sorts biljett köper personen?",
+          ["Enkel", "Ett månadskort", "Tur och retur"],
+          2,
+        ),
+        question(
+          "När går tåget?",
+          ["Halv nio", "Kvart över åtta", "Klockan åtta"],
+          1,
+        ),
+        question("Vad kostar biljetten?", ["42 euro", "24 euro", "52 euro"], 0),
+      ],
+    ),
+    text(
+      "text-mon-appartement",
+      "Mon appartement",
+      "J'habite dans un petit appartement au troisième étage. Il y a une cuisine, un salon et une chambre.\nDans le salon, il y a un canapé bleu et une grande table.\nMa chambre est petite, mais elle a une fenêtre avec une belle vue sur le parc. J'aime beaucoup mon appartement.",
+      "Jag bor i en liten lägenhet på tredje våningen. Det finns ett kök, ett vardagsrum och ett sovrum.\nI vardagsrummet finns en blå soffa och ett stort bord.\nMitt sovrum är litet, men det har ett fönster med fin utsikt över parken. Jag tycker mycket om min lägenhet.",
+      [
+        question(
+          "På vilken våning bor personen?",
+          ["På andra", "På fjärde", "På tredje"],
+          2,
+        ),
+        question("Vilken färg har soffan?", ["Röd", "Blå", "Grön"], 1),
+        question(
+          "Vad ser man från sovrumsfönstret?",
+          ["En park", "Havet", "En kyrka"],
+          0,
+        ),
+      ],
+    ),
+    text(
+      "text-au-marche",
+      "Au marché",
+      "Le samedi matin, je vais au marché avec ma mère.\nNous achetons des légumes, des fruits et du fromage. Les tomates sont très bonnes en été.\nMa mère parle avec le vendeur de fromage, il est très sympathique.\nAprès le marché, nous buvons un café ensemble.",
+      "På lördagsmorgnarna går jag till marknaden med min mamma.\nVi köper grönsaker, frukt och ost. Tomaterna är väldigt goda på sommaren.\nMin mamma pratar med ostförsäljaren, han är väldigt trevlig.\nEfter marknaden dricker vi kaffe tillsammans.",
+      [
+        question(
+          "När går personen till marknaden?",
+          ["På söndagskvällarna", "På måndagsmorgnarna", "På lördagsmorgnarna"],
+          2,
+        ),
+        question(
+          "Vem går personen dit med?",
+          ["Sin bror", "Sin mamma", "En vän"],
+          1,
+        ),
+        question(
+          "Vad gör de efter marknaden?",
+          ["Dricker kaffe", "Äter lunch", "Går hem"],
+          0,
+        ),
+      ],
+    ),
+    text(
+      "text-mon-ami-lucas",
+      "Mon ami Lucas",
+      "Lucas est mon meilleur ami. Il a vingt-cinq ans et il habite à Marseille.\nIl est grand, il a les cheveux noirs et les yeux bleus. Il travaille dans une banque.\nIl aime le sport : il joue au tennis le mardi et il nage le jeudi.\nLe week-end, nous allons souvent au cinéma.",
+      "Lucas är min bästa vän. Han är tjugofem år och bor i Marseille.\nHan är lång, har svart hår och blå ögon. Han arbetar på en bank.\nHan tycker om sport: han spelar tennis på tisdagarna och simmar på torsdagarna.\nPå helgerna går vi ofta på bio.",
+      [
+        question("Var bor Lucas?", ["I Paris", "I Bordeaux", "I Marseille"], 2),
+        question(
+          "Var arbetar han?",
+          ["På ett sjukhus", "På en bank", "I en skola"],
+          1,
+        ),
+        question(
+          "Vad gör han på torsdagarna?",
+          ["Han simmar", "Han spelar tennis", "Han springer"],
+          0,
+        ),
+        question(
+          "Vad gör vännerna ofta på helgerna?",
+          ["Lagar mat", "Åker till havet", "Går på bio"],
+          2,
+        ),
+      ],
+    ),
+    text(
+      "text-le-temps-en-suede",
+      "Le temps en Suède",
+      "En Suède, l'hiver est long et froid. Il neige souvent et il fait nuit tôt, vers trois heures de l'après-midi.\nAu printemps, les jours sont plus longs.\nL'été est court mais très beau : il fait jour presque toute la nuit. Les Suédois aiment beaucoup l'été !",
+      "I Sverige är vintern lång och kall. Det snöar ofta och det blir mörkt tidigt, vid tretiden på eftermiddagen.\nPå våren blir dagarna längre.\nSommaren är kort men väldigt vacker: det är ljust nästan hela natten. Svenskarna tycker väldigt mycket om sommaren!",
+      [
+        question(
+          "Hur är vintern i Sverige?",
+          ["Kort och mild", "Lång och kall", "Varm"],
+          1,
+        ),
+        question(
+          "När blir det mörkt på vintern?",
+          ["Vid tretiden", "Vid femtiden", "Vid sjutiden"],
+          0,
+        ),
+        question(
+          "Hur är sommaren?",
+          ["Lång och regnig", "Varm och torr", "Kort men vacker"],
+          2,
+        ),
+      ],
+    ),
+    text(
+      "text-carte-postale",
+      "Une carte postale",
+      "Chère Marie,\nJe suis en vacances à la montagne avec ma famille. Il fait beau et chaud.\nLe matin, nous marchons dans la forêt et l'après-midi, nous nageons dans le lac.\nL'hôtel est petit mais très joli. Je rentre dimanche.\nBisous, Anna",
+      "Kära Marie,\nJag är på semester i bergen med min familj. Det är fint och varmt väder.\nPå förmiddagarna vandrar vi i skogen och på eftermiddagarna badar vi i sjön.\nHotellet är litet men väldigt fint. Jag åker hem på söndag.\nKram, Anna",
+      [
+        question(
+          "Var är Anna på semester?",
+          ["Vid havet", "I bergen", "I en storstad"],
+          1,
+        ),
+        question(
+          "Vad gör de på eftermiddagarna?",
+          ["Badar i sjön", "Vandrar i skogen", "Sover"],
+          0,
+        ),
+        question(
+          "När åker Anna hem?",
+          ["På lördag", "På måndag", "På söndag"],
+          2,
+        ),
+      ],
+    ),
+    text(
+      "text-au-restaurant",
+      "Au restaurant",
+      "— Bonsoir. Une table pour deux personnes ?\n— Oui, s'il vous plaît.\n— Voici la carte. Qu'est-ce que vous voulez boire ?\n— Une bouteille d'eau et deux verres de vin rouge.\n— Et comme plat ?\n— Pour moi, le poisson. Et pour mon mari, le poulet avec des légumes.\n— Très bien.",
+      "– God kväll. Ett bord för två personer?\n– Ja, tack.\n– Här är menyn. Vad vill ni dricka?\n– En flaska vatten och två glas rött vin.\n– Och vad vill ni äta?\n– Fisken till mig. Och kycklingen med grönsaker till min man.\n– Utmärkt.",
+      [
+        question("Hur många personer är de?", ["En", "Två", "Fyra"], 1),
+        question("Vad dricker de?", ["Vatten och rött vin", "Öl", "Juice"], 0),
+        question(
+          "Vad äter mannen?",
+          ["Fisk", "Pizza", "Kyckling med grönsaker"],
+          2,
         ),
       ],
     ),

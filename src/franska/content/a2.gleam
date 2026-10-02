@@ -1295,13 +1295,17 @@ pub fn entries() -> List(Entry) {
         ),
         question(
           "Hur lång tid tog resan?",
-          ["Fyra timmar", "Sex timmar", "Åtta timmar"],
-          1,
+          ["Sex timmar", "Fyra timmar", "Åtta timmar"],
+          0,
         ),
         question(
           "Var bodde de?",
-          ["På ett hotell", "I en liten lägenhet nära havet", "Hos vänner"],
-          1,
+          [
+            "På ett stort hotell i stan",
+            "Hemma hos några vänner",
+            "I en liten lägenhet nära havet",
+          ],
+          2,
         ),
         question(
           "Hur var vädret den sista dagen?",
@@ -1318,13 +1322,13 @@ pub fn entries() -> List(Entry) {
       [
         question(
           "Varför har Paul fest?",
-          ["Han har fått ett nytt jobb", "Han fyller år", "Han har flyttat"],
-          1,
+          ["Han fyller år", "Han har fått ett nytt jobb", "Han har flyttat"],
+          0,
         ),
         question(
           "Vem tar med sig en gitarr?",
-          ["Sophie", "Pauls bror", "Pauls syster"],
-          1,
+          ["Sophie", "Pauls syster", "Pauls bror"],
+          2,
         ),
         question(
           "När börjar festen?",
@@ -1341,18 +1345,18 @@ pub fn entries() -> List(Entry) {
       [
         question(
           "Hur länge har kvinnan haft feber?",
-          ["En dag", "Två dagar", "En vecka"],
-          1,
+          ["Två dagar", "En dag", "En vecka"],
+          0,
         ),
         question(
           "Vad säger läkaren att hon har?",
-          ["En förkylning", "Influensa", "Huvudvärk"],
-          1,
+          ["En förkylning", "Huvudvärk", "Influensa"],
+          2,
         ),
         question(
           "Hur ofta ska hon ta medicinen?",
-          ["En gång om dagen", "Två gånger om dagen", "Tre gånger om dagen"],
-          2,
+          ["En gång om dagen", "Tre gånger om dagen", "Två gånger om dagen"],
+          1,
         ),
       ],
     ),
@@ -1364,13 +1368,17 @@ pub fn entries() -> List(Entry) {
       [
         question(
           "Var bodde personen som barn?",
-          ["I en stor stad", "I en by på landet", "Vid havet"],
-          1,
+          ["I en by på landet", "I en stor stad", "Vid havet"],
+          0,
         ),
         question(
           "Hur var huset?",
-          ["Litet och nytt", "Gammalt men väldigt stort", "Modernt"],
-          1,
+          [
+            "Litet och helt nytt",
+            "Modernt med en pool",
+            "Gammalt men väldigt stort",
+          ],
+          2,
         ),
         question(
           "Vad gjorde de på onsdagarna?",
@@ -1392,8 +1400,8 @@ pub fn entries() -> List(Entry) {
         ),
         question(
           "Hur är den jämfört med den gamla?",
-          ["Större och dyrare", "Mindre men billigare", "Lika stor"],
-          1,
+          ["Större och dyrare", "Lika stor", "Mindre men billigare"],
+          2,
         ),
         question(
           "Vad är problemet?",
@@ -1410,19 +1418,198 @@ pub fn entries() -> List(Entry) {
       [
         question(
           "Vad arbetar Karim med?",
-          ["Han är servitör", "Han är kock", "Han är bagare"],
-          1,
+          ["Han är kock", "Han är servitör", "Han är bagare"],
+          0,
         ),
         question(
           "När börjar han jobba?",
-          ["Klockan åtta", "Klockan tio", "Klockan tolv"],
-          1,
+          ["Klockan åtta", "Klockan tolv", "Klockan tio"],
+          2,
         ),
         question(
           "Vad vill han göra nästa år?",
           ["Flytta till Lyon", "Öppna en egen restaurang", "Sluta jobba"],
           1,
         ),
+      ],
+    ),
+    // Fler texter
+    text(
+      "text-premier-jour",
+      "Mon premier jour de travail",
+      "Lundi dernier, j'ai commencé un nouveau travail dans une entreprise à Lille.\nJe me suis levé à six heures parce que j'étais nerveux. Je suis arrivé au bureau à huit heures.\nMa patronne m'a présenté mes collègues et elle m'a montré mon ordinateur.\nÀ midi, nous avons déjeuné ensemble dans un petit restaurant. Le soir, j'étais fatigué mais content.",
+      "I måndags började jag ett nytt jobb på ett företag i Lille.\nJag gick upp klockan sex eftersom jag var nervös. Jag kom till kontoret klockan åtta.\nMin chef presenterade mina kollegor och visade mig min dator.\nVid lunch åt vi tillsammans på en liten restaurang. På kvällen var jag trött men nöjd.",
+      [
+        question(
+          "I vilken stad ligger företaget?",
+          ["I Lille", "I Lyon", "I Nantes"],
+          0,
+        ),
+        question(
+          "Varför gick han upp klockan sex?",
+          ["Han hade långt till jobbet", "Han skulle träna", "Han var nervös"],
+          2,
+        ),
+        question(
+          "Var åt de lunch?",
+          ["På kontoret", "På en liten restaurang", "Hemma"],
+          1,
+        ),
+        question(
+          "Hur kände han sig på kvällen?",
+          ["Trött men nöjd", "Ledsen", "Arg"],
+          0,
+        ),
+      ],
+    ),
+    text(
+      "text-week-end-paris",
+      "Un week-end à Paris",
+      "Le week-end dernier, Sarah et Tom sont partis à Paris.\nLe samedi, ils ont visité le musée du Louvre et ils ont vu la Joconde. Il y avait beaucoup de touristes !\nLe soir, ils ont dîné dans un restaurant près de la Seine.\nLe dimanche, il a plu, alors ils sont restés à l'hôtel et ils ont lu. Ils sont rentrés en train dimanche soir.",
+      "Förra helgen åkte Sarah och Tom till Paris.\nPå lördagen besökte de Louvren och såg Mona Lisa. Det var massor av turister!\nPå kvällen åt de middag på en restaurang nära Seine.\nPå söndagen regnade det, så de stannade på hotellet och läste. De åkte hem med tåg på söndagskvällen.",
+      [
+        question(
+          "Vilket museum besökte de?",
+          ["Orsaymuseet", "Pompidoucentret", "Louvren"],
+          2,
+        ),
+        question(
+          "Varför stannade de på hotellet på söndagen?",
+          ["De var trötta", "Det regnade", "Museet var stängt"],
+          1,
+        ),
+        question("Hur åkte de hem?", ["Med tåg", "Med flyg", "Med bil"], 0),
+      ],
+    ),
+    text(
+      "text-au-telephone",
+      "Au téléphone",
+      "— Allô, Julie ? C'est Marc.\n— Salut Marc ! Ça va ?\n— Oui, très bien. Tu es libre ce soir ? Je vais aller au cinéma avec Paul.\n— Ce soir, je ne peux pas. Je vais dîner chez mes parents.\n— Dommage ! Et demain ?\n— Demain, oui ! On se retrouve devant le cinéma à sept heures ?\n— D'accord. À demain !",
+      "– Hallå, Julie? Det är Marc.\n– Hej Marc! Hur är det?\n– Bara bra. Är du ledig i kväll? Jag ska gå på bio med Paul.\n– I kväll kan jag inte. Jag ska äta middag hos mina föräldrar.\n– Synd! Och i morgon?\n– I morgon, ja! Ses vi utanför bion klockan sju?\n– Okej. Vi ses i morgon!",
+      [
+        question(
+          "Varför ringer Marc?",
+          [
+            "För att fråga om vägen",
+            "För att boka ett bord",
+            "För att bjuda med Julie på bio",
+          ],
+          2,
+        ),
+        question(
+          "Vad ska Julie göra i kväll?",
+          ["Jobba", "Äta middag hos sina föräldrar", "Träffa Paul"],
+          1,
+        ),
+        question(
+          "När och var ska de ses?",
+          [
+            "I morgon klockan sju utanför bion",
+            "I kväll klockan åtta hos Paul",
+            "På lördag klockan tre på kaféet",
+          ],
+          0,
+        ),
+      ],
+    ),
+    text(
+      "text-ville-campagne",
+      "La ville et la campagne",
+      "Avant, j'habitais à Paris. La vie en ville était plus rapide et plus chère.\nIl y avait plus de restaurants et de magasins, mais aussi plus de bruit.\nMaintenant, j'habite à la campagne. Ma maison est plus grande et moins chère que mon appartement à Paris.\nJe suis plus calme, mais je vois moins souvent mes amis.",
+      "Förut bodde jag i Paris. Livet i stan var snabbare och dyrare.\nDet fanns fler restauranger och affärer, men också mer buller.\nNu bor jag på landet. Mitt hus är större och billigare än min lägenhet i Paris.\nJag är lugnare, men jag träffar mina vänner mer sällan.",
+      [
+        question(
+          "Hur var livet i stan?",
+          ["Lugnare", "Billigare", "Snabbare och dyrare"],
+          2,
+        ),
+        question(
+          "Hur är huset jämfört med lägenheten?",
+          ["Mindre och dyrare", "Större och billigare", "Lika stort"],
+          1,
+        ),
+        question(
+          "Vad är nackdelen med att bo på landet?",
+          [
+            "Personen träffar sina vänner mer sällan",
+            "Det är mycket buller på nätterna",
+            "Huset är kallt på vintern",
+          ],
+          0,
+        ),
+      ],
+    ),
+    text(
+      "text-projets-lea",
+      "Les projets de Léa",
+      "L'année prochaine, Léa finira ses études. Elle voudrait travailler à l'étranger.\nD'abord, elle passera six mois en Espagne pour apprendre l'espagnol.\nEnsuite, elle cherchera un travail à Madrid ou à Barcelone.\nSes parents seront tristes, mais ils viendront la voir en été.",
+      "Nästa år blir Léa klar med sina studier. Hon skulle vilja arbeta utomlands.\nFörst ska hon tillbringa sex månader i Spanien för att lära sig spanska.\nSedan ska hon söka jobb i Madrid eller Barcelona.\nHennes föräldrar kommer att bli ledsna, men de kommer att hälsa på henne på sommaren.",
+      [
+        question(
+          "Vad händer nästa år?",
+          [
+            "Léa börjar på universitetet",
+            "Léa flyttar hem till sina föräldrar",
+            "Léa blir klar med sina studier",
+          ],
+          2,
+        ),
+        question(
+          "Varför åker hon först till Spanien?",
+          ["För att jobba", "För att lära sig spanska", "För att träffa vänner"],
+          1,
+        ),
+        question(
+          "När ska föräldrarna hälsa på?",
+          ["På sommaren", "På julen", "På våren"],
+          0,
+        ),
+      ],
+    ),
+    text(
+      "text-souvenir-enfance",
+      "Un souvenir d'enfance",
+      "Quand j'avais dix ans, nous passions toutes les vacances chez mes grands-parents en Bretagne.\nIl faisait souvent gris, mais nous allions à la plage tous les jours.\nUn jour, mon frère est tombé dans l'eau avec ses vêtements ! Tout le monde a ri.\nLe soir, ma grand-mère préparait des crêpes.",
+      "När jag var tio år tillbringade vi alla lov hos mina far- och morföräldrar i Bretagne.\nDet var ofta mulet, men vi gick till stranden varje dag.\nEn dag ramlade min bror i vattnet med kläderna på! Alla skrattade.\nPå kvällarna gjorde min mormor pannkakor.",
+      [
+        question(
+          "Var tillbringade de loven?",
+          [
+            "Hos en kusin i Paris",
+            "På ett hotell i Spanien",
+            "Hos far- och morföräldrarna i Bretagne",
+          ],
+          2,
+        ),
+        question(
+          "Vad hände en dag?",
+          [
+            "De gick vilse i skogen en kväll",
+            "Brodern ramlade i vattnet med kläderna på",
+            "En storm förstörde deras tält",
+          ],
+          1,
+        ),
+        question(
+          "Vad gjorde mormodern på kvällarna?",
+          ["Pannkakor", "Soppa", "Fisk"],
+          0,
+        ),
+      ],
+    ),
+    text(
+      "text-a-l-hotel",
+      "À l'hôtel",
+      "— Bonjour, je voudrais une chambre pour deux nuits, s'il vous plaît.\n— Bien sûr. Pour combien de personnes ?\n— Pour une personne. Est-ce que la chambre a une vue sur la mer ?\n— Oui, elle est au quatrième étage. Le petit-déjeuner est compris.\n— Parfait. Est-ce que je pourrais payer par carte ?\n— Oui, sans problème. Voici votre clé.",
+      "– Hej, jag skulle vilja ha ett rum för två nätter, tack.\n– Självklart. För hur många personer?\n– För en person. Har rummet utsikt över havet?\n– Ja, det ligger på fjärde våningen. Frukost ingår.\n– Perfekt. Skulle jag kunna betala med kort?\n– Ja, inga problem. Här är er nyckel.",
+      [
+        question(
+          "Hur många nätter vill gästen stanna?",
+          ["En", "Tre", "Två"],
+          2,
+        ),
+        question("Vad ser man från rummet?", ["Bergen", "Havet", "En park"], 1),
+        question("Vad ingår i priset?", ["Frukost", "Middag", "Parkering"], 0),
       ],
     ),
   ]
