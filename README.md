@@ -12,8 +12,8 @@ Try it at **https://nerggnet.github.io/franska/**.
 ## Status
 
 The browser app ([Lustre](https://hexdocs.pm/lustre/)) offers rounds of 10
-exercises from 886 words and phrases (447 at A1 and 439 at A2), 129
-gap-fill sentences and 46 sentences to rewrite (negation and pronouns),
+exercises from 886 words and phrases (447 at A1 and 439 at A2), 183
+gap-fill sentences and 54 sentences to rewrite (negation and pronouns),
 optionally limited to one theme:
 
 - Swedish → French and French → Swedish translation
@@ -26,7 +26,8 @@ optionally limited to one theme:
   themes for partitive articles, possessives, demonstratives, negation,
   pronouns, comparisons, the future and the conditional, relative pronouns
   (qui, que, où), passé composé or imparfait, places (à, en, au), time
-  expressions (depuis, il y a, pendant), reflexive verbs and the imperative
+  expressions (depuis, il y a, pendant), reflexive verbs, the imperative,
+  articles, adjective agreement, question words and à/de with articles
 - Adjectives: agreement in gender and number (grand, grande, grands, grandes)
 - Negation: make a sentence negative (Tu as un chien → Tu n'as pas de chien)
 - Pronouns: replace part of a sentence with le, la, les, lui, leur, y or en
