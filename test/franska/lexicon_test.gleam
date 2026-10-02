@@ -397,3 +397,16 @@ pub fn ayer_verbs_accept_both_future_spellings_test() {
 pub fn y_does_not_elide_the_article_test() {
   assert lexicon.french(lexicon.noun("yaourt", Masculine)) == "le yaourt"
 }
+
+pub fn some_adjectives_are_not_compared_test() {
+  assert lexicon.compared(
+      lexicon.adjective("premier", "première"),
+      lexicon.More,
+    )
+    == []
+  assert lexicon.compared(
+      lexicon.adjective("suédois", "suédoise"),
+      lexicon.Most,
+    )
+    == []
+}

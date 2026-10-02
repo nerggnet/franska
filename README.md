@@ -30,7 +30,7 @@ optionally limited to one theme:
 - Pronouns: replace part of a sentence with le, la, les, lui, leur, y or en
   (Je parle à Paul → Je lui parle)
 - Comparisons: plus, moins and aussi … que and the superlative for every
-  adjective, with agreement (Elle est plus grande que lui) and meilleur
+  gradable adjective, with agreement (Elle est plus grande que lui) and meilleur
 - Reading and listening comprehension: 26 short texts and dialogues with
   questions in Swedish; in listening, the text is only read aloud (also
   slowly), and the transcript and translation are shown afterwards

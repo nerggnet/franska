@@ -66,9 +66,9 @@ must work on both targets, has no FFI and never reads the clock.
 - `gender.gleam`: gender rules of thumb by noun ending (-tion feminine,
   -age masculine, ...), shown after le/la exercises and article mistakes,
   including when a noun is an exception.
-- `swedish.gleam`: Swedish adjective plurals and verb forms, so a revealed
-  answer shows its Swedish in the same form (nouvelles – nya, nous parlons –
-  vi talar). Verbs not ending in -ar (tala, talar, talade, talat) are listed
+- `swedish.gleam`: Swedish adjective plurals, comparatives and verb forms,
+  so a revealed answer shows its Swedish in the same form (nouvelles – nya,
+  nous parlons – vi talar, plus grande – Hon är större än han). Verbs not ending in -ar (tala, talar, talade, talat) are listed
   in `forms`; a content test checks every verb's Swedish conjugates.
 - `session.gleam`: one practice round. A wrong answer comes back 3 exercises
   later.

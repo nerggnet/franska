@@ -1,6 +1,6 @@
 import franska/lexicon.{
-  Conditionnel, FuturProche, FuturSimple, Il, Ils, Imparfait, Imperatif, Je,
-  Nous, PasseCompose, Presens, Tu, Vous,
+  Conditionnel, Equal, FuturProche, FuturSimple, Il, Ils, Imparfait, Imperatif,
+  Je, Less, More, Most, Nous, PasseCompose, Presens, Tu, Vous,
 }
 import franska/swedish
 import gleam/list
@@ -83,4 +83,34 @@ pub fn maste_is_paraphrased_test() {
   assert swedish.conjugate("måste", PasseCompose, Il)
     == Ok("han har varit tvungen")
   assert swedish.conjugate("måste", Conditionnel, Je) == Ok("jag skulle behöva")
+}
+
+pub fn comparatives_test() {
+  let cases = [
+    #("snabb", #("snabbare", "snabbast")),
+    #("dyr", #("dyrare", "dyrast")),
+    #("vacker", #("vackrare", "vackrast")),
+    #("öppen", #("öppnare", "öppnast")),
+    #("tom", #("tommare", "tommast")),
+    #("blå", #("blåare", "blåast")),
+    #("stor", #("större", "störst")),
+    #("god", #("bättre", "bäst")),
+    #("gammal", #("äldre", "äldst")),
+    #("liten", #("mindre", "minst")),
+    #("intressant", #("mer intressant", "mest intressant")),
+    #("sympatisk", #("mer sympatisk", "mest sympatisk")),
+    #("rosa", #("mer rosa", "mest rosa")),
+    #("förvånad", #("mer förvånad", "mest förvånad")),
+  ]
+  let wrong =
+    list.filter(cases, fn(c) { swedish.compare(c.0) != c.1 })
+    |> list.map(fn(c) { #(c.0, swedish.compare(c.0)) })
+  assert wrong == []
+}
+
+pub fn comparison_sentences_test() {
+  assert swedish.comparison("stor", More) == "Hon är större än han."
+  assert swedish.comparison("dyr", Less) == "De är mindre dyra än vi."
+  assert swedish.comparison("stor", Equal) == "Han är lika stor som du."
+  assert swedish.comparison("stor", Most) == "De är störst av alla."
 }

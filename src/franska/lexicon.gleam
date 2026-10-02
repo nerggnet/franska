@@ -1,6 +1,7 @@
 //// The vocabulary a learner studies. Content is curated as a list of
 //// `Entry` values; exercises are derived from them (see `franska/exercise`).
 
+import gleam/bool
 import gleam/int
 import gleam/list
 import gleam/order
@@ -271,15 +272,25 @@ pub fn comparison_frame(degree: Degree) -> String {
   }
 }
 
+/// Adjectives that are not compared: plus première or plus suédoise make
+/// no sense.
+const not_gradable = [
+  "premier", "dernier", "prochain", "même", "autre", "suédois", "français",
+  "anglais", "allemand", "espagnol", "italien", "américain", "norvégien",
+  "danois", "finlandais",
+]
+
 /// Accepted answers for the gap in `comparison_frame(degree)`, canonical
 /// first: "plus grande", "moins grands", "aussi grand", "les plus grandes".
 /// Bon is irregular (meilleure, les meilleures), and mauvais can also be
-/// pire. Invariable adjectives such as marron get none.
+/// pire. Invariable adjectives such as marron, and adjectives that cannot
+/// be compared (premier, suédois), get none.
 pub fn compared(word: Word, degree: Degree) -> List(String) {
   case word {
     Adjective(masculine:, feminine:, masculine_plural:, feminine_plural:)
       if masculine != feminine_plural
     -> {
+      use <- bool.guard(list.contains(not_gradable, masculine), [])
       let #(form, irregular) = case degree, masculine {
         More, "bon" -> #(feminine, ["meilleure"])
         Most, "bon" -> #(feminine_plural, ["les meilleures"])

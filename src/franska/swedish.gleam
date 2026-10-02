@@ -1,8 +1,9 @@
 //// A little Swedish grammar, for showing translations in the right form.
 
 import franska/lexicon.{
-  type Person, type Tense, Conditionnel, FuturProche, FuturSimple, Il, Ils,
-  Imparfait, Imperatif, Je, Nous, PasseCompose, Presens, Tu, Vous,
+  type Degree, type Person, type Tense, Conditionnel, Equal, FuturProche,
+  FuturSimple, Il, Ils, Imparfait, Imperatif, Je, Less, More, Most, Nous,
+  PasseCompose, Presens, Tu, Vous,
 }
 import gleam/list
 import gleam/result
@@ -254,4 +255,62 @@ fn forms(verb: String) -> Result(Forms, Nil) {
         False -> Error(Nil)
       }
   }
+}
+
+// COMPARISON ------------------------------------------------------------------
+
+/// The Swedish of the sentences in `lexicon.comparison_frame`, with the
+/// adjective compared: "Hon är större än han.", "De är mindre dyra än
+/// vi.", "Han är lika stor som du.", "De är störst av alla."
+pub fn comparison(adjective: String, degree: Degree) -> String {
+  let #(comparative, superlative) = compare(adjective)
+  case degree {
+    More -> "Hon är " <> comparative <> " än han."
+    Less -> "De är mindre " <> adjective_plural(adjective) <> " än vi."
+    Equal -> "Han är lika " <> adjective <> " som du."
+    Most -> "De är " <> superlative <> " av alla."
+  }
+}
+
+/// The comparative and superlative: snabb, snabbare, snabbast. A few are
+/// irregular (stor, större, störst), and some take mer and mest (mer
+/// intressant, mer rosa).
+pub fn compare(adjective: String) -> #(String, String) {
+  case adjective {
+    "bra" | "god" -> #("bättre", "bäst")
+    "dålig" -> #("sämre", "sämst")
+    "stor" -> #("större", "störst")
+    "liten" -> #("mindre", "minst")
+    "gammal" -> #("äldre", "äldst")
+    "ung" -> #("yngre", "yngst")
+    "lång" -> #("längre", "längst")
+    "hög" -> #("högre", "högst")
+    "låg" -> #("lägre", "lägst")
+    "tung" -> #("tyngre", "tyngst")
+    "trång" -> #("trängre", "trängst")
+    // ancien means "före detta", but plus ancien is older.
+    "före detta" -> #("äldre", "äldst")
+    "blå" | "grå" -> #(adjective <> "are", adjective <> "ast")
+    _ ->
+      case takes_mer(adjective) {
+        True -> #("mer " <> adjective, "mest " <> adjective)
+        False -> {
+          // The stem of the plural: vackra gives vackr-, tomma tomm-.
+          let stem = string.drop_end(adjective_plural(adjective), 1)
+          #(stem <> "are", stem <> "ast")
+        }
+      }
+  }
+}
+
+fn takes_mer(adjective: String) -> Bool {
+  ends_with_any(adjective, ["a", "e", "o", "isk"])
+  || { string.ends_with(adjective, "ad") && string.length(adjective) > 5 }
+  || list.contains(
+    [
+      "intelligent", "intressant", "utsökt", "känd", "modern", "svartsjuk",
+      "likadan", "stängd", "möjlig", "omöjlig", "fel",
+    ],
+    adjective,
+  )
 }

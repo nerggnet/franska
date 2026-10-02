@@ -497,7 +497,9 @@ pub fn conjugations_show_the_swedish_in_the_same_form_test() {
   assert string.contains(html, "– vi talar")
 }
 
-pub fn comparisons_have_no_answer_meaning_test() {
+pub fn comparisons_show_the_swedish_sentence_test() {
   assert app.answer_meaning(exercise_with_id("grand:compare:more"))
-    == Error(Nil)
+    == Ok("Hon är större än han.")
+  assert app.answer_meaning(exercise_with_id("bon:compare:most"))
+    == Ok("De är bäst av alla.")
 }

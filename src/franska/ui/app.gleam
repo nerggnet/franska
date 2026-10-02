@@ -1046,15 +1046,15 @@ fn meaning(exercise: Exercise) -> Result(String, Nil) {
 }
 
 /// The Swedish for the French answer of an exercise, in the same form:
-/// nouvelles is "nya", nous parlons is "vi talar". Comparisons (plus
-/// grande) get none, since Swedish comparatives (större) are not in the
-/// content; the prompt shows the plain meaning instead.
+/// nouvelles is "nya", nous parlons is "vi talar", and a comparison is the
+/// whole Swedish sentence ("Hon är större än han.").
 pub fn answer_meaning(exercise: Exercise) -> Result(String, Nil) {
   case exercise.kind {
     Conjugate(tense, person) ->
       meaning(exercise)
       |> result.try(swedish.conjugate(_, tense, person))
-    Compare(..) -> Error(Nil)
+    Compare(degree:, ..) ->
+      meaning(exercise) |> result.map(swedish.comparison(_, degree))
     Agree(lexicon.MasculinePlural) | Agree(lexicon.FemininePlural) ->
       meaning(exercise) |> result.map(swedish.adjective_plural)
     _ -> meaning(exercise)
