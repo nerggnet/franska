@@ -19,6 +19,7 @@ import franska/session.{type Session}
 import franska/srs
 import franska/swedish
 import franska/ui/browser
+import franska/voices.{type Voice, Voice}
 import gleam/bool
 import gleam/dict
 import gleam/dynamic/decode
@@ -70,9 +71,18 @@ pub type Model {
     drill: Drill,
     theme: Option(String),
     progress: Progress,
+    /// The browser's French voices, best first.
+    voices: List(Voice),
     round: Round,
     screen: Screen,
   )
+}
+
+/// How fast French is read out.
+pub type Speed {
+  Normal
+  Slower
+  Slow
 }
 
 pub type Round {
@@ -105,10 +115,14 @@ pub fn init(flags: #(Env, Progress)) -> #(Model, Effect(Msg)) {
       drill: TranslateToFrench,
       theme: None,
       progress:,
+      voices: [],
       round: DrillRound,
       screen: Menu,
     ),
-    effect.none(),
+    case env.can_speak {
+      True -> load_voices_effect()
+      False -> effect.none()
+    },
   )
 }
 
@@ -119,6 +133,9 @@ pub type Msg {
   UserPickedTheme(Option(String))
   UserPickedLevel(Option(lexicon.Level))
   UserToggledReadAloud(Bool)
+  UserPickedVoice(String)
+  UserTestedVoice
+  BrowserLoadedVoices(List(Voice))
   UserStartedRound
   UserStartedReview
   UserStartedDifficultRound
@@ -126,8 +143,7 @@ pub type Msg {
   UserPressedAccent(String)
   UserChoseAnswer(String)
   UserSubmittedAnswer
-  UserAskedToHear(String)
-  UserAskedToHearSlowly(String)
+  UserAskedToHear(String, Speed)
   UserQuitRound
   UserOpenedStatistics
   UserAskedToReset
@@ -140,6 +156,23 @@ pub type Msg {
 
 pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case model.screen, msg {
+    _, BrowserLoadedVoices(found) -> #(
+      Model(..model, voices: voices.rank(found)),
+      effect.none(),
+    )
+
+    Menu, UserPickedVoice(name) -> {
+      let voice = case name {
+        "" -> None
+        _ -> Some(name)
+      }
+      let #(model, save) =
+        update_progress(model, Progress(..model.progress, voice:))
+      #(model, effect.batch([save, speak_effect(model, voice_sample, Normal)]))
+    }
+
+    Menu, UserTestedVoice -> #(model, speak_effect(model, voice_sample, Normal))
+
     Menu, UserPickedDrill(drill) -> {
       let theme = fitting_theme(model, model.theme, drill, model.progress.level)
       #(Model(..model, drill:, theme:), effect.none())
@@ -272,11 +305,9 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
       }
     }
 
-    Practising(..), UserAskedToHear(text) -> #(model, speak_effect(text))
-
-    Practising(..), UserAskedToHearSlowly(text) -> #(
+    Practising(..), UserAskedToHear(text, speed) -> #(
       model,
-      speak_at(text, slow_rate),
+      speak_effect(model, text, speed),
     )
 
     Practising(..), UserQuitRound
@@ -297,9 +328,13 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
     )
 
     Statistics(confirming_reset: True, ..), UserConfirmedReset -> {
-      // Only learning progress is reset; the read-aloud setting stays.
+      // Only learning progress is reset; the speech settings stay.
       let fresh =
-        Progress(..progress.new(), read_aloud: model.progress.read_aloud)
+        Progress(
+          ..progress.new(),
+          read_aloud: model.progress.read_aloud,
+          voice: model.progress.voice,
+        )
       let #(model, save) = update_progress(model, fresh)
       #(statistics(model, None), save)
     }
@@ -369,13 +404,14 @@ fn show_exercise(model: Model, session: Session) -> #(Model, Effect(Msg)) {
     [] -> ""
   }
   let speech = case session.current(session), model.progress.read_aloud {
-    Ok(exercise), _ if exercise.kind == Listen -> speak_effect(exercise.french)
+    Ok(exercise), _ if exercise.kind == Listen ->
+      speak_effect(model, exercise.french, Normal)
     Ok(exercise.Exercise(kind: Comprehend(medium: Hearing, ..), ..) as exercise),
       _
       if exercise.entry_id != previous_entry
-    -> speak_effect(exercise.french)
+    -> speak_effect(model, exercise.french, Normal)
     Ok(exercise), True if exercise.kind == Translate(ToSwedish) ->
-      speak_effect(exercise.french)
+      speak_effect(model, exercise.french, Normal)
     _, _ -> effect.none()
   }
   #(Model(..model, screen:), effect.batch([focus_answer(), speech]))
@@ -410,7 +446,7 @@ fn check_answer(
         | True, Comprehend(..)
         | False, _
         -> effect.none()
-        True, _ -> speak_effect(exercise.french)
+        True, _ -> speak_effect(model, exercise.french, Normal)
       }
       let screen = Practising(session:, input:, grade: Some(grade))
       #(Model(..model, screen:), effect.batch([focus_answer(), speech, save]))
@@ -445,17 +481,54 @@ fn read_import_effect() -> Effect(Msg) {
   dispatch(ImportFileRead(text))
 }
 
-const normal_rate = 0.9
+const voice_sample = "Bonjour ! Comment allez-vous ? On apprend le français ensemble."
 
-const slow_rate = 0.6
-
-fn speak_effect(text: String) -> Effect(Msg) {
-  speak_at(text, normal_rate)
+fn load_voices_effect() -> Effect(Msg) {
+  use dispatch <- effect.from
+  use found <- browser.on_voices
+  list.map(found, fn(pair) { Voice(name: pair.0, lang: pair.1) })
+  |> BrowserLoadedVoices
+  |> dispatch
 }
 
-fn speak_at(text: String, rate: Float) -> Effect(Msg) {
+fn speak_effect(model: Model, text: String, speed: Speed) -> Effect(Msg) {
+  let utterances = speech(model, text)
   use _ <- effect.from
-  browser.speak(text, rate)
+  browser.speak(utterances, rate(speed))
+}
+
+fn rate(speed: Speed) -> Float {
+  case speed {
+    Normal -> 0.9
+    Slower -> 0.75
+    Slow -> 0.6
+  }
+}
+
+/// The chosen voice if the browser has it, or else the best one.
+pub fn main_voice(model: Model) -> Option(Voice) {
+  let chosen =
+    option.then(model.progress.voice, fn(name) {
+      list.find(model.voices, fn(v) { v.name == name }) |> option.from_result
+    })
+  option.lazy_or(chosen, fn() { list.first(model.voices) |> option.from_result })
+}
+
+/// What to say for `text`, as #(text, voice name): one sentence or
+/// dialogue line at a time, with the second person in a dialogue in a
+/// different voice. The voice name is "" when no voices are known.
+pub fn speech(model: Model, text: String) -> List(#(String, String)) {
+  let #(first, second) = case main_voice(model) {
+    Some(voice) -> #(voice.name, voices.partner(voice, model.voices).name)
+    None -> #("", "")
+  }
+  voices.utterances(text)
+  |> list.map(fn(utterance) {
+    case utterance.0 {
+      0 -> #(utterance.1, first)
+      _ -> #(utterance.1, second)
+    }
+  })
 }
 
 // VIEW ------------------------------------------------------------------------
@@ -488,6 +561,43 @@ pub fn view(model: Model) -> Element(Msg) {
           notice,
         )
     },
+  ])
+}
+
+fn view_voice_picker(model: Model) -> Element(Msg) {
+  use <- bool.guard(!model.env.can_speak || model.voices == [], element.none())
+  let chosen = main_voice(model) |> option.map(fn(v) { v.name })
+  let automatic = case list.first(model.voices) {
+    Ok(best) -> "Bästa tillgängliga (" <> best.name <> ")"
+    Error(Nil) -> "Bästa tillgängliga"
+  }
+  html.div([class("voice")], [
+    html.label([attribute.for("voice")], [html.text("Röst")]),
+    html.select([attribute.id("voice"), event.on_change(UserPickedVoice)], [
+      html.option(
+        [attribute.value(""), attribute.selected(model.progress.voice == None)],
+        automatic,
+      ),
+      ..list.map(model.voices, fn(voice) {
+        html.option(
+          [
+            attribute.value(voice.name),
+            attribute.selected(
+              model.progress.voice != None && chosen == Some(voice.name),
+            ),
+          ],
+          voice.name <> " (" <> voice.lang <> ")",
+        )
+      })
+    ]),
+    html.button(
+      [
+        class("secondary"),
+        attribute.type_("button"),
+        event.on_click(UserTestedVoice),
+      ],
+      [html.text("Testa")],
+    ),
   ])
 }
 
@@ -612,6 +722,7 @@ fn view_drill_picker(
         ])
       False -> element.none()
     },
+    view_voice_picker(model),
     html.p([class("hint")], [html.text(round_hint(stats))]),
     html.div([class("actions")], [
       html.button([class("primary"), event.on_click(UserStartedRound)], [
@@ -908,10 +1019,11 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
             attribute.type_("button"),
             attribute.aria_label("Lyssna igen"),
             attribute.title("Lyssna igen"),
-            event.on_click(UserAskedToHear(exercise.french)),
+            event.on_click(UserAskedToHear(exercise.french, Normal)),
           ],
           [speaker_icon()],
         ),
+        slower_buttons(exercise.french),
         html.p([class("hint"), attribute.lang("sv")], [
           html.text("Betyder: " <> exercise.prompt),
         ]),
@@ -931,18 +1043,11 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
             attribute.type_("button"),
             attribute.aria_label("Lyssna igen"),
             attribute.title("Lyssna igen"),
-            event.on_click(UserAskedToHear(exercise.french)),
+            event.on_click(UserAskedToHear(exercise.french, Normal)),
           ],
           [speaker_icon()],
         ),
-        html.button(
-          [
-            class("secondary"),
-            attribute.type_("button"),
-            event.on_click(UserAskedToHearSlowly(exercise.french)),
-          ],
-          [html.text("Lyssna långsamt")],
-        ),
+        slower_buttons(exercise.french),
       ])
     Transform(translation:, ..) ->
       html.div([class("sentence")], [
@@ -1313,11 +1418,32 @@ fn speaker_button(text: String, can_speak: Bool) -> Element(Msg) {
           attribute.type_("button"),
           attribute.aria_label("Lyssna"),
           attribute.title("Lyssna"),
-          event.on_click(UserAskedToHear(text)),
+          event.on_click(UserAskedToHear(text, Normal)),
         ],
         [speaker_icon()],
       )
   }
+}
+
+fn slower_buttons(text: String) -> Element(Msg) {
+  html.div([class("speeds")], [
+    html.button(
+      [
+        class("secondary"),
+        attribute.type_("button"),
+        event.on_click(UserAskedToHear(text, Slower)),
+      ],
+      [html.text("Lite långsammare")],
+    ),
+    html.button(
+      [
+        class("secondary"),
+        attribute.type_("button"),
+        event.on_click(UserAskedToHear(text, Slow)),
+      ],
+      [html.text("Långsamt")],
+    ),
+  ])
 }
 
 fn speaker_icon() -> Element(Msg) {

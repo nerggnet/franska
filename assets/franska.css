@@ -282,6 +282,25 @@ input:focus-visible {
   accent-color: var(--accent);
 }
 
+.voice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.voice select {
+  flex: 1 1 12rem;
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
 .prompt-row {
   display: flex;
   align-items: center;
@@ -444,9 +463,16 @@ input:focus-visible {
 
 .listen {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
   margin: 0.75rem 0 1.25rem;
+}
+
+.speeds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .listen .hint {

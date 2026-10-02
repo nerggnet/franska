@@ -35,13 +35,16 @@ optionally limited to one theme:
 - Comparisons: plus, moins and aussi … que and the superlative for every
   gradable adjective, with agreement (Elle est plus grande que lui) and meilleur
 - Reading and listening comprehension: 34 short texts and dialogues with
-  questions in Swedish; in listening, the text is only read aloud (also
-  slowly), and the transcript and translation are shown afterwards
+  questions in Swedish; in listening, the text is only read aloud, a
+  sentence at a time and at three speeds, with two voices in dialogues, and the transcript and translation are shown afterwards
 
 Blandad runda mixes all of these except the texts in one round, and every
 exercise shows whether it is A1 or A2; the menu can limit practice to one
 level. It has accent buttons for French answers and reads French aloud with the
-browser's speech synthesis. Spaced repetition decides what each round
+browser's speech synthesis, choosing the best French voice available (or
+the one picked in the menu). On a Mac, a premium voice such as Audrey
+(Premium) or Thomas (Förbättrad), installed under System Settings →
+Accessibility → Spoken Content, sounds much better than the defaults. Spaced repetition decides what each round
 contains, so due reviews come first and then new words. Dagens
 repetition reviews everything due across all exercise types in one round,
 and Svåra ord on the statistics page practises the exercises you have got

@@ -20,12 +20,14 @@ const version = 1
 /// Cards in this box or higher count as learned (next review in 7+ days).
 pub const learned_box = 3
 
-/// `level` is the level chosen in the menu, or `None` for both.
+/// `level` is the level chosen in the menu, or `None` for both. `voice` is
+/// the name of the chosen speech voice, or `None` for the best available.
 pub type Progress {
   Progress(
     cards: Dict(String, CardState),
     read_aloud: Bool,
     level: Option(Level),
+    voice: Option(String),
     streak: Streak,
   )
 }
@@ -45,6 +47,7 @@ pub fn new() -> Progress {
     cards: dict.new(),
     read_aloud: True,
     level: None,
+    voice: None,
     streak: Streak(-1, 0),
   )
 }
@@ -225,6 +228,7 @@ pub fn to_json(progress: Progress) -> String {
       "level",
       json.nullable(progress.level, fn(level) { json.string(level_id(level)) }),
     ),
+    #("voice", json.nullable(progress.voice, json.string)),
     #(
       "streak",
       json.object([
@@ -266,6 +270,11 @@ fn progress_decoder() -> Decoder(Progress) {
         decode.optional(decode.string)
           |> decode.map(option.then(_, parse_level)),
       )
+      use voice <- decode.optional_field(
+        "voice",
+        None,
+        decode.optional(decode.string),
+      )
       use streak <- decode.optional_field(
         "streak",
         Streak(-1, 0),
@@ -275,7 +284,7 @@ fn progress_decoder() -> Decoder(Progress) {
         "cards",
         decode.dict(decode.string, card_decoder()),
       )
-      decode.success(Progress(cards:, read_aloud:, level:, streak:))
+      decode.success(Progress(cards:, read_aloud:, level:, voice:, streak:))
     }
   }
 }

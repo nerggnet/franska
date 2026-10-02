@@ -17,9 +17,17 @@ pub fn can_speak() -> Bool {
   False
 }
 
-/// Reads French aloud; `rate` 1.0 is normal speed.
+/// Calls `on_change` with the browser's voices as #(name, lang), now if
+/// they are loaded and again whenever they change.
+@external(javascript, "./browser.ffi.mjs", "on_voices")
+pub fn on_voices(_on_change: fn(List(#(String, String))) -> Nil) -> Nil {
+  Nil
+}
+
+/// Reads French aloud, one #(text, voice name) after the other; `rate` 1.0
+/// is normal speed.
 @external(javascript, "./browser.ffi.mjs", "speak")
-pub fn speak(_text: String, _rate: Float) -> Nil {
+pub fn speak(_utterances: List(#(String, String)), _rate: Float) -> Nil {
   Nil
 }
 

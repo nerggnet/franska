@@ -70,6 +70,12 @@ must work on both targets, has no FFI and never reads the clock.
   so a revealed answer shows its Swedish in the same form (nouvelles – nya,
   nous parlons – vi talar, plus grande – Hon är större än han). Verbs not ending in -ar (tala, talar, talade, talat) are listed
   in `forms`; a content test checks every verb's Swedish conjugates.
+- `voices.gleam`: ranks the browser's French voices (premium, natural and
+  Google voices first, Apple's novelty voices last, fr-FR before fr-CA),
+  guesses their gender, and splits texts into utterances: one sentence at
+  a time, with dialogue lines (starting with "— ") alternating between
+  the chosen voice and a partner voice of the other gender. The chosen
+  voice is saved in progress (`voice`, `None` for the best).
 - `session.gleam`: one practice round. A wrong answer comes back 3 exercises
   later.
 
@@ -136,7 +142,8 @@ must work on both targets, has no FFI and never reads the clock.
 
 Since then: Dagens repetition, progress export/import and persistent
 storage, offline/installable (PWA), dictation, futur proche, passé composé,
-imparfait, numbers, gap-fill sentences, gender hints, Svåra ord and le/la
-keyboard shortcuts (1/2).
+imparfait, numbers, gap-fill sentences, gender hints, Svåra ord, le/la
+keyboard shortcuts (1/2), and a voice picker with dialogue voices and
+three reading speeds.
 
 Ideas for later: more A2 content and sentences, more texts.

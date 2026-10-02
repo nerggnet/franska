@@ -1,3 +1,5 @@
+import { toList } from "../../gleam.mjs";
+
 export function focus(id) {
   document.getElementById(id)?.focus();
 }
@@ -20,19 +22,39 @@ export function can_speak() {
   return typeof window !== "undefined" && "speechSynthesis" in window;
 }
 
-export function speak(text, rate) {
+/// Calls `callback` with the voices as a list of #(name, lang), now if the
+/// browser has them and again whenever the list changes (Chrome loads it
+/// after the page).
+export function on_voices(callback) {
+  if (!can_speak()) return;
+  const synth = window.speechSynthesis;
+  const report = () => {
+    const voices = synth.getVoices();
+    if (voices.length > 0) {
+      callback(toList(voices.map((v) => [v.name, v.lang])));
+    }
+  };
+  synth.addEventListener("voiceschanged", report);
+  report();
+}
+
+/// Speaks a list of #(text, voice name) one after the other, stopping
+/// anything already being said. An unknown voice name uses any French
+/// voice.
+export function speak(utterances, rate) {
   if (!can_speak()) return;
   const synth = window.speechSynthesis;
   synth.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "fr-FR";
   const voices = synth.getVoices();
-  const voice =
-    voices.find((v) => v.lang === "fr-FR") ??
-    voices.find((v) => v.lang.startsWith("fr"));
-  if (voice) utterance.voice = voice;
-  utterance.rate = rate;
-  synth.speak(utterance);
+  const french = voices.find((v) => v.lang.startsWith("fr"));
+  for (const [text, name] of utterances.toArray()) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voice = voices.find((v) => v.name === name) ?? french;
+    if (voice) utterance.voice = voice;
+    utterance.lang = voice?.lang ?? "fr-FR";
+    utterance.rate = rate;
+    synth.speak(utterance);
+  }
 }
 
 /// Returns the stored string, or "" if there is none or storage is blocked.

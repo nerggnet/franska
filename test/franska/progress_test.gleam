@@ -112,6 +112,7 @@ pub fn json_round_trip_test() {
       ]),
       read_aloud: False,
       level: Some(lexicon.A2),
+      voice: Some("Thomas"),
       streak: Streak(last_day: 100, days: 3),
     )
   assert progress.from_json(progress.to_json(p)) == Ok(p)

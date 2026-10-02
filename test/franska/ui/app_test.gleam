@@ -10,6 +10,7 @@ import franska/ui/app.{
   UserConfirmedReset, UserPickedDrill, UserPickedTheme, UserQuitRound,
   UserStartedReview, UserStartedRound, UserSubmittedAnswer, UserTypedAnswer,
 }
+import franska/voices
 import gleam/dict
 import gleam/list
 import gleam/option.{None, Some}
@@ -502,4 +503,51 @@ pub fn comparisons_show_the_swedish_sentence_test() {
     == Ok("Hon är större än han.")
   assert app.answer_meaning(exercise_with_id("bon:compare:most"))
     == Ok("De är bäst av alla.")
+}
+
+pub fn picking_a_voice_saves_it_test() {
+  let model =
+    start()
+    |> send([
+      app.BrowserLoadedVoices([
+        voices.Voice("Eddy", "fr-FR"),
+        voices.Voice("Thomas", "fr-FR"),
+        voices.Voice("Audrey", "fr-FR"),
+      ]),
+    ])
+  assert app.main_voice(model) == Some(voices.Voice("Thomas", "fr-FR"))
+  let model = send(model, [app.UserPickedVoice("Audrey")])
+  assert model.progress.voice == Some("Audrey")
+  assert app.main_voice(model) == Some(voices.Voice("Audrey", "fr-FR"))
+  let model = send(model, [app.UserPickedVoice("")])
+  assert model.progress.voice == None
+}
+
+pub fn a_missing_chosen_voice_falls_back_to_the_best_test() {
+  let model =
+    start()
+    |> with_voice("Audrey (Premium)")
+    |> send([app.BrowserLoadedVoices([voices.Voice("Thomas", "fr-FR")])])
+  assert app.main_voice(model) == Some(voices.Voice("Thomas", "fr-FR"))
+}
+
+pub fn dialogues_use_two_voices_test() {
+  let model =
+    start()
+    |> send([
+      app.BrowserLoadedVoices([
+        voices.Voice("Thomas", "fr-FR"),
+        voices.Voice("Audrey", "fr-FR"),
+      ]),
+    ])
+  assert app.speech(model, "— Bonjour !\n— Salut !")
+    == [#("Bonjour !", "Thomas"), #("Salut !", "Audrey")]
+  assert app.speech(start(), "Bonjour.") == [#("Bonjour.", "")]
+}
+
+fn with_voice(model: app.Model, voice: String) -> app.Model {
+  app.Model(
+    ..model,
+    progress: progress.Progress(..model.progress, voice: Some(voice)),
+  )
 }
