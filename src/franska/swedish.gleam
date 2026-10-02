@@ -388,9 +388,9 @@ fn takes_mer(adjective: String) -> Bool {
   || { string.ends_with(adjective, "ad") && string.length(adjective) > 5 }
   || list.contains(
     [
-      "intelligent", "intressant", "utsökt", "känd", "modern", "svartsjuk",
-      "likadan", "stängd", "möjlig", "omöjlig", "fel", "upptagen", "normal",
-      "privat",
+      "intelligent", "intressant", "utsökt", "professionell", "kompetent",
+      "ansvarig", "exakt", "känd", "modern", "svartsjuk", "likadan", "stängd",
+      "möjlig", "omöjlig", "fel", "upptagen", "normal", "privat",
     ],
     adjective,
   )

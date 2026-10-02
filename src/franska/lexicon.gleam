@@ -289,7 +289,8 @@ pub fn comparison_frame(degree: Degree) -> String {
 const not_gradable = [
   "premier", "dernier", "prochain", "même", "autre", "gratuit", "suédois",
   "français", "anglais", "allemand", "espagnol", "italien", "américain",
-  "norvégien", "danois", "finlandais",
+  "norvégien", "danois", "finlandais", "obligatoire", "facultatif", "actuel",
+  "absent", "présent",
 ]
 
 /// Accepted answers for the gap in `comparison_frame(degree)`, canonical

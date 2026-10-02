@@ -12,7 +12,7 @@ Try it at **https://nerggnet.github.io/franska/**.
 ## Status
 
 The browser app ([Lustre](https://hexdocs.pm/lustre/)) offers rounds of 10
-exercises from 1021 words and phrases (447 at A1 and 574 at A2), 247
+exercises from 1113 words and phrases (447 at A1 and 666 at A2), 247
 gap-fill sentences and 54 sentences to rewrite (negation and pronouns),
 optionally limited to one theme:
 
