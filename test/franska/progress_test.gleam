@@ -5,6 +5,7 @@ import franska/progress.{Progress, Stats, Streak}
 import franska/srs.{type CardState, CardState}
 import gleam/dict
 import gleam/list
+import gleam/option.{None, Some}
 
 const now = 1_000_000
 
@@ -110,6 +111,7 @@ pub fn json_round_trip_test() {
         #("chat:to-fr", CardState(box: 2, due: now, reviews: 5, lapses: 1)),
       ]),
       read_aloud: False,
+      level: Some(lexicon.A2),
       streak: Streak(last_day: 100, days: 3),
     )
   assert progress.from_json(progress.to_json(p)) == Ok(p)
@@ -195,4 +197,13 @@ pub fn mixed_round_fills_up_with_cards_due_soonest_test() {
   let groups = [[exercise("a1")], [exercise("b1")]]
   assert ids(progress.plan_mixed_round(p, groups, now:, size: 5))
     == ["b1", "a1"]
+}
+
+pub fn an_unknown_level_falls_back_to_both_test() {
+  let assert Ok(p) =
+    progress.from_json("{\"version\": 1, \"level\": \"B2\", \"cards\": {}}")
+  assert p.level == None
+  let assert Ok(p) =
+    progress.from_json("{\"version\": 1, \"level\": \"A1\", \"cards\": {}}")
+  assert p.level == Some(lexicon.A1)
 }

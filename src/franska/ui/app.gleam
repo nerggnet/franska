@@ -114,6 +114,7 @@ pub fn init(flags: #(Env, Progress)) -> #(Model, Effect(Msg)) {
 pub type Msg {
   UserPickedDrill(Drill)
   UserPickedTheme(Option(String))
+  UserPickedLevel(Option(lexicon.Level))
   UserToggledReadAloud(Bool)
   UserStartedRound
   UserStartedReview
@@ -137,16 +138,16 @@ pub type Msg {
 pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case model.screen, msg {
     Menu, UserPickedDrill(drill) -> {
-      // Keep the theme only if the new drill has exercises for it.
-      let theme = case model.theme {
-        Some(theme) ->
-          case list.contains(content.themes_for(drill), theme) {
-            True -> Some(theme)
-            False -> None
-          }
-        None -> None
-      }
+      let theme = fitting_theme(model.theme, drill, model.progress.level)
       #(Model(..model, drill:, theme:), effect.none())
+    }
+
+    Menu, UserPickedLevel(level) -> {
+      let theme = fitting_theme(model.theme, model.drill, level)
+      update_progress(
+        Model(..model, theme:),
+        Progress(..model.progress, level:),
+      )
     }
 
     Menu, UserPickedTheme(theme) -> #(Model(..model, theme:), effect.none())
@@ -160,7 +161,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
     -> {
       // A text round is one text with all its questions, in order. Spaced
       // repetition picks the text: the one with the question most due.
-      let questions = content.exercises(model.drill, model.theme)
+      let questions = practice_exercises(model, model.drill)
       let session =
         questions
         |> model.env.shuffle
@@ -180,7 +181,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
       // turn; drills the browser cannot do (dictation) are left out.
       let available = available_drills(model.env)
       let session =
-        content.exercises(exercise.Mixed, model.theme)
+        practice_exercises(model, exercise.Mixed)
         |> list.filter(fn(e) {
           list.contains(available, exercise.drill(e.kind))
         })
@@ -202,7 +203,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
       // Shuffle first so new exercises come in random order, and again so
       // the round does not start with all the reviews.
       let session =
-        content.exercises(model.drill, model.theme)
+        practice_exercises(model, model.drill)
         |> model.env.shuffle
         |> progress.plan_round(
           model.progress,
@@ -218,6 +219,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
     Menu, UserStartedReview | Finished(..), UserStartedReview -> {
       let session =
         content.all_exercises()
+        |> content.at_level(model.progress.level)
         |> progress.due(model.progress, _, now: model.env.now())
         |> list.take(review_size)
         |> model.env.shuffle
@@ -327,7 +329,33 @@ fn update_progress(model: Model, progress: Progress) -> #(Model, Effect(Msg)) {
   #(Model(..model, progress:), save_effect(progress))
 }
 
+/// The exercises of a drill for the theme and level chosen in the menu.
+fn practice_exercises(model: Model, drill: Drill) -> List(Exercise) {
+  content.exercises(drill, model.theme)
+  |> content.at_level(model.progress.level)
+}
+
+/// The theme, if the drill has exercises for it at the level.
+fn fitting_theme(
+  theme: Option(String),
+  drill: Drill,
+  level: Option(lexicon.Level),
+) -> Option(String) {
+  case theme {
+    Some(theme) ->
+      case list.contains(content.themes_at_level(drill, level), theme) {
+        True -> Some(theme)
+        False -> None
+      }
+    None -> None
+  }
+}
+
 fn show_exercise(model: Model, session: Session) -> #(Model, Effect(Msg)) {
+  use <- bool.guard(session.is_finished(session), #(
+    Model(..model, screen: Menu),
+    effect.none(),
+  ))
   let screen = Practising(session:, input: "", grade: None)
   // Dictation is always read out, and a text to listen to when it first
   // comes up; a French prompt is if read-aloud is on.
@@ -458,18 +486,18 @@ pub fn view(model: Model) -> Element(Msg) {
 }
 
 fn view_menu(model: Model) -> Element(Msg) {
-  let themes = content.themes_for(model.drill)
+  let themes = content.themes_at_level(model.drill, model.progress.level)
   let stats =
     progress.stats(
       model.progress,
-      content.exercises(model.drill, model.theme),
+      practice_exercises(model, model.drill),
       now: model.env.now(),
     )
   let streak = progress.streak_days(model.progress, model.env.today())
   let due_everywhere =
     list.length(progress.due(
       model.progress,
-      content.all_exercises(),
+      content.all_exercises() |> content.at_level(model.progress.level),
       now: model.env.now(),
     ))
 
@@ -528,6 +556,20 @@ fn view_drill_picker(
 
   html.section([class("card")], [
     html.h2([], [html.text("Vad vill du öva?")]),
+    html.h2([class("subheading")], [html.text("Nivå")]),
+    html.div(
+      [class("chips")],
+      list.map([None, Some(lexicon.A1), Some(lexicon.A2)], fn(level) {
+        chip(
+          case level {
+            None -> "A1 och A2"
+            Some(level) -> level_name(level)
+          },
+          level == model.progress.level,
+          UserPickedLevel(level),
+        )
+      }),
+    ),
     group("Blandat", MixedDrills),
     group("Ord", WordDrills),
     group("Grammatik", GrammarDrills),
@@ -584,6 +626,8 @@ fn view_drill_picker(
 
 fn round_hint(stats: progress.Stats) -> String {
   case stats.due, stats.new {
+    0, 0 if stats.learning == 0 && stats.learned == 0 ->
+      "Det finns inga sådana övningar på den här nivån."
     0, 0 -> "Allt är repeterat! Du kan öva i förväg."
     due, 0 -> plural(due, "övning", "övningar") <> " att repetera."
     0, new -> plural(new, "ny övning", "nya övningar") <> "."

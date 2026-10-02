@@ -417,3 +417,53 @@ pub fn statistics_have_no_row_for_mixed_rounds_test() {
   assert !string.contains(html, "Blandad runda")
   assert string.contains(html, "Svenska → franska")
 }
+
+pub fn a_round_keeps_to_the_chosen_level_test() {
+  let model =
+    start() |> send([app.UserPickedLevel(Some(lexicon.A2)), UserStartedRound])
+  let assert Practising(session:, ..) = model.screen
+  assert session.queue != []
+  assert list.all(session.queue, fn(e) { e.level == lexicon.A2 })
+  let model =
+    start()
+    |> send([
+      app.UserPickedLevel(Some(lexicon.A1)),
+      UserPickedDrill(exercise.Mixed),
+      UserStartedRound,
+    ])
+  let assert Practising(session:, ..) = model.screen
+  assert list.all(session.queue, fn(e) { e.level == lexicon.A1 })
+}
+
+pub fn the_level_is_saved_with_progress_test() {
+  let model = start() |> send([app.UserPickedLevel(Some(lexicon.A2))])
+  assert model.progress.level == Some(lexicon.A2)
+}
+
+pub fn picking_a_level_drops_a_theme_it_does_not_have_test() {
+  // The school theme only has A1 words.
+  let model =
+    start()
+    |> send([
+      UserPickedTheme(Some("skolan")),
+      app.UserPickedLevel(Some(lexicon.A2)),
+    ])
+  assert model.theme == None
+  let model =
+    start()
+    |> send([
+      UserPickedTheme(Some("djur")),
+      app.UserPickedLevel(Some(lexicon.A1)),
+    ])
+  assert model.theme == Some("djur")
+}
+
+pub fn review_keeps_to_the_chosen_level_test() {
+  let due = srs.CardState(box: 1, due: now - 1, reviews: 1, lapses: 0)
+  let model =
+    start()
+    |> with_progress([#("chat:to-fr", due), #("travail:to-fr", due)])
+    |> send([app.UserPickedLevel(Some(lexicon.A2)), UserStartedReview])
+  let assert Practising(session:, ..) = model.screen
+  assert list.map(session.queue, fn(e) { e.id }) == ["travail:to-fr"]
+}

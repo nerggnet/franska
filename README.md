@@ -36,7 +36,8 @@ optionally limited to one theme:
   slowly), and the transcript and translation are shown afterwards
 
 Blandad runda mixes all of these except the texts in one round, and every
-exercise shows whether it is A1 or A2. It has accent buttons for French answers and reads French aloud with the
+exercise shows whether it is A1 or A2; the menu can limit practice to one
+level. It has accent buttons for French answers and reads French aloud with the
 browser's speech synthesis. Spaced repetition decides what each round
 contains, so due reviews come first and then new words. Dagens
 repetition reviews everything due across all exercise types in one round,

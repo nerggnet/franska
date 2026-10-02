@@ -67,6 +67,27 @@ fn entry_exercises(drill: Drill, theme: Option(String)) -> List(Exercise) {
   |> list.filter(fn(exercise) { exercise.drill(exercise.kind) == drill })
 }
 
+/// Only the exercises of the given level, or all for `None`.
+pub fn at_level(
+  exercises: List(Exercise),
+  level: Option(lexicon.Level),
+) -> List(Exercise) {
+  case level {
+    None -> exercises
+    Some(level) -> list.filter(exercises, fn(e) { e.level == level })
+  }
+}
+
+/// The themes that have at least one exercise for the drill at the level.
+pub fn themes_at_level(
+  drill: Drill,
+  level: Option(lexicon.Level),
+) -> List(String) {
+  list.filter(themes(), fn(theme) {
+    at_level(exercises(drill, Some(theme)), level) != []
+  })
+}
+
 /// The themes that have at least one exercise for the drill.
 pub fn themes_for(drill: Drill) -> List(String) {
   list.filter(themes(), fn(theme) { exercises(drill, Some(theme)) != [] })

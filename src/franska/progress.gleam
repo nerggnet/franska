@@ -3,13 +3,14 @@
 
 import franska/answer.{type Grade}
 import franska/exercise.{type Exercise}
-import franska/lexicon
+import franska/lexicon.{type Level}
 import franska/srs.{type CardState, CardState}
 import gleam/dict.{type Dict}
 import gleam/dynamic/decode.{type Decoder}
 import gleam/int
 import gleam/json
 import gleam/list
+import gleam/option.{type Option, None, Some}
 import gleam/order
 import gleam/result
 
@@ -19,8 +20,14 @@ const version = 1
 /// Cards in this box or higher count as learned (next review in 7+ days).
 pub const learned_box = 3
 
+/// `level` is the level chosen in the menu, or `None` for both.
 pub type Progress {
-  Progress(cards: Dict(String, CardState), read_aloud: Bool, streak: Streak)
+  Progress(
+    cards: Dict(String, CardState),
+    read_aloud: Bool,
+    level: Option(Level),
+    streak: Streak,
+  )
 }
 
 /// `last_day` is the last local day number (days since 1970-01-01) with
@@ -34,7 +41,12 @@ pub type Stats {
 }
 
 pub fn new() -> Progress {
-  Progress(cards: dict.new(), read_aloud: True, streak: Streak(-1, 0))
+  Progress(
+    cards: dict.new(),
+    read_aloud: True,
+    level: None,
+    streak: Streak(-1, 0),
+  )
 }
 
 /// Records the first answer to an exercise in a round.
@@ -210,6 +222,10 @@ pub fn to_json(progress: Progress) -> String {
     #("version", json.int(version)),
     #("read_aloud", json.bool(progress.read_aloud)),
     #(
+      "level",
+      json.nullable(progress.level, fn(level) { json.string(level_id(level)) }),
+    ),
+    #(
       "streak",
       json.object([
         #("last_day", json.int(progress.streak.last_day)),
@@ -244,6 +260,12 @@ fn progress_decoder() -> Decoder(Progress) {
       decode.failure(new(), "progress version " <> int.to_string(version))
     True -> {
       use read_aloud <- decode.optional_field("read_aloud", True, decode.bool)
+      use level <- decode.optional_field(
+        "level",
+        None,
+        decode.optional(decode.string)
+          |> decode.map(option.then(_, parse_level)),
+      )
       use streak <- decode.optional_field(
         "streak",
         Streak(-1, 0),
@@ -253,8 +275,24 @@ fn progress_decoder() -> Decoder(Progress) {
         "cards",
         decode.dict(decode.string, card_decoder()),
       )
-      decode.success(Progress(cards:, read_aloud:, streak:))
+      decode.success(Progress(cards:, read_aloud:, level:, streak:))
     }
+  }
+}
+
+fn level_id(level: Level) -> String {
+  case level {
+    lexicon.A1 -> "A1"
+    lexicon.A2 -> "A2"
+  }
+}
+
+/// An unknown level falls back to both, rather than failing the load.
+fn parse_level(id: String) -> Option(Level) {
+  case id {
+    "A1" -> Some(lexicon.A1)
+    "A2" -> Some(lexicon.A2)
+    _ -> None
   }
 }
 

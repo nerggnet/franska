@@ -32,7 +32,9 @@ must work on both targets, has no FFI and never reads the clock.
 - `src/franska/ui/app.gleam`: the Lustre app (model, update, view), the only
   place with UI state. Time and randomness come from `model.env`, never
   from FFI directly, so `update` is tested in `test/franska/ui/app_test.gleam`
-  with a fixed clock and no shuffling. The menu picks a `Drill` and a theme.
+  with a fixed clock and no shuffling. The menu picks a level, a `Drill`
+  and a theme; `practice_exercises` applies the theme and level to every
+  kind of round, and statistics always show all levels.
 - `src/franska/ui/browser.gleam` and `browser.ffi.mjs`: all browser access
   (storage and the persistence request, file export/import, speech, focus,
   inserting accents at the caret, the clock). Give
@@ -91,7 +93,7 @@ must work on both targets, has no FFI and never reads the clock.
   seconds passed in by the caller. A correct answer before a card is due
   does not promote it.
 - `progress.gleam`: the saved state (cards by exercise id, read-aloud
-  setting, streak), its JSON format, `plan_round` (due first, then new
+  setting, the level chosen in the menu, streak), its JSON format, `plan_round` (due first, then new
   with easier levels first, then due soonest) and `stats`. The app stores it under the
   localStorage key `franska:progress`. Bump `version` when the format
   changes incompatibly; unreadable data falls back to a fresh start.
@@ -129,5 +131,4 @@ storage, offline/installable (PWA), dictation, futur proche, passé composé,
 imparfait, numbers, gap-fill sentences, gender hints, Svåra ord and le/la
 keyboard shortcuts (1/2).
 
-Ideas for later: more A2 content and sentences, more texts, choosing a level
-in the menu.
+Ideas for later: more A2 content and sentences, more texts.
