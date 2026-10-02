@@ -586,3 +586,8 @@ input:focus-visible {
 .reveal .meaning {
   font-weight: 400;
 }
+
+.difficult-list .meaning {
+  font-weight: 400;
+  color: var(--muted);
+}

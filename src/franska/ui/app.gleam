@@ -678,12 +678,13 @@ fn view_exercise(
     ]),
     html.p([class("instruction")], [html.text(instruction(exercise))]),
     view_prompt(exercise, env.can_speak),
+    view_meaning(exercise),
     case exercise.kind {
       Comprehend(options:, ..) -> view_question(exercise, options, answered)
       _ -> view_answer_form(exercise, input, answered)
     },
     case grade {
-      Some(grade) -> view_feedback(exercise, grade, env.can_speak)
+      Some(grade) -> view_feedback(exercise, input, grade, env.can_speak)
       None -> element.none()
     },
   ])
@@ -864,29 +865,23 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
         html.p([class("hint"), attribute.lang("sv")], [html.text(translation)]),
       ])
     Agree(form) ->
-      html.div([], [
-        html.p([class("prompt"), attribute.lang("fr")], [
-          html.text(exercise.prompt),
-          html.span([class("infinitive")], [
-            html.text(" → " <> adjective_form_name(form)),
-          ]),
+      html.p([class("prompt"), attribute.lang("fr")], [
+        html.text(exercise.prompt),
+        html.span([class("infinitive")], [
+          html.text(" → " <> adjective_form_name(form)),
         ]),
-        view_meaning(exercise),
       ])
     Compare(degree:, adjective:) -> {
       let #(before, after) =
         string.split_once(exercise.prompt, lexicon.gap)
         |> result.unwrap(#(exercise.prompt, ""))
-      html.div([], [
-        html.p([class("prompt"), attribute.lang("fr")], [
-          html.text(before),
-          html.span([class("blank")], [html.text("___")]),
-          html.span([class("infinitive")], [
-            html.text(" (" <> adjective <> ", " <> degree_name(degree) <> ")"),
-          ]),
-          html.text(after),
+      html.p([class("prompt"), attribute.lang("fr")], [
+        html.text(before),
+        html.span([class("blank")], [html.text("___")]),
+        html.span([class("infinitive")], [
+          html.text(" (" <> adjective <> ", " <> degree_name(degree) <> ")"),
         ]),
-        view_meaning(exercise),
+        html.text(after),
       ])
     }
     FillGap(hint:, translation:) -> {
@@ -951,11 +946,35 @@ fn meaning(exercise: Exercise) -> Result(String, Nil) {
 
 /// Whether to show the Swedish meaning with the prompt and the answer. Only
 /// where it does not give the answer away: knowing that grand means "stor"
-/// does not tell you that the feminine plural is grandes.
+/// does not tell you that the feminine plural is grandes, nor does "tala"
+/// give the ending of parlons, or "hus" the gender of maison.
 fn shows_meaning(exercise: Exercise) -> Bool {
   case exercise.kind {
-    Agree(_) | Compare(..) -> True
+    Agree(_) | Compare(..) | Conjugate(..) | ChooseArticle -> True
     _ -> False
+  }
+}
+
+/// After a French → Swedish translation, the other accepted translations
+/// than the one given and the one already shown as the answer.
+pub fn other_translations(
+  exercise: Exercise,
+  given: String,
+  grade: Grade,
+) -> List(String) {
+  let shown = case grade {
+    Correct -> ""
+    Almost(expected:, ..) | Wrong(expected:) -> expected
+  }
+  let same = fn(a, b) {
+    answer.normalise(a, answer.Swedish) == answer.normalise(b, answer.Swedish)
+  }
+  case exercise.kind {
+    Translate(ToSwedish) ->
+      list.filter(exercise.accepted, fn(a) {
+        !same(a, given) && !same(a, shown)
+      })
+    _ -> []
   }
 }
 
@@ -1105,6 +1124,7 @@ fn view_accents() -> Element(Msg) {
 
 fn view_feedback(
   exercise: Exercise,
+  given: String,
   grade: Grade,
   can_speak: Bool,
 ) -> Element(Msg) {
@@ -1135,6 +1155,13 @@ fn view_feedback(
       },
       speaker_button(exercise.french, can_speak),
     ]),
+    case other_translations(exercise, given, grade) {
+      [] -> element.none()
+      others ->
+        html.p([class("gender-hint"), attribute.lang("sv")], [
+          html.text("Även rätt: " <> string.join(others, ", ")),
+        ])
+    },
     case gender_hint(exercise, grade) {
       Some(hint) -> html.p([class("gender-hint")], [html.text(hint)])
       None -> element.none()
@@ -1378,8 +1405,17 @@ fn view_difficult(difficult: List(#(Exercise, srs.CardState))) -> Element(Msg) {
           list.map(list.take(difficult, round_size), fn(pair) {
             let #(exercise, card) = pair
             html.li([], [
-              html.span([attribute.lang("fr")], [
-                html.text(exercise_label(exercise)),
+              html.span([], [
+                html.span([attribute.lang("fr")], [
+                  html.text(exercise_label(exercise)),
+                ]),
+                case exercise.kind, meaning(exercise) {
+                  Comprehend(..), _ | _, Error(Nil) -> element.none()
+                  _, Ok(meaning) ->
+                    html.span([class("meaning"), attribute.lang("sv")], [
+                      html.text(" – " <> meaning),
+                    ])
+                },
               ]),
               html.span([class("muted")], [
                 html.text(

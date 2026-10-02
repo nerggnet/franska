@@ -333,3 +333,38 @@ pub fn translation_drills_do_not_show_the_meaning_test() {
     start() |> practising("chat:to-sv") |> app.view |> element.to_string
   assert !string.contains(html, "Betyder:")
 }
+
+pub fn conjugation_and_article_drills_show_the_meaning_test() {
+  let html =
+    start()
+    |> practising("parler:present:nous")
+    |> app.view
+    |> element.to_string
+  assert string.contains(html, "Betyder: tala")
+  let html =
+    start() |> practising("maison:article") |> app.view |> element.to_string
+  assert string.contains(html, "Betyder: hus")
+}
+
+pub fn other_accepted_translations_are_shown_after_answering_test() {
+  let model = start() |> practising("maison:to-sv")
+  let model = send(model, [UserTypedAnswer("ett hus"), UserSubmittedAnswer])
+  assert string.contains(element.to_string(app.view(model)), "Även rätt: hem")
+  let assert Ok(ex) =
+    list.find(content.all_exercises(), fn(e) { e.id == "maison:to-sv" })
+  assert app.other_translations(ex, "hem", Correct) == ["hus"]
+  // A wrong answer already shows the main translation.
+  assert app.other_translations(ex, "katt", Wrong("hus")) == ["hem"]
+}
+
+pub fn the_difficult_list_shows_the_meaning_test() {
+  let missed = srs.CardState(box: 1, due: now + 1000, reviews: 3, lapses: 2)
+  let html =
+    start()
+    |> with_progress([#("chat:to-fr", missed)])
+    |> send([app.UserOpenedStatistics])
+    |> app.view
+    |> element.to_string
+  assert string.contains(html, "le chat")
+  assert string.contains(html, "– katt")
+}
