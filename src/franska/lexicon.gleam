@@ -449,12 +449,11 @@ fn forms(
       conjugate(avoir, person) <> " " <> participle,
     ]
     Verb(participle:, ..), PasseCompose ->
-      list.map(agreements(subject), fn(ending) {
-        reflexive(
-          word,
-          person,
-          conjugate(etre, person) <> " " <> participle <> ending,
-        )
+      agreements(subject)
+      |> list.map(fn(ending) { agree(participle, ending) })
+      |> list.unique
+      |> list.map(fn(participle) {
+        reflexive(word, person, conjugate(etre, person) <> " " <> participle)
       })
     Verb(infinitive:, present:, ..), Imparfait -> [
       reflexive(word, person, imparfait(infinitive, present, person)),
@@ -526,6 +525,11 @@ fn irregular_future_stem(infinitive: String) -> Result(String, Nil) {
     "recevoir" -> Ok("recevr")
     "souvenir" -> Ok("souviendr")
     "mourir" -> Ok("mourr")
+    "tenir" -> Ok("tiendr")
+    "obtenir" -> Ok("obtiendr")
+    "prévenir" -> Ok("préviendr")
+    "asseoir" -> Ok("assiér")
+    "accueillir" -> Ok("accueiller")
     _ -> Error(Nil)
   }
 }
@@ -656,6 +660,14 @@ fn imparfait(infinitive: String, present: Present, person: Person) -> String {
       }
   }
   stem <> ending
+}
+
+/// A participle ending in s takes no plural s: "ils sont assis".
+fn agree(participle: String, ending: String) -> String {
+  case string.ends_with(participle, "s"), ending {
+    True, "s" -> participle
+    _, _ -> participle <> ending
+  }
 }
 
 /// Participle endings for a subject with être, the most common first. Je,

@@ -494,3 +494,18 @@ pub fn states_have_no_progressive_or_recent_past_test() {
   assert lexicon.conjugation_answers(vouloir, lexicon.PasseRecent, lexicon.Je)
     == []
 }
+
+pub fn a_participle_ending_in_s_takes_no_plural_s_test() {
+  let asseoir =
+    reflexive(
+      "asseoir",
+      ["assieds", "assieds", "assied", "asseyons", "asseyez", "asseyent"],
+      "assis",
+    )
+  assert lexicon.conjugated(asseoir, lexicon.PasseCompose, lexicon.Nous)
+    == "nous nous sommes assis"
+  assert lexicon.conjugation_answers(asseoir, lexicon.PasseCompose, lexicon.Ils)
+    |> list.contains("elles se sont assises")
+  assert lexicon.conjugated(asseoir, lexicon.FuturSimple, lexicon.Je)
+    == "je m'assiérai"
+}
