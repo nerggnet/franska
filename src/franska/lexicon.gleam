@@ -275,9 +275,9 @@ pub fn comparison_frame(degree: Degree) -> String {
 /// Adjectives that are not compared: plus première or plus suédoise make
 /// no sense.
 const not_gradable = [
-  "premier", "dernier", "prochain", "même", "autre", "suédois", "français",
-  "anglais", "allemand", "espagnol", "italien", "américain", "norvégien",
-  "danois", "finlandais",
+  "premier", "dernier", "prochain", "même", "autre", "gratuit", "suédois",
+  "français", "anglais", "allemand", "espagnol", "italien", "américain",
+  "norvégien", "danois", "finlandais",
 ]
 
 /// Accepted answers for the gap in `comparison_frame(degree)`, canonical
@@ -487,6 +487,8 @@ fn irregular_future_stem(infinitive: String) -> Result(String, Nil) {
     "devenir" -> Ok("deviendr")
     "revenir" -> Ok("reviendr")
     "recevoir" -> Ok("recevr")
+    "souvenir" -> Ok("souviendr")
+    "mourir" -> Ok("mourr")
     _ -> Error(Nil)
   }
 }

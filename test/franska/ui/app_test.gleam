@@ -441,11 +441,11 @@ pub fn the_level_is_saved_with_progress_test() {
 }
 
 pub fn picking_a_level_drops_a_theme_it_does_not_have_test() {
-  // The school theme only has A1 words.
+  // The calendar theme only has A1 words.
   let model =
     start()
     |> send([
-      UserPickedTheme(Some("skolan")),
+      UserPickedTheme(Some("kalender")),
       app.UserPickedLevel(Some(lexicon.A2)),
     ])
   assert model.theme == None

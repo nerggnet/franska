@@ -114,3 +114,8 @@ pub fn comparison_sentences_test() {
   assert swedish.comparison("stor", Equal) == "Han är lika stor som du."
   assert swedish.comparison("stor", Most) == "De är störst av alla."
 }
+
+pub fn adjectives_after_bli_agree_test() {
+  assert swedish.conjugate("bli frisk", Presens, Je) == Ok("jag blir frisk")
+  assert swedish.conjugate("bli frisk", Presens, Nous) == Ok("vi blir friska")
+}

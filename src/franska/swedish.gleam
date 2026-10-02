@@ -19,7 +19,7 @@ pub fn adjective_plural(adjective: String) -> String {
     "liten" -> "små"
     "gammal" -> "gamla"
     "annan" -> "andra"
-    "fel" | "blå" | "grå" -> adjective
+    "fel" | "blå" | "grå" | "gratis" -> adjective
     _ ->
       case ends_with_any(adjective, ["a", "e", "o"]) {
         True -> adjective
@@ -120,6 +120,17 @@ pub fn conjugate(
     Error(Nil) -> #(verb, [])
   }
   let rest = list.map(rest, fn(word) { reflexive(word, person) })
+  // An adjective after bli or vara agrees: vi blir friska.
+  let rest = case head, person {
+    "bli", Nous
+    | "bli", Vous
+    | "bli", Ils
+    | "vara", Nous
+    | "vara", Vous
+    | "vara", Ils
+    -> list.map(rest, adjective_plural)
+    _, _ -> rest
+  }
   let subject = subject(person)
   let phrase = fn(words: List(String)) {
     words |> list.filter(fn(w) { w != "" }) |> string.join(" ")
@@ -244,6 +255,13 @@ fn forms(verb: String) -> Result(Forms, Nil) {
     "byta" -> Ok(Forms("byter", "bytte", "bytt", "byt"))
     "fortsätta" -> Ok(Forms("fortsätter", "fortsatte", "fortsatt", "fortsätt"))
     "må" -> Ok(Forms("mår", "mådde", "mått", "må"))
+    "hyra" -> Ok(Forms("hyr", "hyrde", "hyrt", "hyr"))
+    "gifta" -> Ok(Forms("gifter", "gifte", "gift", "gift"))
+    "ställa" -> Ok(Forms("ställer", "ställde", "ställt", "ställ"))
+    "bjuda" -> Ok(Forms("bjuder", "bjöd", "bjudit", "bjud"))
+    "översätta" -> Ok(Forms("översätter", "översatte", "översatt", "översätt"))
+    "svänga" -> Ok(Forms("svänger", "svängde", "svängt", "sväng"))
+    "dö" -> Ok(Forms("dör", "dog", "dött", "dö"))
     // Deponent verbs end in -s in every form and have no imperative.
     "lyckas" | "hoppas" -> {
       let stem = string.drop_end(verb, 2)
@@ -310,7 +328,8 @@ fn takes_mer(adjective: String) -> Bool {
   || list.contains(
     [
       "intelligent", "intressant", "utsökt", "känd", "modern", "svartsjuk",
-      "likadan", "stängd", "möjlig", "omöjlig", "fel",
+      "likadan", "stängd", "möjlig", "omöjlig", "fel", "upptagen", "normal",
+      "privat",
     ],
     adjective,
   )
