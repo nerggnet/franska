@@ -31,7 +31,7 @@ pub fn entries() -> List(Entry) {
     phrase(
       "je-voudrais",
       "vardagsfraser",
-      ["jag skulle vilja", "jag vill gärna"],
+      ["jag skulle vilja", "jag vill gärna", "jag vill ha"],
       [
         "je voudrais",
       ],
@@ -481,7 +481,7 @@ pub fn entries() -> List(Entry) {
     adjective(
       "ancien",
       "egenskaper",
-      ["forntida", "före detta"],
+      ["före detta", "tidigare", "förra", "forntida", "gammal"],
       "ancien",
       "ancienne",
     ),
@@ -516,7 +516,7 @@ pub fn entries() -> List(Entry) {
     adjective(
       "tranquille",
       "egenskaper",
-      ["stilla"],
+      ["stilla", "lugn"],
       "tranquille",
       "tranquille",
     ),
@@ -538,7 +538,7 @@ pub fn entries() -> List(Entry) {
     ),
     verb(
       "offrir",
-      ["ge bort", "bjuda på"],
+      ["ge bort", "bjuda på", "ge"],
       "offrir",
       #("offre", "offres", "offre", "offrons", "offrez", "offrent"),
       "offert",
@@ -794,7 +794,7 @@ pub fn entries() -> List(Entry) {
     ),
     reflexive(
       "s-arreter",
-      ["sluta", "stoppa"],
+      ["stanna upp", "stanna", "sluta", "stoppa"],
       "arrêter",
       #("arrête", "arrêtes", "arrête", "arrêtons", "arrêtez", "arrêtent"),
       "arrêté",
@@ -1253,7 +1253,7 @@ pub fn entries() -> List(Entry) {
     ),
     pronoun(
       "pron-je-mange-soupe",
-      "Jag äter av den.",
+      "Jag äter lite av den.",
       "Je mange [de la soupe].",
       ["J'en mange."],
     ),

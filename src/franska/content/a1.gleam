@@ -18,10 +18,13 @@ pub fn entries() -> List(Entry) {
     phrase("merci-beaucoup", "hälsningar", ["tack så mycket"], [
       "merci beaucoup",
     ]),
-    phrase("s-il-vous-plait", "hälsningar", ["snälla", "var snäll"], [
-      "s'il vous plaît", "s'il te plaît",
-    ]),
-    phrase("excusez-moi", "hälsningar", ["ursäkta", "förlåt"], [
+    phrase(
+      "s-il-vous-plait",
+      "hälsningar",
+      ["snälla", "var snäll", "var så snäll"],
+      ["s'il vous plaît", "s'il te plaît"],
+    ),
+    phrase("excusez-moi", "hälsningar", ["ursäkta", "ursäkta mig", "förlåt"], [
       "excusez-moi", "excuse-moi", "pardon",
     ]),
     phrase("oui", "hälsningar", ["ja"], ["oui"]),
@@ -222,7 +225,7 @@ pub fn entries() -> List(Entry) {
     phrase("a-cote-de", "prepositioner", ["bredvid"], ["à côté de"]),
     phrase("pres-de", "prepositioner", ["nära"], ["près de"]),
     phrase("loin-de", "prepositioner", ["långt från"], ["loin de"]),
-    phrase("avant", "prepositioner", ["före"], ["avant"]),
+    phrase("avant", "prepositioner", ["före", "innan"], ["avant"]),
     phrase("apres", "prepositioner", ["efter"], ["après"]),
     phrase("et", "småord", ["och"], ["et"]),
     phrase("ou", "småord", ["eller"], ["ou"]),
@@ -230,7 +233,7 @@ pub fn entries() -> List(Entry) {
     phrase("aussi", "småord", ["också"], ["aussi"]),
     phrase("tres", "småord", ["väldigt", "mycket"], ["très"]),
     phrase("beaucoup", "småord", ["mycket"], ["beaucoup"]),
-    phrase("bien", "småord", ["väl", "bra"], ["bien"]),
+    phrase("bien", "småord", ["bra", "väl"], ["bien"]),
     phrase("ici", "småord", ["här"], ["ici"]),
     phrase("la-bas", "småord", ["där borta", "där"], ["là-bas"]),
     // Fler substantiv
@@ -388,7 +391,7 @@ pub fn entries() -> List(Entry) {
     // Reflexiva verb
     reflexive(
       "se-lever",
-      ["stiga upp", "resa sig"],
+      ["stiga upp", "gå upp", "resa sig"],
       "lever",
       #("lève", "lèves", "lève", "levons", "levez", "lèvent"),
       "levé",
@@ -438,7 +441,7 @@ pub fn entries() -> List(Entry) {
     // Adjektiv
     adjective("grand", "egenskaper", ["stor"], "grand", "grande"),
     adjective("petit", "egenskaper", ["liten"], "petit", "petite"),
-    adjective("bon", "egenskaper", ["bra", "god"], "bon", "bonne"),
+    adjective("bon", "egenskaper", ["god", "bra"], "bon", "bonne"),
     adjective("mauvais", "egenskaper", ["dålig"], "mauvais", "mauvaise"),
     adjective("beau", "egenskaper", ["vacker", "snygg", "fin"], "beau", "belle"),
     adjective("joli", "egenskaper", ["söt", "fin", "vacker"], "joli", "jolie"),
@@ -526,7 +529,7 @@ pub fn entries() -> List(Entry) {
       "stormarknad",
       "mataffär",
     ]),
-    noun("piscine", "staden", "piscine", Feminine, ["simhall", "pool"]),
+    noun("piscine", "staden", "piscine", Feminine, ["simhall", "badhus", "pool"]),
     noun("bibliotheque", "staden", "bibliothèque", Feminine, ["bibliotek"]),
     noun("police", "staden", "police", Feminine, ["polisen"]),
     noun("quartier", "staden", "quartier", Masculine, ["kvarter", "stadsdel"]),
@@ -634,14 +637,22 @@ pub fn entries() -> List(Entry) {
       "pas de problème",
     ]),
     phrase("bien-sur", "vardagsfraser", ["självklart", "såklart"], ["bien sûr"]),
-    phrase("voila", "vardagsfraser", ["här är", "där är"], ["voilà"]),
-    phrase("je-suis-desole", "vardagsfraser", ["jag är ledsen", "förlåt mig"], [
-      "je suis désolé",
-      "je suis désolée",
-      "désolé",
-      "désolée",
+    phrase("voila", "vardagsfraser", ["här är", "där är", "varsågod"], ["voilà"]),
+    phrase(
+      "je-suis-desole",
+      "vardagsfraser",
+      ["förlåt", "jag ber om ursäkt", "jag är ledsen", "förlåt mig"],
+      [
+        "je suis désolé",
+        "je suis désolée",
+        "désolé",
+        "désolée",
+        "pardon",
+      ],
+    ),
+    phrase("felicitations", "vardagsfraser", ["gratulerar", "grattis"], [
+      "félicitations",
     ]),
-    phrase("felicitations", "vardagsfraser", ["gratulerar"], ["félicitations"]),
     phrase("bon-anniversaire", "vardagsfraser", ["grattis på födelsedagen"], [
       "bon anniversaire",
       "joyeux anniversaire",
@@ -704,7 +715,7 @@ pub fn entries() -> List(Entry) {
     adjective(
       "delicieux",
       "egenskaper",
-      ["utsökt", "jättegod"],
+      ["utsökt", "jättegod", "läcker", "god"],
       "délicieux",
       "délicieuse",
     ),
@@ -753,7 +764,7 @@ pub fn entries() -> List(Entry) {
     ),
     verb(
       "marcher",
-      ["gå till fots", "promenera"],
+      ["gå till fots", "promenera", "gå"],
       "marcher",
       #("marche", "marches", "marche", "marchons", "marchez", "marchent"),
       "marché",
@@ -986,7 +997,7 @@ pub fn entries() -> List(Entry) {
       "meningar",
       "Huset är stort.",
       "___ maison est grande.",
-      ["la"],
+      ["La"],
       "le/la",
     ),
     sentence(

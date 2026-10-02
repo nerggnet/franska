@@ -393,3 +393,7 @@ pub fn ayer_verbs_accept_both_future_spellings_test() {
   assert list.contains(answers, "j'essaierai")
   assert list.contains(answers, "j'essayerai")
 }
+
+pub fn y_does_not_elide_the_article_test() {
+  assert lexicon.french(lexicon.noun("yaourt", Masculine)) == "le yaourt"
+}

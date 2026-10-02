@@ -676,7 +676,8 @@ pub fn pronoun(person: Person) -> String {
 
 fn starts_with_vowel_sound(word: String) -> Bool {
   case string.first(string.lowercase(word)) {
-    Ok(c) -> string.contains("aàâeéèêëiîïoôuùûüyœh", c)
+    // Not y: le yaourt.
+    Ok(c) -> string.contains("aàâeéèêëiîïoôuùûüœh", c)
     Error(Nil) -> False
   }
 }
