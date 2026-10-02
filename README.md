@@ -18,7 +18,8 @@ optionally limited to one theme:
 
 - Swedish → French and French → Swedish translation
 - le or la? for nouns
-- Verb conjugation: présent, futur proche, futur simple, passé composé,
+- Verb conjugation: présent, présent progressif (en train de), futur proche,
+  passé récent (venir de), futur simple, passé composé,
   imparfait, conditionnel and imperative, including reflexive verbs (se lever, lève-toi)
 - Dictation: write down French read aloud
 - Numbers: write 0–100, the hundreds and a few thousands in words

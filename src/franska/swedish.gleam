@@ -3,7 +3,7 @@
 import franska/lexicon.{
   type Degree, type Person, type Tense, Conditionnel, Equal, FuturProche,
   FuturSimple, Il, Ils, Imparfait, Imperatif, Je, Less, More, Most, Nous,
-  PasseCompose, Presens, Tu, Vous,
+  PasseCompose, PasseRecent, Presens, PresentProgressif, Tu, Vous,
 }
 import gleam/list
 import gleam/result
@@ -146,6 +146,7 @@ pub fn conjugate(
       case tense {
         Presens -> Ok(phrase([subject, "måste", ..rest]))
         FuturProche -> Ok(phrase([subject, "ska behöva", ..rest]))
+        PresentProgressif | PasseRecent -> Error(Nil)
         FuturSimple -> Ok(phrase([subject, "kommer att behöva", ..rest]))
         PasseCompose -> Ok(phrase([subject, "har varit", forced, ..rest]))
         Imparfait -> Ok(phrase([subject, "var", forced, ..rest]))
@@ -158,6 +159,9 @@ pub fn conjugate(
       case tense {
         Presens -> Ok(phrase([subject, forms.present, ..rest]))
         FuturProche -> Ok(phrase([subject, "ska", head, ..rest]))
+        PresentProgressif ->
+          Ok(phrase([subject, "håller på att", head, ..rest]))
+        PasseRecent -> Ok(phrase([subject, "har just", forms.supine, ..rest]))
         FuturSimple -> Ok(phrase([subject, "kommer att", head, ..rest]))
         PasseCompose -> Ok(phrase([subject, "har", forms.supine, ..rest]))
         Imparfait -> Ok(phrase([subject, forms.past, ..rest]))

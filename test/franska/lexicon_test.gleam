@@ -410,3 +410,73 @@ pub fn some_adjectives_are_not_compared_test() {
     )
     == []
 }
+
+pub fn present_progressive_is_etre_en_train_de_test() {
+  let manger =
+    verb("manger", ["mange", "manges", "mange", "mangeons", "mangez", "mangent"])
+  let ecrire =
+    verb("écrire", [
+      "écris",
+      "écris",
+      "écrit",
+      "écrivons",
+      "écrivez",
+      "écrivent",
+    ])
+  assert all_persons(manger, lexicon.PresentProgressif)
+    == [
+      "je suis en train de manger", "tu es en train de manger",
+      "il est en train de manger", "nous sommes en train de manger",
+      "vous êtes en train de manger", "ils sont en train de manger",
+    ]
+  assert lexicon.conjugated(ecrire, lexicon.PresentProgressif, lexicon.Il)
+    == "il est en train d'écrire"
+}
+
+pub fn recent_past_is_venir_de_test() {
+  let arriver =
+    verb("arriver", [
+      "arrive",
+      "arrives",
+      "arrive",
+      "arrivons",
+      "arrivez",
+      "arrivent",
+    ])
+  assert all_persons(arriver, lexicon.PasseRecent)
+    == [
+      "je viens d'arriver", "tu viens d'arriver", "il vient d'arriver",
+      "nous venons d'arriver", "vous venez d'arriver", "ils viennent d'arriver",
+    ]
+  let lever =
+    reflexive(
+      "lever",
+      ["lève", "lèves", "lève", "levons", "levez", "lèvent"],
+      "levé",
+    )
+  assert lexicon.conjugated(lever, lexicon.PasseRecent, lexicon.Je)
+    == "je viens de me lever"
+  let habiller =
+    reflexive(
+      "habiller",
+      ["habille", "habilles", "habille", "habillons", "habillez", "habillent"],
+      "habillé",
+    )
+  assert lexicon.conjugated(habiller, lexicon.PresentProgressif, lexicon.Nous)
+    == "nous sommes en train de nous habiller"
+  assert lexicon.conjugated(habiller, lexicon.PasseRecent, lexicon.Il)
+    == "il vient de s'habiller"
+}
+
+pub fn states_have_no_progressive_or_recent_past_test() {
+  let vouloir =
+    verb("vouloir", ["veux", "veux", "veut", "voulons", "voulez", "veulent"])
+  assert lexicon.conjugation_answers(
+      vouloir,
+      lexicon.PresentProgressif,
+      lexicon.Je,
+    )
+    == []
+  assert lexicon.conjugation_answers(vouloir, lexicon.PasseRecent, lexicon.Je)
+    == []
+}

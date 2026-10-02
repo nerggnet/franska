@@ -111,8 +111,12 @@ pub type Auxiliary {
 
 pub type Tense {
   Presens
+  /// être en train de + infinitive: "je suis en train de manger".
+  PresentProgressif
   /// aller + infinitive: "je vais parler".
   FuturProche
+  /// venir de + infinitive: "je viens de manger".
+  PasseRecent
   /// A stem, mostly the infinitive, plus -ai, -as, -a, -ons, -ez, -ont:
   /// "je parlerai", "j'irai".
   FuturSimple
@@ -129,7 +133,9 @@ pub type Tense {
 
 pub const tenses = [
   Presens,
+  PresentProgressif,
   FuturProche,
+  PasseRecent,
   FuturSimple,
   PasseCompose,
   Imparfait,
@@ -149,7 +155,9 @@ pub fn persons_for(tense: Tense) -> List(Person) {
 pub fn tense_id(tense: Tense) -> String {
   case tense {
     Presens -> "present"
+    PresentProgressif -> "present-progressif"
     FuturProche -> "futur-proche"
+    PasseRecent -> "passe-recent"
     FuturSimple -> "futur-simple"
     PasseCompose -> "passe-compose"
     Imparfait -> "imparfait"
@@ -408,6 +416,24 @@ fn forms(
     Verb(infinitive:, ..), FuturProche -> [
       conjugate(aller, person) <> " " <> reflexive(word, person, infinitive),
     ]
+    Verb(infinitive:, ..), PresentProgressif ->
+      case list.contains(not_progressive, infinitive) {
+        True -> []
+        False -> [
+          conjugate(etre, person)
+          <> " en train "
+          <> elide("de", reflexive(word, person, infinitive)),
+        ]
+      }
+    Verb(infinitive:, ..), PasseRecent ->
+      case list.contains(not_recent, infinitive) {
+        True -> []
+        False -> [
+          conjugate(venir, person)
+          <> " "
+          <> elide("de", reflexive(word, person, infinitive)),
+        ]
+      }
     Verb(participle:, auxiliary: Avoir, reflexive: False, ..), PasseCompose -> [
       conjugate(avoir, person) <> " " <> participle,
     ]
@@ -590,11 +616,11 @@ fn reflexive_pronoun(person: Person) -> String {
   }
 }
 
-/// Joins a short word to the next one, eliding me, te, se and je before a
-/// vowel sound: "s'habiller", "je m'appelle".
+/// Joins a short word to the next one, eliding me, te, se, je and de
+/// before a vowel sound: "s'habiller", "je m'appelle", "d'arriver".
 fn elide(word: String, next: String) -> String {
   case word, starts_with_vowel_sound(next) {
-    "me", True | "te", True | "se", True | "je", True ->
+    "me", True | "te", True | "se", True | "je", True | "de", True ->
       string.drop_end(word, 1) <> "'" <> next
     _, _ -> word <> " " <> next
   }
@@ -640,6 +666,19 @@ const aller = Present("vais", "vas", "va", "allons", "allez", "vont")
 const avoir = Present("ai", "as", "a", "avons", "avez", "ont")
 
 const etre = Present("suis", "es", "est", "sommes", "êtes", "sont")
+
+const venir = Present("viens", "viens", "vient", "venons", "venez", "viennent")
+
+/// Verbs for states rather than actions, which sound wrong as "en train
+/// de" or "venir de": je suis en train de vouloir.
+const stative = [
+  "vouloir", "pouvoir", "devoir", "savoir", "connaître", "aimer", "préférer",
+  "croire", "sembler", "espérer", "souhaiter",
+]
+
+const not_progressive = ["être", "avoir", ..stative]
+
+const not_recent = ["venir", ..stative]
 
 /// Every accepted answer for a verb in a tense and person: the forms on
 /// their own ("parlons") and with each subject ("nous parlons"), canonical

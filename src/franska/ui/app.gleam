@@ -830,7 +830,9 @@ fn chip_label(drill: Drill) -> String {
 fn tense_name(tense: lexicon.Tense) -> String {
   case tense {
     lexicon.Presens -> "presens"
+    lexicon.PresentProgressif -> "présent progressif"
     lexicon.FuturProche -> "futur proche"
+    lexicon.PasseRecent -> "passé récent"
     lexicon.FuturSimple -> "futur simple"
     lexicon.PasseCompose -> "passé composé"
     lexicon.Imparfait -> "imparfait"

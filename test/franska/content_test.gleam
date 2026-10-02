@@ -204,8 +204,8 @@ pub fn right_answers_are_spread_over_the_positions_test() {
   assert most * 2 <= total
 }
 
-/// Every verb's Swedish can be conjugated in every tense, except where
-/// Swedish has no imperative (kunna, lyckas).
+/// Every verb's Swedish can be conjugated in every tense the French has,
+/// except where Swedish has no imperative (kunna, lyckas).
 pub fn every_verb_has_swedish_forms_test() {
   let bad =
     content.entries()
@@ -213,7 +213,10 @@ pub fn every_verb_has_swedish_forms_test() {
       case e.word, e.sv {
         lexicon.Verb(..), [sv, ..] ->
           lexicon.tenses
-          |> list.filter(fn(tense) { tense != lexicon.Imperatif })
+          |> list.filter(fn(tense) {
+            tense != lexicon.Imperatif
+            && lexicon.conjugation_answers(e.word, tense, lexicon.Je) != []
+          })
           |> list.filter_map(fn(tense) {
             case swedish.conjugate(sv, tense, lexicon.Je) {
               Ok(_) -> Error(Nil)

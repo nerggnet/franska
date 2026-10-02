@@ -142,7 +142,8 @@ must work on both targets, has no FFI and never reads the clock.
 
 Since then: Dagens repetition, progress export/import and persistent
 storage, offline/installable (PWA), dictation, futur proche, passé composé,
-imparfait, numbers, gap-fill sentences, gender hints, Svåra ord, le/la
+imparfait, présent progressif (en train de, not for state verbs such as
+vouloir), passé récent (venir de), numbers, gap-fill sentences, gender hints, Svåra ord, le/la
 keyboard shortcuts (1/2), and a voice picker with dialogue voices and
 three reading speeds.
 
