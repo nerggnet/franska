@@ -240,20 +240,34 @@ pub fn comparisons_agree_with_the_subject_test() {
       ["moins grands"],
       ["aussi grand"],
       ["les plus grandes"],
+      ["le plus grand"],
     ]
   assert compared("beau", "belle")
-    == [["plus belle"], ["moins beaux"], ["aussi beau"], ["les plus belles"]]
+    == [
+      ["plus belle"],
+      ["moins beaux"],
+      ["aussi beau"],
+      ["les plus belles"],
+      ["le plus beau"],
+    ]
 }
 
 pub fn bon_and_mauvais_are_irregular_test() {
   assert compared("bon", "bonne")
-    == [["meilleure"], ["moins bons"], ["aussi bon"], ["les meilleures"]]
+    == [
+      ["meilleure"],
+      ["moins bons"],
+      ["aussi bon"],
+      ["les meilleures"],
+      ["le meilleur"],
+    ]
   assert compared("mauvais", "mauvaise")
     == [
       ["plus mauvaise", "pire"],
       ["moins mauvais"],
       ["aussi mauvais"],
       ["les plus mauvaises", "les pires"],
+      ["le plus mauvais", "le pire"],
     ]
 }
 

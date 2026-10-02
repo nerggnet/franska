@@ -255,9 +255,11 @@ pub type Degree {
   Equal
   /// The superlative: "les plus grandes".
   Most
+  /// The superlative in the masculine singular: "le plus grand".
+  MostSingular
 }
 
-pub const degrees = [More, Less, Equal, Most]
+pub const degrees = [More, Less, Equal, Most, MostSingular]
 
 /// Stable id of a degree, part of exercise ids.
 pub fn degree_id(degree: Degree) -> String {
@@ -266,6 +268,7 @@ pub fn degree_id(degree: Degree) -> String {
     Less -> "less"
     Equal -> "equal"
     Most -> "most"
+    MostSingular -> "most-singular"
   }
 }
 
@@ -277,6 +280,7 @@ pub fn comparison_frame(degree: Degree) -> String {
     Less -> "Ils sont " <> gap <> " que nous."
     Equal -> "Il est " <> gap <> " que toi."
     Most -> "Elles sont " <> gap <> " de toutes."
+    MostSingular -> "Il est " <> gap <> " de tous."
   }
 }
 
@@ -302,6 +306,7 @@ pub fn compared(word: Word, degree: Degree) -> List(String) {
       let #(form, irregular) = case degree, masculine {
         More, "bon" -> #(feminine, ["meilleure"])
         Most, "bon" -> #(feminine_plural, ["les meilleures"])
+        MostSingular, "bon" -> #(masculine, ["le meilleur"])
         More, "mauvais" -> #(feminine, ["plus mauvaise", "pire"])
         Most, "mauvais" -> #(feminine_plural, [
           "les plus mauvaises",
@@ -310,7 +315,12 @@ pub fn compared(word: Word, degree: Degree) -> List(String) {
         More, _ -> #(feminine, [])
         Less, _ -> #(masculine_plural, [])
         Equal, _ -> #(masculine, [])
+        MostSingular, "mauvais" -> #(masculine, [
+          "le plus mauvais",
+          "le pire",
+        ])
         Most, _ -> #(feminine_plural, [])
+        MostSingular, _ -> #(masculine, [])
       }
       case irregular {
         [_, ..] -> irregular
@@ -320,6 +330,7 @@ pub fn compared(word: Word, degree: Degree) -> List(String) {
             Less -> ["moins " <> form]
             Equal -> ["aussi " <> form]
             Most -> ["les plus " <> form]
+            MostSingular -> ["le plus " <> form]
           }
       }
     }

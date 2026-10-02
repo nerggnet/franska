@@ -2,8 +2,8 @@
 
 import franska/lexicon.{
   type Degree, type Person, type Tense, Conditionnel, Equal, FuturProche,
-  FuturSimple, Il, Ils, Imparfait, Imperatif, Je, Less, More, Most, Nous,
-  PasseCompose, PasseRecent, Presens, PresentProgressif, Tu, Vous,
+  FuturSimple, Il, Ils, Imparfait, Imperatif, Je, Less, More, Most, MostSingular,
+  Nous, PasseCompose, PasseRecent, Presens, PresentProgressif, Tu, Vous,
 }
 import gleam/list
 import gleam/result
@@ -292,6 +292,7 @@ pub fn comparison(adjective: String, degree: Degree) -> String {
     Less -> "De är inte lika " <> adjective_plural(adjective) <> " som vi."
     Equal -> "Han är lika " <> adjective <> " som du."
     Most -> "De är " <> superlative <> " av alla."
+    MostSingular -> "Han är " <> superlative <> " av alla."
   }
 }
 

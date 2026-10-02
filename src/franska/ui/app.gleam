@@ -1138,7 +1138,7 @@ fn degree_name(degree: lexicon.Degree) -> String {
     lexicon.More -> "mer"
     lexicon.Less -> "mindre"
     lexicon.Equal -> "lika"
-    lexicon.Most -> "mest"
+    lexicon.Most | lexicon.MostSingular -> "mest"
   }
 }
 

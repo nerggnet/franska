@@ -117,6 +117,8 @@ pub fn comparison_sentences_test() {
   assert swedish.comparison("dyr", Less) == "De är inte lika dyra som vi."
   assert swedish.comparison("stor", Equal) == "Han är lika stor som du."
   assert swedish.comparison("stor", Most) == "De är störst av alla."
+  assert swedish.comparison("bra", lexicon.MostSingular)
+    == "Han är bäst av alla."
 }
 
 pub fn adjectives_after_bli_agree_test() {

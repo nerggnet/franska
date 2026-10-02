@@ -33,7 +33,7 @@ optionally limited to one theme:
 - Negation: make a sentence negative (Tu as un chien → Tu n'as pas de chien)
 - Pronouns: replace part of a sentence with le, la, les, lui, leur, y or en
   (Je parle à Paul → Je lui parle)
-- Comparisons: plus, moins and aussi … que and the superlative for every
+- Comparisons: plus, moins and aussi … que and the superlative (les plus grandes, le plus grand) for every
   gradable adjective, with agreement (Elle est plus grande que lui) and meilleur
 - Reading and listening comprehension: 34 short texts and dialogues with
   questions in Swedish; in listening, the text is only read aloud, a
