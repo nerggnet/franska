@@ -393,8 +393,9 @@ fn takes_mer(adjective: String) -> Bool {
     [
       "intelligent", "intressant", "utsökt", "professionell", "kompetent",
       "ansvarig", "exakt", "besviken", "förtjust", "kreativ", "ambitiös",
-      "förkyld", "känd", "modern", "svartsjuk", "likadan", "stängd", "möjlig",
-      "omöjlig", "fel", "upptagen", "normal", "privat",
+      "förkyld", "pittoresk", "direkt", "tillgänglig", "känd", "modern",
+      "svartsjuk", "likadan", "stängd", "möjlig", "omöjlig", "fel", "upptagen",
+      "normal", "privat",
     ],
     adjective,
   )
