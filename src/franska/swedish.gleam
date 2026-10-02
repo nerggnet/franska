@@ -260,13 +260,14 @@ fn forms(verb: String) -> Result(Forms, Nil) {
 // COMPARISON ------------------------------------------------------------------
 
 /// The Swedish of the sentences in `lexicon.comparison_frame`, with the
-/// adjective compared: "Hon är större än han.", "De är mindre dyra än
-/// vi.", "Han är lika stor som du.", "De är störst av alla."
+/// adjective compared: "Hon är större än han.", "De är inte lika dyra som
+/// vi." (more natural than mindre dyra än), "Han är lika stor som du.",
+/// "De är störst av alla."
 pub fn comparison(adjective: String, degree: Degree) -> String {
   let #(comparative, superlative) = compare(adjective)
   case degree {
     More -> "Hon är " <> comparative <> " än han."
-    Less -> "De är mindre " <> adjective_plural(adjective) <> " än vi."
+    Less -> "De är inte lika " <> adjective_plural(adjective) <> " som vi."
     Equal -> "Han är lika " <> adjective <> " som du."
     Most -> "De är " <> superlative <> " av alla."
   }

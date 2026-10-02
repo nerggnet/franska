@@ -110,7 +110,7 @@ pub fn comparatives_test() {
 
 pub fn comparison_sentences_test() {
   assert swedish.comparison("stor", More) == "Hon är större än han."
-  assert swedish.comparison("dyr", Less) == "De är mindre dyra än vi."
+  assert swedish.comparison("dyr", Less) == "De är inte lika dyra som vi."
   assert swedish.comparison("stor", Equal) == "Han är lika stor som du."
   assert swedish.comparison("stor", Most) == "De är störst av alla."
 }
