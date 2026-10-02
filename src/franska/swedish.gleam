@@ -371,6 +371,9 @@ pub fn compare(adjective: String) -> #(String, String) {
     // ancien means "före detta", but plus ancien is older.
     "före detta" -> #("äldre", "äldst")
     "blå" | "grå" -> #(adjective <> "are", adjective <> "ast")
+    // Prompts made unambiguous compare like the plain word: lätt, söt.
+    "lättviktig" -> #("lättare", "lättast")
+    "sockersöt" -> #("sötare", "sötast")
     _ ->
       case takes_mer(adjective) {
         True -> #("mer " <> adjective, "mest " <> adjective)
