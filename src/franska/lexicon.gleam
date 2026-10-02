@@ -290,7 +290,7 @@ const not_gradable = [
   "premier", "dernier", "prochain", "même", "autre", "gratuit", "suédois",
   "français", "anglais", "allemand", "espagnol", "italien", "américain",
   "norvégien", "danois", "finlandais", "obligatoire", "facultatif", "actuel",
-  "absent", "présent",
+  "absent", "présent", "mort", "vivant", "enceinte",
 ]
 
 /// Accepted answers for the gap in `comparison_frame(degree)`, canonical
