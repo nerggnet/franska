@@ -864,23 +864,29 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
         html.p([class("hint"), attribute.lang("sv")], [html.text(translation)]),
       ])
     Agree(form) ->
-      html.p([class("prompt"), attribute.lang("fr")], [
-        html.text(exercise.prompt),
-        html.span([class("infinitive")], [
-          html.text(" → " <> adjective_form_name(form)),
+      html.div([], [
+        html.p([class("prompt"), attribute.lang("fr")], [
+          html.text(exercise.prompt),
+          html.span([class("infinitive")], [
+            html.text(" → " <> adjective_form_name(form)),
+          ]),
         ]),
+        view_meaning(exercise),
       ])
     Compare(degree:, adjective:) -> {
       let #(before, after) =
         string.split_once(exercise.prompt, lexicon.gap)
         |> result.unwrap(#(exercise.prompt, ""))
-      html.p([class("prompt"), attribute.lang("fr")], [
-        html.text(before),
-        html.span([class("blank")], [html.text("___")]),
-        html.span([class("infinitive")], [
-          html.text(" (" <> adjective <> ", " <> degree_name(degree) <> ")"),
+      html.div([], [
+        html.p([class("prompt"), attribute.lang("fr")], [
+          html.text(before),
+          html.span([class("blank")], [html.text("___")]),
+          html.span([class("infinitive")], [
+            html.text(" (" <> adjective <> ", " <> degree_name(degree) <> ")"),
+          ]),
+          html.text(after),
         ]),
-        html.text(after),
+        view_meaning(exercise),
       ])
     }
     FillGap(hint:, translation:) -> {
@@ -934,6 +940,35 @@ fn degree_name(degree: lexicon.Degree) -> String {
 }
 
 /// The title, French and Swedish of the text a question is about.
+/// The Swedish meaning of the word an exercise is about: the entry's main
+/// translation.
+fn meaning(exercise: Exercise) -> Result(String, Nil) {
+  case content.entry(exercise.entry_id) {
+    Ok(lexicon.Entry(sv: [first, ..], ..)) -> Ok(first)
+    _ -> Error(Nil)
+  }
+}
+
+/// Whether to show the Swedish meaning with the prompt and the answer. Only
+/// where it does not give the answer away: knowing that grand means "stor"
+/// does not tell you that the feminine plural is grandes.
+fn shows_meaning(exercise: Exercise) -> Bool {
+  case exercise.kind {
+    Agree(_) | Compare(..) -> True
+    _ -> False
+  }
+}
+
+fn view_meaning(exercise: Exercise) -> Element(Msg) {
+  case shows_meaning(exercise), meaning(exercise) {
+    True, Ok(meaning) ->
+      html.p([class("hint meaning-line"), attribute.lang("sv")], [
+        html.text("Betyder: " <> meaning),
+      ])
+    _, _ -> element.none()
+  }
+}
+
 fn text_of(exercise: Exercise) -> Result(#(String, String, String), Nil) {
   case content.entry(exercise.entry_id) {
     Ok(lexicon.Entry(word: lexicon.Text(title:, french:, swedish:, ..), ..)) ->
@@ -1091,6 +1126,13 @@ fn view_feedback(
     html.p([], [html.text(answer.explain(grade))]),
     html.div([class("reveal")], [
       html.span([attribute.lang("fr")], [html.text(exercise.french)]),
+      case shows_meaning(exercise), meaning(exercise) {
+        True, Ok(meaning) ->
+          html.span([class("meaning"), attribute.lang("sv")], [
+            html.text("– " <> meaning),
+          ])
+        _, _ -> element.none()
+      },
       speaker_button(exercise.french, can_speak),
     ]),
     case gender_hint(exercise, grade) {

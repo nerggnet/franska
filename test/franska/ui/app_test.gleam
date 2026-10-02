@@ -299,3 +299,37 @@ pub fn number_keys_pick_options_test() {
   assert app.choice_shortcut(["Ja", "Nej", "Vet ej"], "3") == Ok("Vet ej")
   assert app.choice_shortcut(["Ja", "Nej"], "3") == Error(Nil)
 }
+
+fn practising(model: app.Model, id: String) -> app.Model {
+  let assert Ok(ex) = list.find(content.all_exercises(), fn(e) { e.id == id })
+  app.Model(
+    ..model,
+    screen: Practising(session: session.new([ex]), input: "", grade: None),
+  )
+}
+
+pub fn adjective_drills_show_the_swedish_meaning_test() {
+  let html =
+    start() |> practising("grand:agree:fp") |> app.view |> element.to_string
+  assert string.contains(html, "Betyder: stor")
+  let html =
+    start() |> practising("grand:compare:more") |> app.view |> element.to_string
+  assert string.contains(html, "Betyder: stor")
+}
+
+pub fn the_meaning_is_shown_with_the_answer_test() {
+  let html =
+    start()
+    |> practising("grand:agree:fp")
+    |> send([UserTypedAnswer("grandes"), UserSubmittedAnswer])
+    |> app.view
+    |> element.to_string
+  assert string.contains(html, "– stor")
+}
+
+pub fn translation_drills_do_not_show_the_meaning_test() {
+  // The Swedish is the prompt itself here, or the answer.
+  let html =
+    start() |> practising("chat:to-sv") |> app.view |> element.to_string
+  assert !string.contains(html, "Betyder:")
+}
