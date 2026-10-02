@@ -160,3 +160,39 @@ pub fn difficult_lists_most_mistakes_first_test() {
     |> list.map(fn(pair) { { pair.0 }.id })
     == ["thrice", "once-weak", "once"]
 }
+
+pub fn mixed_round_takes_new_exercises_from_every_group_in_turn_test() {
+  let groups = [
+    list.map(["a1", "a2", "a3", "a4", "a5"], exercise),
+    list.map(["b1", "b2"], exercise),
+    list.map(["c1", "c2", "c3"], exercise),
+  ]
+  assert ids(progress.plan_mixed_round(progress.new(), groups, now:, size: 6))
+    == ["a1", "b1", "c1", "a2", "b2", "c2"]
+}
+
+pub fn mixed_round_puts_due_exercises_first_test() {
+  let p =
+    with_cards([
+      #("c2", CardState(box: 1, due: now - 50, reviews: 1, lapses: 0)),
+      #("a3", CardState(box: 1, due: now - 10, reviews: 1, lapses: 0)),
+      #("b1", CardState(box: 2, due: now + day, reviews: 1, lapses: 0)),
+    ])
+  let groups = [
+    list.map(["a1", "a2", "a3"], exercise),
+    list.map(["b1", "b2"], exercise),
+    list.map(["c1", "c2"], exercise),
+  ]
+  assert ids(progress.plan_mixed_round(p, groups, now:, size: 5))
+    == ["c2", "a3", "a1", "b2", "c1"]
+}
+
+pub fn mixed_round_fills_up_with_cards_due_soonest_test() {
+  let p =
+    with_cards([
+      #("a1", CardState(box: 1, due: now + day, reviews: 1, lapses: 0)),
+    ])
+  let groups = [[exercise("a1")], [exercise("b1")]]
+  assert ids(progress.plan_mixed_round(p, groups, now:, size: 5))
+    == ["b1", "a1"]
+}

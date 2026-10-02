@@ -106,6 +106,47 @@ pub fn plan_round(
   |> list.take(size)
 }
 
+/// Picks up to `size` exercises from several groups (one per drill) for a
+/// mixed round. Due exercises come first, most overdue first, whatever
+/// their group. Then new exercises are taken one group at a time in turn,
+/// easiest level first within a group, so that a big group (conjugation)
+/// does not crowd out the others. Any rest are the ones due soonest.
+pub fn plan_mixed_round(
+  progress: Progress,
+  groups: List(List(Exercise)),
+  now now: Int,
+  size size: Int,
+) -> List(Exercise) {
+  let all = list.flatten(groups)
+  let due = due(progress, all, now:) |> list.take(size)
+  let new =
+    groups
+    |> list.map(fn(group) {
+      group
+      |> list.filter(fn(e) { !dict.has_key(progress.cards, e.id) })
+      |> list.sort(fn(a, b) { lexicon.compare_levels(a.level, b.level) })
+    })
+    |> round_robin([])
+    |> list.take(size - list.length(due))
+  let chosen = list.append(due, new)
+  let later =
+    plan_round(progress, all, now:, size: size)
+    |> list.filter(fn(e) { !list.contains(chosen, e) })
+  list.append(chosen, later) |> list.take(size)
+}
+
+/// Takes the first of every list, then the second of every list, and so on.
+fn round_robin(lists: List(List(a)), acc: List(a)) -> List(a) {
+  case list.filter(lists, fn(l) { l != [] }) {
+    [] -> list.reverse(acc)
+    lists -> {
+      let firsts = list.filter_map(lists, list.first)
+      let rests = list.map(lists, fn(l) { list.drop(l, 1) })
+      round_robin(rests, list.append(list.reverse(firsts), acc))
+    }
+  }
+}
+
 /// The exercises that are due for review, the most overdue first.
 pub fn due(
   progress: Progress,

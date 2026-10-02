@@ -35,7 +35,8 @@ optionally limited to one theme:
   questions in Swedish; in listening, the text is only read aloud (also
   slowly), and the transcript and translation are shown afterwards
 
-It has accent buttons for French answers and reads French aloud with the
+Blandad runda mixes all of these except the texts in one round, and every
+exercise shows whether it is A1 or A2. It has accent buttons for French answers and reads French aloud with the
 browser's speech synthesis. Spaced repetition decides what each round
 contains, so due reviews come first and then new words. Dagens
 repetition reviews everything due across all exercise types in one round,

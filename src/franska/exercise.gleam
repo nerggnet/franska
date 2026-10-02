@@ -50,6 +50,8 @@ pub type Kind {
 
 /// The kinds of practice a learner can choose between.
 pub type Drill {
+  /// A round mixing the other drills (see `in_mixed_rounds`).
+  Mixed
   TranslateToFrench
   TranslateToSwedish
   Articles
@@ -67,6 +69,7 @@ pub type Drill {
 
 pub fn drills() -> List(Drill) {
   [
+    Mixed,
     TranslateToFrench,
     TranslateToSwedish,
     Articles,
@@ -98,6 +101,15 @@ pub type Exercise {
     french: String,
     level: Level,
   )
+}
+
+/// Whether an exercise can be part of a mixed round. Questions about texts
+/// cannot: they belong with the rest of their text.
+pub fn in_mixed_rounds(kind: Kind) -> Bool {
+  case kind {
+    Comprehend(..) -> False
+    _ -> True
+  }
 }
 
 pub fn drill(kind: Kind) -> Drill {

@@ -95,6 +95,9 @@ must work on both targets, has no FFI and never reads the clock.
   with easier levels first, then due soonest) and `stats`. The app stores it under the
   localStorage key `franska:progress`. Bump `version` when the format
   changes incompatibly; unreadable data falls back to a fresh start.
+  `plan_mixed_round` plans the `Mixed` drill: due first, then new
+  exercises round-robin over the drills, so conjugation does not crowd out
+  the rest. Text questions are never mixed (`exercise.in_mixed_rounds`).
   Only the first attempt at an exercise in a round is recorded.
 
 ## Conventions
@@ -126,4 +129,5 @@ storage, offline/installable (PWA), dictation, futur proche, passé composé,
 imparfait, numbers, gap-fill sentences, gender hints, Svåra ord and le/la
 keyboard shortcuts (1/2).
 
-Ideas for later: more A2 content and sentences, rounds mixing drills, longer reading and listening texts.
+Ideas for later: more A2 content and sentences, more texts, choosing a level
+in the menu.

@@ -19,6 +19,7 @@ import franska/session.{type Session}
 import franska/srs
 import franska/ui/browser
 import gleam/bool
+import gleam/dict
 import gleam/dynamic/decode
 import gleam/int
 import gleam/list
@@ -167,6 +168,32 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
         |> list.flat_map(fn(first) {
           list.filter(questions, fn(e) { e.entry_id == first.entry_id })
         })
+        |> session.new
+      show_exercise(Model(..model, round: DrillRound), session)
+    }
+
+    Menu, UserStartedRound
+    | Finished(..), UserStartedRound
+      if model.drill == exercise.Mixed
+    -> {
+      // One group per drill, so that new exercises are taken from each in
+      // turn; drills the browser cannot do (dictation) are left out.
+      let available = available_drills(model.env)
+      let session =
+        content.exercises(exercise.Mixed, model.theme)
+        |> list.filter(fn(e) {
+          list.contains(available, exercise.drill(e.kind))
+        })
+        |> list.group(fn(e) { exercise.drill(e.kind) })
+        |> dict.values
+        |> list.map(model.env.shuffle)
+        |> progress.plan_mixed_round(
+          model.progress,
+          _,
+          now: model.env.now(),
+          size: round_size,
+        )
+        |> model.env.shuffle
         |> session.new
       show_exercise(Model(..model, round: DrillRound), session)
     }
@@ -418,7 +445,10 @@ pub fn view(model: Model) -> Element(Msg) {
       Statistics(confirming_reset:, notice:) ->
         view_statistics(
           model.progress,
-          available_drills(model.env),
+          // A mixed round has no statistics of its own.
+          list.filter(available_drills(model.env), fn(drill) {
+            drill != exercise.Mixed
+          }),
           model.env.now(),
           confirming_reset,
           notice,
@@ -498,6 +528,7 @@ fn view_drill_picker(
 
   html.section([class("card")], [
     html.h2([], [html.text("Vad vill du öva?")]),
+    group("Blandat", MixedDrills),
     group("Ord", WordDrills),
     group("Grammatik", GrammarDrills),
     group("Böj verb", VerbDrills),
@@ -602,10 +633,12 @@ fn drill_name(drill: Drill) -> String {
     Comparisons -> "Jämförelse"
     ReadingTexts -> "Läsförståelse"
     ListeningTexts -> "Hörförståelse"
+    exercise.Mixed -> "Blandad runda"
   }
 }
 
 type DrillGroup {
+  MixedDrills
   WordDrills
   GrammarDrills
   VerbDrills
@@ -620,6 +653,7 @@ fn drill_group(drill: Drill) -> DrillGroup {
     Adjectives | Sentences | Negation | Pronouns | Comparisons -> GrammarDrills
     Conjugation(_) -> VerbDrills
     ReadingTexts | ListeningTexts -> TextDrills
+    exercise.Mixed -> MixedDrills
   }
 }
 
@@ -666,7 +700,16 @@ fn view_exercise(
 
   html.section([class("card")], [
     html.div([class("progress")], [
-      html.span([], [html.text(int.to_string(remaining) <> " kvar")]),
+      html.span([], [
+        html.text(int.to_string(remaining) <> " kvar"),
+        html.span(
+          [
+            class("level"),
+            attribute.title("Nivå enligt den europeiska referensramen"),
+          ],
+          [html.text(level_name(exercise.level))],
+        ),
+      ]),
       html.button(
         [
           class("link"),
@@ -922,6 +965,13 @@ fn view_prompt(exercise: Exercise, can_speak: Bool) -> Element(Msg) {
           html.text(" (" <> exercise.prompt <> ")"),
         ]),
       ])
+  }
+}
+
+fn level_name(level: lexicon.Level) -> String {
+  case level {
+    lexicon.A1 -> "A1"
+    lexicon.A2 -> "A2"
   }
 }
 

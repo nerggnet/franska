@@ -895,7 +895,7 @@ pub fn entries() -> List(Entry) {
     // Meningar
     sentence(
       "je-suis-suedois",
-      "blandat",
+      "meningar",
       "Jag är svensk.",
       "Je ___ suédois.",
       ["suis"],
@@ -903,7 +903,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "nous-habitons-a-paris",
-      "blandat",
+      "meningar",
       "Vi bor i Paris.",
       "Nous ___ à Paris.",
       ["habitons"],
@@ -911,7 +911,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "elle-a-un-chat",
-      "blandat",
+      "meningar",
       "Hon har en katt.",
       "Elle ___ un chat.",
       ["a"],
@@ -919,7 +919,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "tu-veux-du-cafe",
-      "blandat",
+      "meningar",
       "Vill du ha kaffe?",
       "Tu ___ du café ?",
       ["veux"],
@@ -927,7 +927,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "ils-parlent-francais",
-      "blandat",
+      "meningar",
       "De talar franska.",
       "Ils ___ français.",
       ["parlent"],
@@ -935,7 +935,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "il-va-au-cinema",
-      "blandat",
+      "meningar",
       "Han går på bio.",
       "Il ___ au cinéma.",
       ["va"],
@@ -943,7 +943,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "vous-avez-quel-age",
-      "blandat",
+      "meningar",
       "Hur gammal är ni?",
       "Vous ___ quel âge ?",
       ["avez"],
@@ -951,7 +951,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "nous-mangeons-une-pizza",
-      "blandat",
+      "meningar",
       "Vi äter en pizza.",
       "Nous ___ une pizza.",
       ["mangeons"],
@@ -959,7 +959,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "elles-vont-au-restaurant",
-      "blandat",
+      "meningar",
       "De går på restaurang.",
       "Elles ___ au restaurant.",
       ["vont"],
@@ -967,7 +967,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "je-fais-mes-devoirs",
-      "blandat",
+      "meningar",
       "Jag gör mina läxor.",
       "Je ___ mes devoirs.",
       ["fais"],
@@ -975,7 +975,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "j-aime-le-pain",
-      "blandat",
+      "meningar",
       "Jag tycker om bröd.",
       "J'aime ___ pain.",
       ["le"],
@@ -983,7 +983,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "la-maison-est-grande",
-      "blandat",
+      "meningar",
       "Huset är stort.",
       "___ maison est grande.",
       ["la"],
@@ -991,7 +991,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "c-est-le-livre-de-paul",
-      "blandat",
+      "meningar",
       "Det är Pauls bok.",
       "C'est ___ livre de Paul.",
       ["le"],
@@ -999,7 +999,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "et-toi",
-      "blandat",
+      "meningar",
       "Jag heter Anna, och du?",
       "Je m'appelle Anna, et ___ ?",
       ["toi", "vous"],
@@ -1007,7 +1007,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "j-ai-vingt-ans",
-      "blandat",
+      "meningar",
       "Jag är tjugo år.",
       "J'ai ___ ans.",
       ["vingt"],
@@ -1015,7 +1015,7 @@ pub fn entries() -> List(Entry) {
     ),
     sentence(
       "il-fait-beau-aujourd-hui",
-      "blandat",
+      "meningar",
       "Det är fint väder i dag.",
       "Il fait ___ aujourd'hui.",
       ["beau"],

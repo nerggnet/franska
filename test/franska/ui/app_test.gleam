@@ -368,3 +368,52 @@ pub fn the_difficult_list_shows_the_meaning_test() {
   assert string.contains(html, "le chat")
   assert string.contains(html, "– katt")
 }
+
+pub fn a_mixed_round_takes_exercises_from_many_drills_test() {
+  let model =
+    start() |> send([UserPickedDrill(exercise.Mixed), UserStartedRound])
+  let assert Practising(session:, ..) = model.screen
+  assert list.length(session.queue) == 10
+  let drills =
+    session.queue
+    |> list.map(fn(e) { exercise.drill(e.kind) })
+    |> list.unique
+  assert list.length(drills) == 10
+  assert !list.any(session.queue, fn(e) {
+    exercise.drill(e.kind) == exercise.ReadingTexts
+    || exercise.drill(e.kind) == exercise.Dictation
+  })
+}
+
+pub fn a_mixed_round_keeps_to_the_chosen_theme_test() {
+  let model =
+    start()
+    |> send([
+      UserPickedDrill(exercise.Mixed),
+      UserPickedTheme(Some("djur")),
+      UserStartedRound,
+    ])
+  let assert Practising(session:, ..) = model.screen
+  assert list.all(session.queue, fn(e) {
+    case content.entry(e.entry_id) {
+      Ok(entry) -> entry.theme == "djur"
+      Error(Nil) -> False
+    }
+  })
+}
+
+pub fn exercises_show_their_level_test() {
+  let html =
+    start() |> practising("chat:to-fr") |> app.view |> element.to_string
+  assert string.contains(html, ">A1<")
+  let html =
+    start() |> practising("travail:to-fr") |> app.view |> element.to_string
+  assert string.contains(html, ">A2<")
+}
+
+pub fn statistics_have_no_row_for_mixed_rounds_test() {
+  let html =
+    start() |> send([app.UserOpenedStatistics]) |> app.view |> element.to_string
+  assert !string.contains(html, "Blandad runda")
+  assert string.contains(html, "Svenska → franska")
+}

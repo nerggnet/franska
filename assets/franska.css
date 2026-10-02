@@ -591,3 +591,13 @@ input:focus-visible {
   font-weight: 400;
   color: var(--muted);
 }
+
+.level {
+  margin-left: 0.6rem;
+  padding: 0.05rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}

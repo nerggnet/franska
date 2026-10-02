@@ -39,18 +39,30 @@ pub fn exercises(drill: Drill, theme: Option(String)) -> List(Exercise) {
   case drill, theme {
     exercise.Numbers, None -> numbers.exercises()
     exercise.Numbers, Some(_) -> []
+    exercise.Mixed, _ ->
+      list.flatten([
+        entries_in(theme) |> list.flat_map(exercise.from_entry),
+        case theme {
+          None -> numbers.exercises()
+          Some(_) -> []
+        },
+      ])
+      |> list.filter(fn(e) { exercise.in_mixed_rounds(e.kind) })
     _, _ -> entry_exercises(drill, theme)
   }
 }
 
-fn entry_exercises(drill: Drill, theme: Option(String)) -> List(Exercise) {
-  entries()
-  |> list.filter(fn(entry) {
+fn entries_in(theme: Option(String)) -> List(Entry) {
+  list.filter(entries(), fn(entry) {
     case theme {
       Some(theme) -> entry.theme == theme
       None -> True
     }
   })
+}
+
+fn entry_exercises(drill: Drill, theme: Option(String)) -> List(Exercise) {
+  entries_in(theme)
   |> list.flat_map(exercise.from_entry)
   |> list.filter(fn(exercise) { exercise.drill(exercise.kind) == drill })
 }
