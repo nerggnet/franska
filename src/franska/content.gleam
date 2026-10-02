@@ -180,7 +180,14 @@ pub fn ambiguous_prompts(entries: List(Entry)) -> List(List(String)) {
       _ -> True
     }
   })
-  |> list.group(fn(e) { #(e.kind, answer.normalise(e.prompt, answer.Swedish)) })
+  |> list.group(fn(e) {
+    // Only Swedish → French has a Swedish prompt; "en haut" is not "haut".
+    let language = case e.kind {
+      exercise.Translate(exercise.ToFrench) -> answer.Swedish
+      _ -> answer.French
+    }
+    #(e.kind, answer.normalise(e.prompt, language))
+  })
   |> dict.values
   |> list.filter(fn(group) { list.length(group) > 1 })
   |> list.map(fn(group) { list.reverse(list.map(group, fn(e) { e.id })) })
