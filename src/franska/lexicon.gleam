@@ -752,9 +752,13 @@ pub fn pronoun(person: Person) -> String {
 }
 
 fn starts_with_vowel_sound(word: String) -> Bool {
-  case string.first(string.lowercase(word)) {
-    // Not y: le yaourt.
-    Ok(c) -> string.contains("aàâeéèêëiîïoôuùûüœh", c)
-    Error(Nil) -> False
-  }
+  let word = string.lowercase(word)
+  // Not y: le yaourt. starts_with is much faster than taking the first
+  // grapheme on JavaScript, and this runs for every generated form.
+  list.any(vowel_sounds, string.starts_with(word, _))
 }
+
+const vowel_sounds = [
+  "a", "à", "â", "e", "é", "è", "ê", "ë", "i", "î", "ï", "o", "ô", "u", "ù", "û",
+  "ü", "œ", "h",
+]

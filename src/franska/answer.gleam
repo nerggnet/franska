@@ -110,9 +110,7 @@ pub fn normalise(text: String, language: Language) -> String {
   let text =
     text
     |> string.lowercase
-    |> string.to_graphemes
-    |> list.map(compose)
-    |> string.concat
+    |> compose_accents
     |> string.replace("’", "'")
     |> string.replace("‘", "'")
     |> string.replace("`", "'")
@@ -203,12 +201,29 @@ fn allowed_typos(length: Int) -> Int {
 }
 
 fn strip_trailing_punctuation(text: String) -> String {
-  case string.last(text) {
-    Ok(".") | Ok("!") | Ok("?") | Ok("…") | Ok(" ") ->
-      strip_trailing_punctuation(string.drop_end(text, 1))
-    _ -> text
+  // ends_with first: string.last is slow on JavaScript, and most text has
+  // no trailing punctuation.
+  case list.any([".", "!", "?", "…", " "], string.ends_with(text, _)) {
+    True -> strip_trailing_punctuation(string.drop_end(text, 1))
+    False -> text
   }
 }
+
+/// Composes letters followed by a combining accent, if there are any.
+fn compose_accents(text: String) -> String {
+  case list.any(combining_accents, string.contains(text, _)) {
+    False -> text
+    True ->
+      text
+      |> string.to_graphemes
+      |> list.map(compose)
+      |> string.concat
+  }
+}
+
+const combining_accents = [
+  "\u{300}", "\u{301}", "\u{302}", "\u{308}", "\u{30A}", "\u{327}",
+]
 
 /// Composes a base letter followed by a combining accent into the single
 /// precomposed character, so "e\u{301}" compares equal to "é".
