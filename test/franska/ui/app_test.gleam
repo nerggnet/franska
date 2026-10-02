@@ -324,7 +324,7 @@ pub fn the_meaning_is_shown_with_the_answer_test() {
     |> send([UserTypedAnswer("grandes"), UserSubmittedAnswer])
     |> app.view
     |> element.to_string
-  assert string.contains(html, "– stor")
+  assert string.contains(html, "– stora<")
 }
 
 pub fn translation_drills_do_not_show_the_meaning_test() {
@@ -466,4 +466,32 @@ pub fn review_keeps_to_the_chosen_level_test() {
     |> send([app.UserPickedLevel(Some(lexicon.A2)), UserStartedReview])
   let assert Practising(session:, ..) = model.screen
   assert list.map(session.queue, fn(e) { e.id }) == ["travail:to-fr"]
+}
+
+fn exercise_with_id(id: String) {
+  let assert Ok(ex) = list.find(content.all_exercises(), fn(e) { e.id == id })
+  ex
+}
+
+pub fn the_answer_meaning_has_the_same_number_test() {
+  assert app.answer_meaning(exercise_with_id("nouveau:agree:fp")) == Ok("nya")
+  assert app.answer_meaning(exercise_with_id("nouveau:agree:fs")) == Ok("ny")
+  assert app.answer_meaning(exercise_with_id("vieux:agree:fp")) == Ok("gamla")
+  assert app.answer_meaning(exercise_with_id("maison:article")) == Ok("hus")
+}
+
+pub fn conjugations_and_comparisons_have_no_answer_meaning_test() {
+  assert app.answer_meaning(exercise_with_id("parler:present:nous"))
+    == Error(Nil)
+  assert app.answer_meaning(exercise_with_id("grand:compare:more"))
+    == Error(Nil)
+  // The prompt still shows what the verb means.
+  let html =
+    start()
+    |> practising("parler:present:nous")
+    |> send([UserTypedAnswer("parlons"), UserSubmittedAnswer])
+    |> app.view
+    |> element.to_string
+  assert string.contains(html, "Betyder: tala")
+  assert !string.contains(html, "– tala")
 }

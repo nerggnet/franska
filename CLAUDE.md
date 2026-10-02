@@ -62,6 +62,8 @@ must work on both targets, has no FFI and never reads the clock.
 - `gender.gleam`: gender rules of thumb by noun ending (-tion feminine,
   -age masculine, ...), shown after le/la exercises and article mistakes,
   including when a noun is an exception.
+- `swedish.gleam`: Swedish adjective plurals, so a revealed answer shows
+  its Swedish in the same form (nouvelles – nya).
 - `session.gleam`: one practice round. A wrong answer comes back 3 exercises
   later.
 

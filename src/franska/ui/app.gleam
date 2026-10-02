@@ -17,6 +17,7 @@ import franska/lexicon
 import franska/progress.{type Progress, Progress}
 import franska/session.{type Session}
 import franska/srs
+import franska/swedish
 import franska/ui/browser
 import gleam/bool
 import gleam/dict
@@ -1038,6 +1039,19 @@ fn meaning(exercise: Exercise) -> Result(String, Nil) {
   }
 }
 
+/// The Swedish for the French answer of an exercise, in the same form:
+/// nouvelles is "nya", not "ny". Conjugated verbs (parlons) and comparisons
+/// (plus grande) get none, since their Swedish forms (talar, större) are
+/// not in the content; the prompt shows the plain meaning instead.
+pub fn answer_meaning(exercise: Exercise) -> Result(String, Nil) {
+  case exercise.kind {
+    Conjugate(..) | Compare(..) -> Error(Nil)
+    Agree(lexicon.MasculinePlural) | Agree(lexicon.FemininePlural) ->
+      meaning(exercise) |> result.map(swedish.adjective_plural)
+    _ -> meaning(exercise)
+  }
+}
+
 /// Whether to show the Swedish meaning with the prompt and the answer. Only
 /// where it does not give the answer away: knowing that grand means "stor"
 /// does not tell you that the feminine plural is grandes, nor does "tala"
@@ -1240,7 +1254,7 @@ fn view_feedback(
     html.p([], [html.text(answer.explain(grade))]),
     html.div([class("reveal")], [
       html.span([attribute.lang("fr")], [html.text(exercise.french)]),
-      case shows_meaning(exercise), meaning(exercise) {
+      case shows_meaning(exercise), answer_meaning(exercise) {
         True, Ok(meaning) ->
           html.span([class("meaning"), attribute.lang("sv")], [
             html.text("– " <> meaning),
@@ -1503,7 +1517,7 @@ fn view_difficult(difficult: List(#(Exercise, srs.CardState))) -> Element(Msg) {
                 html.span([attribute.lang("fr")], [
                   html.text(exercise_label(exercise)),
                 ]),
-                case exercise.kind, meaning(exercise) {
+                case exercise.kind, answer_meaning(exercise) {
                   Comprehend(..), _ | _, Error(Nil) -> element.none()
                   _, Ok(meaning) ->
                     html.span([class("meaning"), attribute.lang("sv")], [
