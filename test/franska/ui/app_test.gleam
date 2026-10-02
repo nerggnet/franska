@@ -480,12 +480,13 @@ pub fn the_answer_meaning_has_the_same_number_test() {
   assert app.answer_meaning(exercise_with_id("maison:article")) == Ok("hus")
 }
 
-pub fn conjugations_and_comparisons_have_no_answer_meaning_test() {
+pub fn conjugations_show_the_swedish_in_the_same_form_test() {
   assert app.answer_meaning(exercise_with_id("parler:present:nous"))
-    == Error(Nil)
-  assert app.answer_meaning(exercise_with_id("grand:compare:more"))
-    == Error(Nil)
-  // The prompt still shows what the verb means.
+    == Ok("vi talar")
+  assert app.answer_meaning(exercise_with_id("aller:passe-compose:je"))
+    == Ok("jag har gått")
+  assert app.answer_meaning(exercise_with_id("se-lever:imperatif:tu"))
+    == Ok("stig upp!")
   let html =
     start()
     |> practising("parler:present:nous")
@@ -493,5 +494,10 @@ pub fn conjugations_and_comparisons_have_no_answer_meaning_test() {
     |> app.view
     |> element.to_string
   assert string.contains(html, "Betyder: tala")
-  assert !string.contains(html, "– tala")
+  assert string.contains(html, "– vi talar")
+}
+
+pub fn comparisons_have_no_answer_meaning_test() {
+  assert app.answer_meaning(exercise_with_id("grand:compare:more"))
+    == Error(Nil)
 }

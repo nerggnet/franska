@@ -66,6 +66,7 @@ pub type Env {
 pub type Model {
   Model(
     env: Env,
+    catalog: content.Catalog,
     drill: Drill,
     theme: Option(String),
     progress: Progress,
@@ -100,6 +101,7 @@ pub fn init(flags: #(Env, Progress)) -> #(Model, Effect(Msg)) {
   #(
     Model(
       env:,
+      catalog: content.catalog(),
       drill: TranslateToFrench,
       theme: None,
       progress:,
@@ -139,12 +141,12 @@ pub type Msg {
 pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case model.screen, msg {
     Menu, UserPickedDrill(drill) -> {
-      let theme = fitting_theme(model.theme, drill, model.progress.level)
+      let theme = fitting_theme(model, model.theme, drill, model.progress.level)
       #(Model(..model, drill:, theme:), effect.none())
     }
 
     Menu, UserPickedLevel(level) -> {
-      let theme = fitting_theme(model.theme, model.drill, level)
+      let theme = fitting_theme(model, model.theme, model.drill, level)
       update_progress(
         Model(..model, theme:),
         Progress(..model.progress, level:),
@@ -219,7 +221,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
 
     Menu, UserStartedReview | Finished(..), UserStartedReview -> {
       let session =
-        content.all_exercises()
+        model.catalog.all
         |> content.at_level(model.progress.level)
         |> progress.due(model.progress, _, now: model.env.now())
         |> list.take(review_size)
@@ -235,7 +237,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
     | Finished(..), UserStartedDifficultRound
     -> {
       let session =
-        progress.difficult(model.progress, content.all_exercises())
+        progress.difficult(model.progress, model.catalog.all)
         |> list.take(round_size)
         |> list.map(fn(pair) { pair.0 })
         |> model.env.shuffle
@@ -332,19 +334,21 @@ fn update_progress(model: Model, progress: Progress) -> #(Model, Effect(Msg)) {
 
 /// The exercises of a drill for the theme and level chosen in the menu.
 fn practice_exercises(model: Model, drill: Drill) -> List(Exercise) {
-  content.exercises(drill, model.theme)
-  |> content.at_level(model.progress.level)
+  content.select(model.catalog, drill, model.theme, model.progress.level)
 }
 
 /// The theme, if the drill has exercises for it at the level.
 fn fitting_theme(
+  model: Model,
   theme: Option(String),
   drill: Drill,
   level: Option(lexicon.Level),
 ) -> Option(String) {
   case theme {
     Some(theme) ->
-      case list.contains(content.themes_at_level(drill, level), theme) {
+      case
+        list.contains(content.select_themes(model.catalog, drill, level), theme)
+      {
         True -> Some(theme)
         False -> None
       }
@@ -474,6 +478,7 @@ pub fn view(model: Model) -> Element(Msg) {
       Statistics(confirming_reset:, notice:) ->
         view_statistics(
           model.progress,
+          model.catalog,
           // A mixed round has no statistics of its own.
           list.filter(available_drills(model.env), fn(drill) {
             drill != exercise.Mixed
@@ -487,7 +492,8 @@ pub fn view(model: Model) -> Element(Msg) {
 }
 
 fn view_menu(model: Model) -> Element(Msg) {
-  let themes = content.themes_at_level(model.drill, model.progress.level)
+  let themes =
+    content.select_themes(model.catalog, model.drill, model.progress.level)
   let stats =
     progress.stats(
       model.progress,
@@ -498,7 +504,7 @@ fn view_menu(model: Model) -> Element(Msg) {
   let due_everywhere =
     list.length(progress.due(
       model.progress,
-      content.all_exercises() |> content.at_level(model.progress.level),
+      model.catalog.all |> content.at_level(model.progress.level),
       now: model.env.now(),
     ))
 
@@ -1040,12 +1046,15 @@ fn meaning(exercise: Exercise) -> Result(String, Nil) {
 }
 
 /// The Swedish for the French answer of an exercise, in the same form:
-/// nouvelles is "nya", not "ny". Conjugated verbs (parlons) and comparisons
-/// (plus grande) get none, since their Swedish forms (talar, större) are
-/// not in the content; the prompt shows the plain meaning instead.
+/// nouvelles is "nya", nous parlons is "vi talar". Comparisons (plus
+/// grande) get none, since Swedish comparatives (större) are not in the
+/// content; the prompt shows the plain meaning instead.
 pub fn answer_meaning(exercise: Exercise) -> Result(String, Nil) {
   case exercise.kind {
-    Conjugate(..) | Compare(..) -> Error(Nil)
+    Conjugate(tense, person) ->
+      meaning(exercise)
+      |> result.try(swedish.conjugate(_, tense, person))
+    Compare(..) -> Error(Nil)
     Agree(lexicon.MasculinePlural) | Agree(lexicon.FemininePlural) ->
       meaning(exercise) |> result.map(swedish.adjective_plural)
     _ -> meaning(exercise)
@@ -1393,13 +1402,15 @@ fn view_finished(session: Session, round: Round) -> Element(Msg) {
 
 fn view_statistics(
   progress: Progress,
+  catalog: content.Catalog,
   drills: List(Drill),
   now: Int,
   confirming_reset: Bool,
   notice: Option(Notice),
 ) -> Element(Msg) {
   let row = fn(drill: Drill) {
-    let stats = progress.stats(progress, content.exercises(drill, None), now:)
+    let stats =
+      progress.stats(progress, content.select(catalog, drill, None, None), now:)
     html.tr([], [
       html.th([attribute("scope", "row")], [html.text(drill_name(drill))]),
       html.td([], [html.text(int.to_string(stats.new))]),
@@ -1433,7 +1444,7 @@ fn view_statistics(
         "En övning räknas som inlärd när nästa repetition är minst en vecka bort.",
       ),
     ]),
-    view_difficult(progress.difficult(progress, content.all_exercises())),
+    view_difficult(progress.difficult(progress, catalog.all)),
     view_backup(notice),
     case confirming_reset {
       False ->

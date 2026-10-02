@@ -1,3 +1,7 @@
+import franska/lexicon.{
+  Conditionnel, FuturProche, FuturSimple, Il, Ils, Imparfait, Imperatif, Je,
+  Nous, PasseCompose, Presens, Tu, Vous,
+}
 import franska/swedish
 import gleam/list
 
@@ -40,4 +44,43 @@ pub fn adjective_plurals_test() {
     list.filter(cases, fn(c) { swedish.adjective_plural(c.0) != c.1 })
     |> list.map(fn(c) { #(c.0, swedish.adjective_plural(c.0)) })
   assert wrong == []
+}
+
+pub fn regular_verbs_test() {
+  assert swedish.conjugate("tala", Presens, Nous) == Ok("vi talar")
+  assert swedish.conjugate("tala", Imparfait, Je) == Ok("jag talade")
+  assert swedish.conjugate("tala", PasseCompose, Il) == Ok("han har talat")
+  assert swedish.conjugate("tala", FuturProche, Tu) == Ok("du ska tala")
+  assert swedish.conjugate("tala", FuturSimple, Vous)
+    == Ok("ni kommer att tala")
+  assert swedish.conjugate("tala", Conditionnel, Ils) == Ok("de skulle tala")
+  assert swedish.conjugate("tala", Imperatif, Tu) == Ok("tala!")
+  assert swedish.conjugate("tala", Imperatif, Nous) == Ok("låt oss tala!")
+}
+
+pub fn irregular_verbs_test() {
+  assert swedish.conjugate("gå", Imparfait, Je) == Ok("jag gick")
+  assert swedish.conjugate("vara", Presens, Il) == Ok("han är")
+  assert swedish.conjugate("äta", Imperatif, Vous) == Ok("ät!")
+  assert swedish.conjugate("ringa", PasseCompose, Je) == Ok("jag har ringt")
+  assert swedish.conjugate("lyckas", Imparfait, Nous) == Ok("vi lyckades")
+  assert swedish.conjugate("kunna", Imperatif, Tu) == Error(Nil)
+}
+
+pub fn particles_and_reflexives_follow_the_verb_test() {
+  assert swedish.conjugate("stiga upp", PasseCompose, Nous)
+    == Ok("vi har stigit upp")
+  assert swedish.conjugate("klä på sig", Presens, Je) == Ok("jag klär på mig")
+  assert swedish.conjugate("tvätta sig", Imperatif, Tu) == Ok("tvätta dig!")
+  assert swedish.conjugate("tvätta sig", Imperatif, Nous)
+    == Ok("låt oss tvätta oss!")
+  assert swedish.conjugate("tvätta sig", Presens, Ils) == Ok("de tvättar sig")
+}
+
+pub fn maste_is_paraphrased_test() {
+  assert swedish.conjugate("måste", Presens, Je) == Ok("jag måste")
+  assert swedish.conjugate("måste", Imparfait, Nous) == Ok("vi var tvungna")
+  assert swedish.conjugate("måste", PasseCompose, Il)
+    == Ok("han har varit tvungen")
+  assert swedish.conjugate("måste", Conditionnel, Je) == Ok("jag skulle behöva")
 }

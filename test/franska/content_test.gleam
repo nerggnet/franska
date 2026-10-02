@@ -2,6 +2,7 @@ import franska/answer.{Correct}
 import franska/content
 import franska/exercise
 import franska/lexicon.{Expression}
+import franska/swedish
 import gleam/int
 import gleam/list
 import gleam/option
@@ -201,4 +202,44 @@ pub fn right_answers_are_spread_over_the_positions_test() {
     |> list.map(fn(position) { list.count(positions, fn(p) { p == position }) })
     |> list.fold(0, int.max)
   assert most * 2 <= total
+}
+
+/// Every verb's Swedish can be conjugated in every tense, except where
+/// Swedish has no imperative (kunna, lyckas).
+pub fn every_verb_has_swedish_forms_test() {
+  let bad =
+    content.entries()
+    |> list.flat_map(fn(e) {
+      case e.word, e.sv {
+        lexicon.Verb(..), [sv, ..] ->
+          lexicon.tenses
+          |> list.filter(fn(tense) { tense != lexicon.Imperatif })
+          |> list.filter_map(fn(tense) {
+            case swedish.conjugate(sv, tense, lexicon.Je) {
+              Ok(_) -> Error(Nil)
+              Error(Nil) -> Ok(e.id <> " " <> lexicon.tense_id(tense))
+            }
+          })
+        _, _ -> []
+      }
+    })
+  assert bad == []
+}
+
+fn to_french(id: String) {
+  let assert Ok(ex) =
+    content.all_exercises() |> list.find(fn(e) { e.id == id <> ":to-fr" })
+  ex
+}
+
+pub fn other_words_with_the_same_translation_are_accepted_test() {
+  // "ringa" is appeler, but téléphoner also means ringa.
+  let ringa = to_french("appeler")
+  assert ringa.prompt == "ringa"
+  assert exercise.check(ringa, "téléphoner") == Correct
+  assert exercise.check(ringa, "appeler") == Correct
+  // "hej" is salut, but bonjour also means hej.
+  assert exercise.check(to_french("salut"), "bonjour") == Correct
+  // Unrelated words are still wrong.
+  assert exercise.check(ringa, "parler") != Correct
 }

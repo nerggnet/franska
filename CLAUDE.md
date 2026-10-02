@@ -53,7 +53,11 @@ must work on both targets, has no FFI and never reads the clock.
   `gleam run -m lustre/dev build --minify` and then rewrites the generated
   root-relative script path to a relative one.
 - `content.gleam`, `content/a1.gleam` and `content/a2.gleam`: the curated
-  entries. Keep easier levels first in `content.entries()`. Add a new level
+  entries. Building all exercises is slow (~150 ms), so the app builds a
+  `content.Catalog` once at start-up and selects from it with
+  `content.select`; never call `content.exercises` from the view. A
+  Swedish → French translation also accepts every other entry that lists
+  the prompt among its translations (ringa: appeler or téléphoner). Keep easier levels first in `content.entries()`. Add a new level
   as a module, add it to `lexicon.Level` and `level_rank`, and include it
   there.
 - `numbers.gleam`: French number words (traditional spelling, 1990 reform
@@ -62,8 +66,10 @@ must work on both targets, has no FFI and never reads the clock.
 - `gender.gleam`: gender rules of thumb by noun ending (-tion feminine,
   -age masculine, ...), shown after le/la exercises and article mistakes,
   including when a noun is an exception.
-- `swedish.gleam`: Swedish adjective plurals, so a revealed answer shows
-  its Swedish in the same form (nouvelles – nya).
+- `swedish.gleam`: Swedish adjective plurals and verb forms, so a revealed
+  answer shows its Swedish in the same form (nouvelles – nya, nous parlons –
+  vi talar). Verbs not ending in -ar (tala, talar, talade, talat) are listed
+  in `forms`; a content test checks every verb's Swedish conjugates.
 - `session.gleam`: one practice round. A wrong answer comes back 3 exercises
   later.
 
