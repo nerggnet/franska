@@ -481,7 +481,8 @@ fn read_import_effect() -> Effect(Msg) {
   dispatch(ImportFileRead(text))
 }
 
-const voice_sample = "Bonjour ! Comment allez-vous ? On apprend le français ensemble."
+const voice_sample =
+  "Bonjour ! Comment allez-vous ? On apprend le français ensemble."
 
 fn load_voices_effect() -> Effect(Msg) {
   use dispatch <- effect.from
