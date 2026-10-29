@@ -1,6 +1,7 @@
 import franska/answer
 import franska/content
 import franska/course
+import franska/course/lesson
 import franska/exercise
 import franska/lexicon
 import franska/progress.{type Progress, Progress}
@@ -9,6 +10,7 @@ import gleam/dict
 import gleam/int
 import gleam/list
 import gleam/option.{Some}
+import gleam/order
 import gleam/set
 import gleam/string
 
@@ -60,8 +62,8 @@ pub fn no_exercise_is_in_two_lessons_test() {
   assert twice == []
 }
 
-/// The A1 course covers all A1 content: place new A1 entries in a lesson.
-pub fn every_a1_entry_and_number_is_in_the_course_test() {
+/// The course covers all content: place new entries in a lesson.
+pub fn every_entry_and_number_is_in_the_course_test() {
   let in_course =
     course.lessons()
     |> list.flat_map(fn(lesson) { lesson.parts })
@@ -69,7 +71,6 @@ pub fn every_a1_entry_and_number_is_in_the_course_test() {
     |> set.from_list
   let missing =
     content.all_exercises()
-    |> list.filter(fn(e) { e.level == lexicon.A1 })
     |> list.map(fn(e) { e.entry_id })
     |> list.unique
     |> list.filter(fn(id) { !set.contains(in_course, id) })
@@ -81,6 +82,23 @@ pub fn lessons_are_a_reasonable_size_test() {
     course.build(content.all_exercises())
     |> list.map(fn(pair) { list.length(pair.1) })
   assert list.all(sizes, fn(size) { size >= 40 && size <= 160 })
+}
+
+/// A lesson only practises its own level and easier ones, and the lessons
+/// of a level come after those of easier levels.
+pub fn lessons_are_in_level_order_test() {
+  let levels = list.map(course.lessons(), fn(lesson) { lesson.level })
+  assert list.sort(levels, lexicon.compare_levels) == levels
+  let all = content.all_exercises()
+  let too_hard =
+    course.build(all)
+    |> list.flat_map(fn(pair) {
+      list.filter(pair.1, fn(e) {
+        lexicon.compare_levels(e.level, { pair.0 }.level) == order.Gt
+      })
+      |> list.map(fn(e) { { pair.0 }.id <> ": " <> e.id })
+    })
+  assert too_hard == []
 }
 
 pub fn every_lesson_has_a_note_test() {
@@ -105,7 +123,15 @@ fn small_course() {
     )
   }
   list.map(["first", "second", "third"], fn(id) {
-    let lesson = course.Lesson(id:, title: id, topic: "", note: [], parts: [])
+    let lesson =
+      lesson.Lesson(
+        id:,
+        level: lexicon.A1,
+        title: id,
+        topic: "",
+        note: [],
+        parts: [],
+      )
     let exercises =
       list.map([1, 2, 3, 4, 5], fn(n) { exercise(id <> int.to_string(n)) })
     #(lesson, exercises)

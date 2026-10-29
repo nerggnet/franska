@@ -641,3 +641,16 @@ pub fn the_lesson_list_shows_which_lessons_are_open_test() {
   assert string.contains(html, "Klar")
   assert string.contains(html, "Låst")
 }
+
+pub fn lessons_are_numbered_within_their_level_test() {
+  let html = start() |> app.view |> element.to_string
+  assert string.contains(html, "Kursen · A1 · lektion 1 av 24")
+  let html =
+    start_with(
+      progress.Progress(..progress.new(), course: Some("a2-varje-dag")),
+    )
+    |> app.view
+    |> element.to_string
+  assert string.contains(html, "Kursen · A2 · lektion 1 av")
+  assert string.contains(html, "Varje dag")
+}

@@ -6,6 +6,7 @@
 import franska/answer.{type Grade, Almost, Correct, Wrong}
 import franska/content
 import franska/course
+import franska/course/lesson.{type Lesson}
 import franska/exercise.{
   type Drill, type Exercise, Adjectives, Agree, Articles, ChooseArticle, Compare,
   Comparisons, Comprehend, Conjugate, Conjugation, Dictation, FillGap, Hearing,
@@ -71,7 +72,7 @@ pub type Model {
     env: Env,
     catalog: content.Catalog,
     /// The course's lessons with the exercises the browser can do.
-    course: List(#(course.Lesson, List(Exercise))),
+    course: List(#(Lesson, List(Exercise))),
     drill: Drill,
     theme: Option(String),
     progress: Progress,
@@ -1670,9 +1671,7 @@ fn view_lesson_after_round(model: Model, index: Int) -> Element(Msg) {
       [#(lesson, exercises), ..] ->
         html.div([class("lesson-status")], [
           html.p([], [
-            html.text(
-              "Lektion " <> int.to_string(index + 1) <> ": " <> lesson.title,
-            ),
+            html.text(lesson_name(model, index) <> ": " <> lesson.title),
           ]),
           view_meter(course.known(model.progress, exercises), exercises),
         ])
@@ -1682,11 +1681,11 @@ fn view_lesson_after_round(model: Model, index: Int) -> Element(Msg) {
       True, Ok(#(lesson, _)) ->
         html.p([class("lesson-done"), attribute.role("status")], [
           html.text(
-            "Lektionen är klar! Nu kan du gå vidare till lektion "
-            <> int.to_string(index + 2)
-            <> ": "
+            "Lektionen är klar! Nu kan du gå vidare till nästa lektion, "
             <> lesson.title
-            <> ".",
+            <> " ("
+            <> lesson_name(model, index + 1)
+            <> ").",
           ),
         ])
       True, Error(Nil) ->
@@ -1727,12 +1726,7 @@ fn view_course_banner(model: Model) -> Element(Msg) {
   html.section([class("card course")], case list.drop(model.course, current) {
     [#(lesson, exercises), ..] -> [
       html.p([class("eyebrow")], [
-        html.text(
-          "Kursen · lektion "
-          <> int.to_string(current + 1)
-          <> " av "
-          <> int.to_string(total),
-        ),
+        html.text("Kursen · " <> lesson_name(model, current)),
       ]),
       html.h2([], [html.text(lesson.title)]),
       html.p([class("topic")], [html.text(lesson.topic)]),
@@ -1827,49 +1821,94 @@ fn view_lessons(model: Model) -> Element(Msg) {
         <> " % av övningarna. Då öppnas nästa lektion.",
       ),
     ]),
-    html.ol(
-      [class("lessons")],
-      list.index_map(model.course, fn(pair, index) {
-        let #(lesson, exercises) = pair
-        let status = case int.compare(index, current) {
-          order.Lt -> "Klar"
-          order.Eq ->
-            int.to_string(
-              course.known(model.progress, exercises)
-              * 100
-              / int.max(list.length(exercises), 1),
-            )
-            <> " %"
-          order.Gt -> "Låst"
+    element.fragment(
+      list.map([lexicon.A1, lexicon.A2], fn(level) {
+        let lessons =
+          list.index_map(model.course, fn(pair, index) { #(index, pair) })
+          |> list.filter(fn(item) { item.1.0.level == level })
+        case lessons {
+          [] -> element.none()
+          lessons ->
+            element.fragment([
+              html.h3([class("level-heading")], [
+                html.text(level_name(level)),
+              ]),
+              html.ol(
+                [class("lessons")],
+                list.index_map(lessons, fn(item, number) {
+                  view_lesson_item(model, current, item.0, number + 1, item.1)
+                }),
+              ),
+            ])
         }
-        let content = [
-          html.span([class("number")], [html.text(int.to_string(index + 1))]),
-          html.span([class("lesson-text")], [
-            html.strong([], [html.text(lesson.title)]),
-            html.span([class("topic")], [html.text(lesson.topic)]),
-          ]),
-          html.span([class("status")], [html.text(status)]),
-        ]
-        html.li([], [
-          case index <= current {
-            True ->
-              html.button(
-                [
-                  class(case index == current {
-                    True -> "lesson current"
-                    False -> "lesson done"
-                  }),
-                  attribute.type_("button"),
-                  event.on_click(UserOpenedLesson(index)),
-                ],
-                content,
-              )
-            False -> html.div([class("lesson locked")], content)
-          },
-        ])
       }),
     ),
   ])
+}
+
+fn view_lesson_item(
+  model: Model,
+  current: Int,
+  index: Int,
+  number: Int,
+  pair: #(Lesson, List(Exercise)),
+) -> Element(Msg) {
+  let #(lesson, exercises) = pair
+  let status = case int.compare(index, current) {
+    order.Lt -> "Klar"
+    order.Eq ->
+      int.to_string(
+        course.known(model.progress, exercises)
+        * 100
+        / int.max(list.length(exercises), 1),
+      )
+      <> " %"
+    order.Gt -> "Låst"
+  }
+  let content = [
+    html.span([class("number")], [html.text(int.to_string(number))]),
+    html.span([class("lesson-text")], [
+      html.strong([], [html.text(lesson.title)]),
+      html.span([class("topic")], [html.text(lesson.topic)]),
+    ]),
+    html.span([class("status")], [html.text(status)]),
+  ]
+  html.li([], [
+    case index <= current {
+      True ->
+        html.button(
+          [
+            class(case index == current {
+              True -> "lesson current"
+              False -> "lesson done"
+            }),
+            attribute.type_("button"),
+            event.on_click(UserOpenedLesson(index)),
+          ],
+          content,
+        )
+      False -> html.div([class("lesson locked")], content)
+    },
+  ])
+}
+
+/// "A2 · lektion 3 av 58": lessons are numbered within their level.
+fn lesson_name(model: Model, index: Int) -> String {
+  case list.drop(model.course, index) {
+    [#(lesson, _), ..] -> {
+      let same_level =
+        list.filter(model.course, fn(pair) { pair.0.level == lesson.level })
+      let number =
+        list.take(model.course, index)
+        |> list.count(fn(pair) { pair.0.level == lesson.level })
+      level_name(lesson.level)
+      <> " · lektion "
+      <> int.to_string(number + 1)
+      <> " av "
+      <> int.to_string(list.length(same_level))
+    }
+    [] -> ""
+  }
 }
 
 fn view_lesson(model: Model, index: Int) -> Element(Msg) {
@@ -1884,12 +1923,7 @@ fn view_lesson(model: Model, index: Int) -> Element(Msg) {
       html.section([class("card")], [
         html.div([class("progress")], [
           html.span([], [
-            html.text(
-              "Lektion "
-              <> int.to_string(index + 1)
-              <> " av "
-              <> int.to_string(list.length(model.course)),
-            ),
+            html.text(lesson_name(model, index)),
           ]),
           html.button(
             [

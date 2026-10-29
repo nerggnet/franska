@@ -821,3 +821,9 @@ button.lesson:hover {
   color: var(--correct);
   font-weight: 500;
 }
+
+.level-heading {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1rem;
+  color: var(--muted);
+}
