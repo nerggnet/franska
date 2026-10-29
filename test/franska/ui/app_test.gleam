@@ -551,3 +551,93 @@ fn with_voice(model: app.Model, voice: String) -> app.Model {
     progress: progress.Progress(..model.progress, voice: Some(voice)),
   )
 }
+
+// Course ----------------------------------------------------------------------
+
+fn start_with(progress: progress.Progress) -> app.Model {
+  let env =
+    Env(
+      now: fn() { now },
+      today: fn() { today },
+      shuffle: fn(exercises) { exercises },
+      can_speak: False,
+    )
+  app.init(#(env, progress)).0
+}
+
+pub fn the_menu_shows_the_current_lesson_test() {
+  let html = start() |> app.view |> element.to_string
+  assert string.contains(html, "lektion 1 av")
+  assert string.contains(html, "Hej och hej då")
+}
+
+pub fn only_unlocked_lessons_open_test() {
+  let model = start() |> send([app.UserOpenedLesson(1)])
+  assert model.screen == Menu
+  let model = send(model, [app.UserOpenedLesson(0)])
+  assert model.screen == app.Lesson(0)
+  let html = element.to_string(app.view(model))
+  assert string.contains(html, "Grammatik")
+  assert string.contains(html, "bonjour")
+}
+
+pub fn a_lesson_round_keeps_to_the_lesson_test() {
+  let model =
+    start() |> send([app.UserOpenedLesson(0), app.UserStartedLesson(0)])
+  let assert Practising(session:, ..) = model.screen
+  let assert [#(_, lesson), ..] = model.course
+  assert list.length(session.queue) == 10
+  assert list.all(session.queue, list.contains(lesson, _))
+  // New exercises are taken from each drill of the lesson in turn.
+  let drills =
+    list.map(session.queue, fn(e) { exercise.drill(e.kind) }) |> list.unique
+  assert list.length(drills) > 1
+}
+
+pub fn quitting_a_lesson_round_returns_to_the_lesson_test() {
+  let model =
+    start()
+    |> send([app.UserOpenedLesson(0), app.UserStartedLesson(0), UserQuitRound])
+  assert model.screen == app.Lesson(0)
+}
+
+pub fn answers_move_the_course_forward_test() {
+  let model =
+    start()
+    |> send([app.UserOpenedLesson(0), app.UserStartedLesson(0)])
+    |> answer_all_correctly
+  assert model.progress.course == Some("a1-hej")
+  // Knowing the whole first lesson opens the second.
+  let assert [#(_, first), ..] = model.course
+  let cards =
+    list.map(first, fn(e) {
+      #(e.id, srs.CardState(box: 2, due: now + 1000, reviews: 2, lapses: 0))
+    })
+    |> dict.from_list
+  let model =
+    start_with(progress.Progress(..progress.new(), cards:))
+    |> send([app.UserOpenedLesson(1)])
+  assert model.screen == app.Lesson(1)
+}
+
+pub fn a_lesson_text_round_is_one_text_test() {
+  let model =
+    start_with(progress.Progress(..progress.new(), course: Some("a1-familjen")))
+    |> send([app.UserOpenedLesson(2), app.UserStartedLessonText(2)])
+  let assert Practising(session:, ..) = model.screen
+  let assert [first, ..] = session.queue
+  assert first.entry_id == "text-lea"
+  assert list.all(session.queue, fn(e) {
+    e.entry_id == "text-lea" && exercise.drill(e.kind) == exercise.ReadingTexts
+  })
+}
+
+pub fn the_lesson_list_shows_which_lessons_are_open_test() {
+  let html =
+    start_with(progress.Progress(..progress.new(), course: Some("a1-familjen")))
+    |> send([app.UserOpenedLessons])
+    |> app.view
+    |> element.to_string
+  assert string.contains(html, "Klar")
+  assert string.contains(html, "Låst")
+}

@@ -22,6 +22,8 @@ pub const learned_box = 3
 
 /// `level` is the level chosen in the menu, or `None` for both. `voice` is
 /// the name of the chosen speech voice, or `None` for the best available.
+/// `course` is the id of the furthest lesson reached in the course (see
+/// `franska/course`).
 pub type Progress {
   Progress(
     cards: Dict(String, CardState),
@@ -29,6 +31,7 @@ pub type Progress {
     level: Option(Level),
     voice: Option(String),
     streak: Streak,
+    course: Option(String),
   )
 }
 
@@ -49,6 +52,7 @@ pub fn new() -> Progress {
     level: None,
     voice: None,
     streak: Streak(-1, 0),
+    course: None,
   )
 }
 
@@ -229,6 +233,7 @@ pub fn to_json(progress: Progress) -> String {
       json.nullable(progress.level, fn(level) { json.string(level_id(level)) }),
     ),
     #("voice", json.nullable(progress.voice, json.string)),
+    #("course", json.nullable(progress.course, json.string)),
     #(
       "streak",
       json.object([
@@ -280,11 +285,23 @@ fn progress_decoder() -> Decoder(Progress) {
         Streak(-1, 0),
         streak_decoder(),
       )
+      use course <- decode.optional_field(
+        "course",
+        None,
+        decode.optional(decode.string),
+      )
       use cards <- decode.field(
         "cards",
         decode.dict(decode.string, card_decoder()),
       )
-      decode.success(Progress(cards:, read_aloud:, level:, voice:, streak:))
+      decode.success(Progress(
+        cards:,
+        read_aloud:,
+        level:,
+        voice:,
+        streak:,
+        course:,
+      ))
     }
   }
 }

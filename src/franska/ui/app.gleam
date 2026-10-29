@@ -5,6 +5,7 @@
 
 import franska/answer.{type Grade, Almost, Correct, Wrong}
 import franska/content
+import franska/course
 import franska/exercise.{
   type Drill, type Exercise, Adjectives, Agree, Articles, ChooseArticle, Compare,
   Comparisons, Comprehend, Conjugate, Conjugation, Dictation, FillGap, Hearing,
@@ -26,6 +27,7 @@ import gleam/dynamic/decode
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
+import gleam/order
 import gleam/result
 import gleam/string
 import lustre/attribute.{attribute, class}
@@ -68,6 +70,8 @@ pub type Model {
   Model(
     env: Env,
     catalog: content.Catalog,
+    /// The course's lessons with the exercises the browser can do.
+    course: List(#(course.Lesson, List(Exercise))),
     drill: Drill,
     theme: Option(String),
     progress: Progress,
@@ -92,6 +96,10 @@ pub type Round {
   ReviewRound
   /// Svåra ord: the exercises with the most mistakes.
   DifficultRound
+  /// A lesson of the course, by index.
+  LessonRound(index: Int)
+  /// A text of a lesson of the course.
+  LessonTextRound(index: Int)
 }
 
 pub type Screen {
@@ -99,6 +107,10 @@ pub type Screen {
   Practising(session: Session, input: String, grade: Option(Grade))
   Finished(session: Session)
   Statistics(confirming_reset: Bool, notice: Option(Notice))
+  /// All the lessons of the course.
+  Lessons
+  /// One lesson of the course, by index.
+  Lesson(index: Int)
 }
 
 pub type Notice {
@@ -108,10 +120,23 @@ pub type Notice {
 
 pub fn init(flags: #(Env, Progress)) -> #(Model, Effect(Msg)) {
   let #(env, progress) = flags
+  let catalog = content.catalog()
+  let available = available_drills(env)
+  let lessons =
+    course.build(catalog.all)
+    |> list.map(fn(pair) {
+      #(
+        pair.0,
+        list.filter(pair.1, fn(e) {
+          list.contains(available, exercise.drill(e.kind))
+        }),
+      )
+    })
   #(
     Model(
       env:,
-      catalog: content.catalog(),
+      catalog:,
+      course: lessons,
       drill: TranslateToFrench,
       theme: None,
       progress:,
@@ -139,6 +164,10 @@ pub type Msg {
   UserStartedRound
   UserStartedReview
   UserStartedDifficultRound
+  UserOpenedLessons
+  UserOpenedLesson(Int)
+  UserStartedLesson(Int)
+  UserStartedLessonText(Int)
   UserTypedAnswer(String)
   UserPressedAccent(String)
   UserChoseAnswer(String)
@@ -195,17 +224,7 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
     | Finished(..), UserStartedRound
       if model.drill == ReadingTexts || model.drill == ListeningTexts
     -> {
-      // A text round is one text with all its questions, in order. Spaced
-      // repetition picks the text: the one with the question most due.
-      let questions = practice_exercises(model, model.drill)
-      let session =
-        questions
-        |> model.env.shuffle
-        |> progress.plan_round(model.progress, _, now: model.env.now(), size: 1)
-        |> list.flat_map(fn(first) {
-          list.filter(questions, fn(e) { e.entry_id == first.entry_id })
-        })
-        |> session.new
+      let session = text_session(model, practice_exercises(model, model.drill))
       show_exercise(Model(..model, round: DrillRound), session)
     }
 
@@ -281,6 +300,62 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
       }
     }
 
+    Menu, UserOpenedLessons
+    | Lesson(..), UserOpenedLessons
+    | Finished(..), UserOpenedLessons
+    -> #(Model(..model, screen: Lessons), effect.none())
+
+    Menu, UserOpenedLesson(index)
+    | Lessons, UserOpenedLesson(index)
+    | Finished(..), UserOpenedLesson(index)
+      if index >= 0
+    ->
+      case is_unlocked(model, index) {
+        True -> #(Model(..model, screen: Lesson(index)), effect.none())
+        False -> #(model, effect.none())
+      }
+
+    Lesson(..), UserStartedLesson(index)
+    | Finished(..), UserStartedLesson(index)
+      if index >= 0
+    ->
+      case is_unlocked(model, index) {
+        False -> #(model, effect.none())
+        True -> {
+          // New exercises are taken from each drill of the lesson in turn.
+          let session =
+            lesson_exercises(model, index)
+            |> list.filter(fn(e) { exercise.in_mixed_rounds(e.kind) })
+            |> list.group(fn(e) { exercise.drill(e.kind) })
+            |> dict.values
+            |> list.map(model.env.shuffle)
+            |> progress.plan_mixed_round(
+              model.progress,
+              _,
+              now: model.env.now(),
+              size: round_size,
+            )
+            |> model.env.shuffle
+            |> session.new
+          show_exercise(Model(..model, round: LessonRound(index)), session)
+        }
+      }
+
+    Lesson(..), UserStartedLessonText(index)
+    | Finished(..), UserStartedLessonText(index)
+      if index >= 0
+    ->
+      case is_unlocked(model, index) {
+        False -> #(model, effect.none())
+        True -> {
+          let session =
+            lesson_exercises(model, index)
+            |> list.filter(fn(e) { !exercise.in_mixed_rounds(e.kind) })
+            |> text_session(model, _)
+          show_exercise(Model(..model, round: LessonTextRound(index)), session)
+        }
+      }
+
     Practising(grade: None, ..) as screen, UserTypedAnswer(input) -> #(
       Model(..model, screen: Practising(..screen, input:)),
       effect.none(),
@@ -310,9 +385,20 @@ pub fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
       speak_effect(model, text, speed),
     )
 
-    Practising(..), UserQuitRound
-    | Finished(..), UserQuitRound
+    // Quitting a lesson's round goes back to the lesson.
+    Practising(..), UserQuitRound ->
+      case model.round {
+        LessonRound(index:) | LessonTextRound(index:) -> #(
+          Model(..model, screen: Lesson(index)),
+          effect.none(),
+        )
+        _ -> #(Model(..model, screen: Menu), effect.none())
+      }
+
+    Finished(..), UserQuitRound
     | Statistics(..), UserQuitRound
+    | Lessons, UserQuitRound
+    | Lesson(..), UserQuitRound
     -> #(Model(..model, screen: Menu), effect.none())
 
     Menu, UserOpenedStatistics -> #(statistics(model, None), effect.none())
@@ -370,6 +456,36 @@ fn update_progress(model: Model, progress: Progress) -> #(Model, Effect(Msg)) {
 /// The exercises of a drill for the theme and level chosen in the menu.
 fn practice_exercises(model: Model, drill: Drill) -> List(Exercise) {
   content.select(model.catalog, drill, model.theme, model.progress.level)
+}
+
+/// A text round is one text with all its questions in one medium, in
+/// order. Spaced repetition picks the text: the one with the question most
+/// due.
+fn text_session(model: Model, questions: List(Exercise)) -> Session {
+  questions
+  |> model.env.shuffle
+  |> progress.plan_round(model.progress, _, now: model.env.now(), size: 1)
+  |> list.flat_map(fn(first) {
+    list.filter(questions, fn(e) {
+      e.entry_id == first.entry_id
+      && exercise.drill(e.kind) == exercise.drill(first.kind)
+    })
+  })
+  |> session.new
+}
+
+/// The exercises of a lesson of the course.
+fn lesson_exercises(model: Model, index: Int) -> List(Exercise) {
+  case list.drop(model.course, index) {
+    [#(_, exercises), ..] -> exercises
+    [] -> []
+  }
+}
+
+/// Lessons up to the one the learner is at can be practised.
+fn is_unlocked(model: Model, index: Int) -> Bool {
+  index < list.length(model.course)
+  && index <= course.current(model.progress, model.course)
 }
 
 /// The theme, if the drill has exercises for it at the level.
@@ -436,6 +552,7 @@ fn check_answer(
             now: model.env.now(),
             today: model.env.today(),
           )
+          |> course.advance(model.course)
           |> update_progress(model, _)
         False -> #(model, effect.none())
       }
@@ -548,7 +665,9 @@ pub fn view(model: Model) -> Element(Msg) {
             view_exercise(model.env, session, exercise, input, grade)
           Error(Nil) -> element.none()
         }
-      Finished(session:) -> view_finished(session, model.round)
+      Finished(session:) -> view_finished(model, session)
+      Lessons -> view_lessons(model)
+      Lesson(index:) -> view_lesson(model, index)
       Statistics(confirming_reset:, notice:) ->
         view_statistics(
           model.progress,
@@ -624,6 +743,7 @@ fn view_menu(model: Model) -> Element(Msg) {
       0 -> element.none()
       due -> view_review_banner(due)
     },
+    view_course_banner(model),
     view_drill_picker(model, themes, stats, streak),
   ])
 }
@@ -1470,7 +1590,8 @@ fn speaker_icon() -> Element(Msg) {
   )
 }
 
-fn view_finished(session: Session, round: Round) -> Element(Msg) {
+fn view_finished(model: Model, session: Session) -> Element(Msg) {
+  let round = model.round
   let summary = session.summary(session)
   let stat = fn(count: Int, label: String, tone: String) {
     html.div([class("stat " <> tone)], [
@@ -1510,23 +1631,338 @@ fn view_finished(session: Session, round: Round) -> Element(Msg) {
         ])
       }),
     ),
-    html.div([class("actions")], [
-      html.button(
-        [
-          class("primary"),
-          event.on_click(case round {
-            DrillRound -> UserStartedRound
-            ReviewRound -> UserStartedReview
-            DifficultRound -> UserStartedDifficultRound
-          }),
-        ],
-        [html.text("Öva igen")],
-      ),
-      html.button([class("secondary"), event.on_click(UserQuitRound)], [
-        html.text("Till menyn"),
+    case round {
+      LessonRound(index:) | LessonTextRound(index:) ->
+        view_lesson_after_round(model, index)
+      DrillRound | ReviewRound | DifficultRound ->
+        html.div([class("actions")], [
+          html.button(
+            [
+              class("primary"),
+              event.on_click(case round {
+                ReviewRound -> UserStartedReview
+                DifficultRound -> UserStartedDifficultRound
+                _ -> UserStartedRound
+              }),
+            ],
+            [html.text("Öva igen")],
+          ),
+          html.button([class("secondary"), event.on_click(UserQuitRound)], [
+            html.text("Till menyn"),
+          ]),
+        ])
+    },
+  ])
+}
+
+/// How far the learner has come in the lesson, and the way on: to the
+/// next lesson once this one is done.
+fn view_lesson_after_round(model: Model, index: Int) -> Element(Msg) {
+  let again = case model.round {
+    LessonTextRound(..) -> UserStartedLessonText(index)
+    _ -> UserStartedLesson(index)
+  }
+  let current = course.current(model.progress, model.course)
+  let next = list.drop(model.course, index + 1) |> list.first
+  let finished_now = index + 1 == current
+  element.fragment([
+    case list.drop(model.course, index) {
+      [#(lesson, exercises), ..] ->
+        html.div([class("lesson-status")], [
+          html.p([], [
+            html.text(
+              "Lektion " <> int.to_string(index + 1) <> ": " <> lesson.title,
+            ),
+          ]),
+          view_meter(course.known(model.progress, exercises), exercises),
+        ])
+      [] -> element.none()
+    },
+    case finished_now, next {
+      True, Ok(#(lesson, _)) ->
+        html.p([class("lesson-done"), attribute.role("status")], [
+          html.text(
+            "Lektionen är klar! Nu kan du gå vidare till lektion "
+            <> int.to_string(index + 2)
+            <> ": "
+            <> lesson.title
+            <> ".",
+          ),
+        ])
+      True, Error(Nil) ->
+        html.p([class("lesson-done"), attribute.role("status")], [
+          html.text("Du har gått igenom hela kursen. Bra jobbat!"),
+        ])
+      False, _ -> element.none()
+    },
+    html.div([class("actions")], case finished_now, next {
+      True, Ok(_) -> [
+        html.button(
+          [class("primary"), event.on_click(UserOpenedLesson(index + 1))],
+          [html.text("Nästa lektion")],
+        ),
+        html.button([class("secondary"), event.on_click(again)], [
+          html.text("Öva igen"),
+        ]),
+      ]
+      _, _ -> [
+        html.button([class("primary"), event.on_click(again)], [
+          html.text("Öva igen"),
+        ]),
+        html.button(
+          [class("secondary"), event.on_click(UserOpenedLesson(index))],
+          [html.text("Till lektionen")],
+        ),
+      ]
+    }),
+  ])
+}
+
+// COURSE ----------------------------------------------------------------------
+
+/// The lesson the learner is at, on the menu.
+fn view_course_banner(model: Model) -> Element(Msg) {
+  let current = course.current(model.progress, model.course)
+  let total = list.length(model.course)
+  html.section([class("card course")], case list.drop(model.course, current) {
+    [#(lesson, exercises), ..] -> [
+      html.p([class("eyebrow")], [
+        html.text(
+          "Kursen · lektion "
+          <> int.to_string(current + 1)
+          <> " av "
+          <> int.to_string(total),
+        ),
       ]),
+      html.h2([], [html.text(lesson.title)]),
+      html.p([class("topic")], [html.text(lesson.topic)]),
+      view_meter(course.known(model.progress, exercises), exercises),
+      html.div([class("actions")], [
+        html.button(
+          [class("primary"), event.on_click(UserOpenedLesson(current))],
+          [html.text("Fortsätt kursen")],
+        ),
+        html.button([class("secondary"), event.on_click(UserOpenedLessons)], [
+          html.text("Alla lektioner"),
+        ]),
+      ]),
+    ]
+    [] -> [
+      html.p([class("eyebrow")], [html.text("Kursen")]),
+      html.h2([], [html.text("Du har gått igenom hela kursen!")]),
+      html.p([class("topic")], [
+        html.text(
+          "Alla "
+          <> int.to_string(total)
+          <> " lektionerna är klara. Repetera dem när du vill, eller öva fritt nedan.",
+        ),
+      ]),
+      html.div([class("actions")], [
+        html.button([class("secondary"), event.on_click(UserOpenedLessons)], [
+          html.text("Alla lektioner"),
+        ]),
+      ]),
+    ]
+  })
+}
+
+/// A bar for how much of a lesson is known, with a mark where it is done.
+fn view_meter(known: Int, exercises: List(Exercise)) -> Element(Msg) {
+  let total = int.max(list.length(exercises), 1)
+  let percent = known * 100 / total
+  html.div([class("meter-row")], [
+    html.div(
+      [
+        class("meter"),
+        attribute.role("progressbar"),
+        attribute("aria-valuemin", "0"),
+        attribute("aria-valuemax", "100"),
+        attribute("aria-valuenow", int.to_string(percent)),
+        attribute.aria_label("Hur mycket av lektionen du kan"),
+      ],
+      [
+        html.span(
+          [
+            class("fill"),
+            attribute.style("width", int.to_string(percent) <> "%"),
+          ],
+          [],
+        ),
+        html.span(
+          [
+            class("goal"),
+            attribute.style("left", int.to_string(course.done_share) <> "%"),
+          ],
+          [],
+        ),
+      ],
+    ),
+    html.span([class("meter-label")], [
+      html.text(
+        int.to_string(known) <> " av " <> int.to_string(total) <> " övningar",
+      ),
     ]),
   ])
+}
+
+fn view_lessons(model: Model) -> Element(Msg) {
+  let current = course.current(model.progress, model.course)
+  html.section([class("card")], [
+    html.div([class("progress")], [
+      html.span([], [html.text("Kursen")]),
+      html.button(
+        [
+          class("link"),
+          attribute.type_("button"),
+          event.on_click(UserQuitRound),
+        ],
+        [html.text("Till menyn")],
+      ),
+    ]),
+    html.h2([], [html.text("Alla lektioner")]),
+    html.p([class("hint")], [
+      html.text(
+        "En lektion är klar när du kan "
+        <> int.to_string(course.done_share)
+        <> " % av övningarna. Då öppnas nästa lektion.",
+      ),
+    ]),
+    html.ol(
+      [class("lessons")],
+      list.index_map(model.course, fn(pair, index) {
+        let #(lesson, exercises) = pair
+        let status = case int.compare(index, current) {
+          order.Lt -> "Klar"
+          order.Eq ->
+            int.to_string(
+              course.known(model.progress, exercises)
+              * 100
+              / int.max(list.length(exercises), 1),
+            )
+            <> " %"
+          order.Gt -> "Låst"
+        }
+        let content = [
+          html.span([class("number")], [html.text(int.to_string(index + 1))]),
+          html.span([class("lesson-text")], [
+            html.strong([], [html.text(lesson.title)]),
+            html.span([class("topic")], [html.text(lesson.topic)]),
+          ]),
+          html.span([class("status")], [html.text(status)]),
+        ]
+        html.li([], [
+          case index <= current {
+            True ->
+              html.button(
+                [
+                  class(case index == current {
+                    True -> "lesson current"
+                    False -> "lesson done"
+                  }),
+                  attribute.type_("button"),
+                  event.on_click(UserOpenedLesson(index)),
+                ],
+                content,
+              )
+            False -> html.div([class("lesson locked")], content)
+          },
+        ])
+      }),
+    ),
+  ])
+}
+
+fn view_lesson(model: Model, index: Int) -> Element(Msg) {
+  case list.drop(model.course, index) {
+    [] -> element.none()
+    [#(lesson, exercises), ..] -> {
+      let known = course.known(model.progress, exercises)
+      let words =
+        list.filter(exercises, fn(e) { e.kind == Translate(ToFrench) })
+      let has_texts =
+        list.any(exercises, fn(e) { !exercise.in_mixed_rounds(e.kind) })
+      html.section([class("card")], [
+        html.div([class("progress")], [
+          html.span([], [
+            html.text(
+              "Lektion "
+              <> int.to_string(index + 1)
+              <> " av "
+              <> int.to_string(list.length(model.course)),
+            ),
+          ]),
+          html.button(
+            [
+              class("link"),
+              attribute.type_("button"),
+              event.on_click(UserOpenedLessons),
+            ],
+            [html.text("Alla lektioner")],
+          ),
+        ]),
+        html.h2([], [html.text(lesson.title)]),
+        html.p([class("topic")], [html.text(lesson.topic)]),
+        view_meter(known, exercises),
+        html.details([class("note"), attribute.open(known == 0)], [
+          html.summary([], [html.text("Grammatik")]),
+          element.fragment(
+            list.map(lesson.note, fn(paragraph) {
+              html.p(
+                [],
+                string.split(paragraph, "\n")
+                  |> list.map(html.text)
+                  |> list.intersperse(html.br([])),
+              )
+            }),
+          ),
+        ]),
+        case words {
+          [] -> element.none()
+          words ->
+            html.details([class("words")], [
+              html.summary([], [
+                html.text(
+                  "Ord och fraser (" <> int.to_string(list.length(words)) <> ")",
+                ),
+              ]),
+              html.ul(
+                [],
+                list.map(words, fn(e) {
+                  html.li([], [
+                    html.span([attribute.lang("fr")], [html.text(e.french)]),
+                    html.span([class("muted"), attribute.lang("sv")], [
+                      html.text(e.prompt),
+                    ]),
+                  ])
+                }),
+              ),
+            ])
+        },
+        html.div([class("actions")], [
+          html.button(
+            [class("primary"), event.on_click(UserStartedLesson(index))],
+            [html.text("Börja öva")],
+          ),
+          case has_texts {
+            True ->
+              html.button(
+                [
+                  class("secondary"),
+                  event.on_click(UserStartedLessonText(index)),
+                ],
+                [
+                  html.text(case model.env.can_speak {
+                    True -> "Läs eller lyssna på en text"
+                    False -> "Läs en text"
+                  }),
+                ],
+              )
+            False -> element.none()
+          },
+        ]),
+      ])
+    }
+  }
 }
 
 fn view_statistics(

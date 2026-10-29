@@ -63,3 +63,13 @@ pub fn early_wrong_review_still_demotes_test() {
   let state = CardState(box: 4, due: now + day, reviews: 3, lapses: 0)
   assert srs.review(state, Wrong("x"), now).box == 1
 }
+
+pub fn a_card_is_known_when_its_last_answer_was_right_test() {
+  let new = srs.new(0)
+  assert !srs.is_known(new)
+  let right = srs.review(new, Correct, 0)
+  assert srs.is_known(right)
+  let wrong = srs.review(new, Wrong("chat"), 0)
+  assert !srs.is_known(wrong)
+  assert srs.is_known(srs.review(wrong, Correct, 3600))
+}

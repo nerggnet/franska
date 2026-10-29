@@ -67,6 +67,12 @@ pub fn review(state: CardState, grade: Grade, now: Int) -> CardState {
   }
 }
 
+/// Whether the last answer to a card was right: it has moved past the first
+/// box, or it is in the first box without ever having been answered wrong.
+pub fn is_known(state: CardState) -> Bool {
+  state.box >= 2 || state.box == 1 && state.lapses == 0
+}
+
 pub fn is_due(state: CardState, now: Int) -> Bool {
   state.due <= now
 }

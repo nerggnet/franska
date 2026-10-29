@@ -76,6 +76,16 @@ must work on both targets, has no FFI and never reads the clock.
   a time, with dialogue lines (starting with "— ") alternating between
   the chosen voice and a partner voice of the other gender. The chosen
   voice is saved in progress (`voice`, `None` for the best).
+- `course.gleam`: the A1 course, 24 lessons in order, each with a Swedish
+  grammar note and `Part`s (entry ids × drills, number ranges). A lesson
+  is done when 80 % of its exercises are known (`srs.is_known`: the last
+  answer was right), and then the next one opens. Progress stores the
+  furthest lesson reached (`course`), so the course never goes back.
+  Lesson ids are stored: never rename or reuse one. Every A1 entry and
+  number must be in exactly one lesson (a test checks), so place new A1
+  content in a lesson. The app builds the lessons once at start-up, like
+  the catalog; a lesson round takes new exercises from each drill in turn,
+  and texts are practised with their own button.
 - `session.gleam`: one practice round. A wrong answer comes back 3 exercises
   later.
 
@@ -145,6 +155,7 @@ storage, offline/installable (PWA), dictation, futur proche, passé composé,
 imparfait, présent progressif (en train de, not for state verbs such as
 vouloir), passé récent (venir de), numbers, gap-fill sentences, gender hints, Svåra ord, le/la
 keyboard shortcuts (1/2), and a voice picker with dialogue voices and
-three reading speeds.
+three reading speeds, and an A1 course (Kursen) with lessons that
+unlock as you learn them.
 
-Ideas for later: more A2 content and sentences, more texts.
+Ideas for later: an A2 course, more A2 content and sentences, more texts.
